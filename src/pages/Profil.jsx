@@ -1,3 +1,3 @@
 export default function Profil() {
-  return <p>Dig</p>;
+  return <p>Profil</p>;
 }

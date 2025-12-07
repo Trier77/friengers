@@ -4,4 +4,10 @@
   --primary: #002546;
   --secondary: #3b82f6;
   --white: #f0f0f0;
+  --font: "Quicksand", sans-serif;
+  --overskrift: "Winky Sans", sans-serif;
+}
+
+body {
+  font-family: var(--font);
 }

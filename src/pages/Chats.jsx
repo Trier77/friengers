@@ -1,3 +1,3 @@
 export default function Chats() {
-  return <p>Dem</p>;
+  return <p>Chats</p>;
 }

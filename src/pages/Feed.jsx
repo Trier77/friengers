@@ -1,3 +1,7 @@
 export default function Feed() {
-  return <p>Alle</p>;
+  return (
+    <div className="text-6xl ">
+      <p>Feed</p>
+    </div>
+  );
 }
