@@ -35,11 +35,33 @@ export default function Feed() {
         <p>No posts yet.</p>
       ) : (
         posts.map((posts) => (
-          <div key={posts.id} className="mb-4 p-4 bg-[var(--primary)]">
-            <h2 className="text-xl text-[var(--white)] font-[var(--overskrift)]">
-              {posts.title}
-            </h2>
-            <p>{posts.description}</p>
+          <div key={posts.id} className="mb-4 p-4 bg-(--primary) rounded-2xl">
+            <div className="flex items-center gap-4">
+              <h2 className="justify-start text-(--secondary) text-xl overskrift">
+                {posts.title}
+              </h2>
+              <div className="bg-(--white) rounded-2xl p-2 flex gap-2">
+                <p className="text-(--secondary) text-sm">
+                  {posts.time?.toDate().toLocaleDateString(undefined, {
+                    month: "short",
+                    day: "numeric",
+                  })}
+                </p>
+                <p className="text-(--secondary) text-sm">
+                  {posts.time?.toDate().toLocaleTimeString(undefined, {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </p>
+              </div>
+            </div>
+
+            <p className="w-60 justify-start text-(--white) text-sm">
+              {posts.description}
+            </p>
+            <p className="justify-start text-(--secondary) text-sm">
+              {posts.participants}
+            </p>
           </div>
         ))
       )}

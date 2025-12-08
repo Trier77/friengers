@@ -25,3 +25,9 @@ body {
 .animate-ripple {
   animation: ripple 1.5s infinite;
 }
+.overskrift {
+  font-family: var(--overskrift);
+  text-transform: uppercase;
+  font-weight: bold;
+  letter-spacing: 0.05em;
+}
