@@ -3,7 +3,7 @@
   "private": true,
   "version": "0.0.0",
   "type": "module",
-  "scripts": {
+https://github.com/Trier77/friengers/pull/4/conflict?name=package.json&ancestor_oid=b4fa9c59e03205db50cf8c48f94153a0ea8b0bbe&base_oid=865f441c1af63464b5256ea0dd17155d346c41b1&head_oid=e2d4c01bdeccc8cbc69df1dcd3c95b69ace3c621  "scripts": {
     "dev": "vite",
     "build": "vite build",
     "lint": "eslint .",
@@ -11,6 +11,7 @@
   },
   "dependencies": {
     "@tailwindcss/vite": "^4.1.17",
+    "firebase": "^12.6.0",
     "i18next": "^25.7.2",
     "i18next-http-backend": "^3.0.2",
     "react": "^19.2.0",
