@@ -2,10 +2,12 @@ import { useEffect, useState } from "react";
 import { collection, getDocs } from "firebase/firestore";
 import { db } from "../firebase";
 import { motion } from "framer-motion";
+import CalenderIcon from "../../public/icons/CalenderIcon";
+import MapPinIcon from "../../public/icons/MapPinIcon";
+import Tilmeld from "../components/Tilmeld";
 
 export default function Feed() {
   const [posts, setPosts] = useState([]);
-  const [loading, setLoading] = useState(true);
   const [expandedPosts, setExpandedPosts] = useState({});
   const [selectedTags, setSelectedTags] = useState([]);
   const [showFilter, setShowFilter] = useState(false); // toggle dropdown visibility
@@ -22,8 +24,6 @@ export default function Feed() {
         setPosts(postsList);
       } catch (error) {
         console.error("Error fetching posts:", error);
-      } finally {
-        setLoading(false);
       }
     };
 
@@ -40,8 +40,6 @@ export default function Feed() {
     );
   };
 
-  if (loading) return <p>Loading...</p>;
-
   const allTags = Array.from(new Set(posts.flatMap((post) => post.tags)));
 
   const filteredPosts =
@@ -53,21 +51,34 @@ export default function Feed() {
 
   return (
     <div className="text-2xl p-4">
-      <div className="mb-4 flex flex-col justify-end">
-        <button
-          onClick={() => setShowFilter((prev) => !prev)}
-          className="px-4 py-2 text-(--primary)"
-        >
-          Filter {showFilter ? "▲" : "▼"}
-        </button>
+      {/* Det her filtre funktion hell yeah */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5 }}
+        className="mb-4 flex flex-col justify-end"
+      >
+        <div className="flex justify-end">
+          <button
+            onClick={() => setShowFilter((prev) => !prev)}
+            className="px-4 py-2 text-lg text-(--primary) "
+          >
+            Filter {showFilter ? "▲" : "▼"}
+          </button>
+        </div>
 
         {showFilter && (
-          <motion.div className="mt-2 flex flex-wrap gap-2 p-2">
+          <motion.div
+            initial={{ opacity: 0, x: 0 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.5 }}
+            className="mt-2 flex flex-wrap gap-2 p-2 justify-end "
+          >
             {allTags.map((tag) => (
               <button
                 key={tag}
                 onClick={() => handleDropdownChange(tag)}
-                className={`px-3 py-1 rounded-2xl text-sm font-bold ${
+                className={`px-3 py-1 rounded-2xl text-xs font-bold ${
                   selectedTags.includes(tag)
                     ? "bg-(--secondary)  text-(--white)"
                     : "border  text-(--secondary) border-(--secondary)"
@@ -78,11 +89,10 @@ export default function Feed() {
             ))}
           </motion.div>
         )}
-      </div>
+      </motion.div>
 
       {filteredPosts.length === 0 ? (
         <p>
-          No posts found
           {selectedTags.length > 0 ? ` for "${selectedTags.join(", ")}"` : ""}.
         </p>
       ) : (
@@ -101,20 +111,25 @@ export default function Feed() {
                 delay: 0.3 + index * 0.15,
                 ease: "easeInOut",
               }}
-              className="mb-4 p-4 bg-(--primary) rounded-2xl gap-2 flex flex-col"
+              className="mb-4 p-4 bg-(--primary) rounded-2xl gap-2 flex flex-col relative overflow-hidden"
             >
               <div className="flex items-center justify-between">
                 <h2 className="justify-start text-(--secondary) text-xl overskrift">
                   {post.title}
                 </h2>
-                <div className="bg-(--white) rounded-2xl px-3 flex gap-2 font-bold text-sm text-(--secondary)">
-                  <p>{post.location}</p>
-                  <p>
-                    {post.time?.toDate().toLocaleDateString(undefined, {
-                      day: "2-digit",
-                      month: "2-digit",
-                    })}
-                  </p>
+                <div className="bg-(--white) rounded-2xl px-2 flex gap-4 font-bold text-sm text-(--secondary)">
+                  <div className="flex items-center gap-1">
+                    <MapPinIcon /> <p>{post.location}</p>
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <CalenderIcon />
+                    <p>
+                      {post.time?.toDate().toLocaleDateString(undefined, {
+                        day: "2-digit",
+                        month: "2-digit",
+                      })}
+                    </p>
+                  </div>
                 </div>
               </div>
 
@@ -123,9 +138,9 @@ export default function Feed() {
                   {post.tags.map((tag, index) => (
                     <li
                       key={index}
-                      className={`border border-(--secondary) rounded-2xl px-3 cursor-pointer ${
+                      className={`border border-(--secondary) py-1  rounded-2xl px-3 cursor-pointer ${
                         selectedTags.includes(tag)
-                          ? "bg-(--secondary) text-(--primary)"
+                          ? "bg-(--white) text-(--secondary) font-bold"
                           : ""
                       }`}
                       onClick={() => handleDropdownChange(tag)}
@@ -136,23 +151,28 @@ export default function Feed() {
                 </ul>
               </div>
 
-              <p
-                className={`text-(--white) text-sm cursor-pointer overflow-hidden ${
-                  expandedPosts[post.id] ? "" : "line-clamp-3"
-                }`}
-                onClick={() => toggleExpand(post.id)}
-              >
-                {post.description}
-              </p>
+              <div className="flex justify-between relative">
+                <div className="w-60 flex flex-col justify-between gap-2">
+                  <p
+                    className={`text-(--white) text-sm cursor-pointer overflow-hidden ${
+                      expandedPosts[post.id] ? "" : "line-clamp-3"
+                    }`}
+                    onClick={() => toggleExpand(post.id)}
+                  >
+                    {post.description}
+                  </p>
 
-              <div className="flex justify-between">
-                <div>
-                  <p className="text-(--secondary) text-sm">Afsender</p>
+                  <div className="flex justify-between">
+                    <div>
+                      <p className="text-(--secondary) text-sm">Afsender</p>
+                    </div>
+                    <p className="text-(--secondary) text-sm">
+                      {post.participants}
+                    </p>
+                  </div>
                 </div>
-                <p className="text-(--secondary) text-sm">
-                  {post.participants}
-                </p>
               </div>
+              <Tilmeld className="absolute bottom-0 right-0 z-10" />
             </motion.div>
           </motion.div>
         ))
