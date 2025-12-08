@@ -9,6 +9,7 @@ import Chats from "./pages/Chats";
 import Navbar from "./components/Navbar";
 import Logo from "./components/Logo";
 import Login from "./pages/Login";
+import Settings from "./pages/Settings";
 
 function App() {
   const [user, setUser] = useState(null);
@@ -36,9 +37,11 @@ function App() {
       <Logo />
       <Navbar />
       <Routes>
+        <Route path="/login" element={<Login />} />
         <Route path="/" element={<Feed />} />
         <Route path="/Chats" element={<Chats />} />
         <Route path="/Profil" element={<Profil />} />
+        <Route path="/Settings" element={<Settings />} />
       </Routes>
     </>
   );
