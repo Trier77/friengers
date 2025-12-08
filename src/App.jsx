@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Routes, Route } from "react-router";
 import { onAuthStateChanged } from "firebase/auth";
 import { auth } from "./firebase";
+import IndividualChat from "./pages/IndividualChat";
 
 import Feed from "./pages/Feed";
 import Profil from "./pages/Profil";
@@ -41,6 +42,7 @@ function App() {
         <Route path="/" element={<Feed />} />
         <Route path="/Chats" element={<Chats />} />
         <Route path="/Profil" element={<Profil />} />
+        <Route path="/Chats/:chatId" element={<IndividualChat />} />
         <Route path="/Settings" element={<Settings />} />
       </Routes>
     </>
