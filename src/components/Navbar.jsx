@@ -3,7 +3,7 @@ import { NavLink } from "react-router";
 
 export default function Navbar() {
   return (
-    <nav className=" p-7 text-white bottom-0 w-full flex justify-around fixed">
+    <nav className="z-50 p-7 text-white bottom-0 w-full flex justify-around fixed">
       {/* Chat Icon */}
       <NavLink to="/Chats">
         {({ isActive }) => (
