@@ -89,7 +89,7 @@ function Chats() {
         </div>
       </div>
 
-      {/* Chat List */}
+      {/* Indbakke Liste */}
       <div className="px-4 mt-4">
         {currentChats.map((chat) => (
           <div
