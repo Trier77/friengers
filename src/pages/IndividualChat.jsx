@@ -6,11 +6,11 @@ function IndividualChat() {
   const { chatId } = useParams();
   const navigate = useNavigate();
   const messagesEndRef = useRef(null);
-  const [newMessage, setNewMessage] = useState("");
-  const [messages, setMessages] = useState([]);
-  const [isInputFocused, setIsInputFocused] = useState(false);
+  const [newMessage, setNewMessage] = useState(""); // Hvad man skriver lige nu
+  const [messages, setMessages] = useState([]); // Alle beskeder i chatten
+  const [isInputFocused, setIsInputFocused] = useState(false); // Om tastaturet er åbent eller ej
 
-  // Dummy data
+  // Dummy data vi erstatter det senere når vi når til firebase osv.
   const chatData = {
     1: {
       name: "Emma Sørensen",
@@ -66,7 +66,7 @@ function IndividualChat() {
 
   const chat = chatData[chatId];
 
-  // Initialize messages from dummy data
+  // starter beskeder fra dummy-data
   useEffect(() => {
     if (chat) {
       setMessages(chat.messages);
