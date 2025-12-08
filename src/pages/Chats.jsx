@@ -1,9 +1,11 @@
 import { useState } from "react";
 import UnreadBadge from "../components/UnreadBadge";
 import { motion } from "framer-motion";
+import { useNavigate } from "react-router";
 
 function Chats() {
   const [activeTab, setActiveTab] = useState("private"); // 'privat chat' eller 'gruppe chat'
+  const navigate = useNavigate();
 
   // Dette er bare noget dummy data, indtil at vi når til det
   const privateChats = [
@@ -108,6 +110,7 @@ function Chats() {
         {currentChats.map((chat, index) => (
           <motion.div
             key={chat.id}
+            onClick={() => navigate(`/Chats/${chat.id}`)}
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{
