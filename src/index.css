@@ -10,6 +10,7 @@
 
 body {
   font-family: var(--font);
+  background-color: var(--white);
 }
 
 /* Unread badge animations */
@@ -27,7 +28,6 @@ body {
 }
 .overskrift {
   font-family: var(--overskrift);
-  text-transform: uppercase;
   font-weight: bold;
   letter-spacing: 0.05em;
 }
