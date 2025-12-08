@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { NavLink } from "react-router";
+import UnreadBadge from "../components/UnreadBadge";
+import { motion } from "framer-motion";
 
 function Chats() {
   const [activeTab, setActiveTab] = useState("private"); // 'privat chat' eller 'gruppe chat'
@@ -11,7 +12,8 @@ function Chats() {
       name: "Emma Sørensen",
       message: "Hvis det passer?",
       time: "9:33",
-      avatar: "/path-to-avatar.jpg",
+      avatar:
+        "https://img.freepik.com/free-photo/fair-haired-woman-looking-with-pleased-calm-expression_176420-15145.jpg?semt=ais_hybrid&w=740&q=80",
       unread: 2,
       online: true,
     },
@@ -20,7 +22,8 @@ function Chats() {
       name: "Jesper Madsen",
       message: "Tak for hjælpen, endnu en gang!",
       time: "Tir.",
-      avatar: "/path-to-avatar.jpg",
+      avatar:
+        "https://media.istockphoto.com/id/1200677760/photo/portrait-of-handsome-smiling-young-man-with-crossed-arms.jpg?s=612x612&w=0&k=20&c=g_ZmKDpK9VEEzWw4vJ6O577ENGLTOcrvYeiLxi8mVuo=",
       unread: 0,
       online: true,
     },
@@ -29,7 +32,8 @@ function Chats() {
       name: "Jens Andersen",
       message: "Dig: Super, så ses vi der!",
       time: "27/11",
-      avatar: "/path-to-avatar.jpg",
+      avatar:
+        "https://t3.ftcdn.net/jpg/00/77/71/12/360_F_77711294_BA5QTjtgGPmLKCXGdtbAgZciL4kEwCnx.jpg",
       unread: 0,
       online: true,
     },
@@ -40,8 +44,18 @@ function Chats() {
   const currentChats = activeTab === "private" ? privateChats : groupChats;
 
   return (
-    <div className="min-h-screen bg-gray-100 pb-20">
-      <div className="bg-white pt-6 pb-4 px-6">
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="min-h-screen bg-gray-100 pb-20"
+    >
+      <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.1 }}
+        className="bg-white pt-6 pb-4 px-6"
+      >
         {/* Search Bar */}
         <div className="relative">
           <input
@@ -87,14 +101,21 @@ function Chats() {
             Gruppe chat
           </button>
         </div>
-      </div>
+      </motion.div>
 
       {/* Indbakke Liste */}
       <div className="px-4 mt-4">
-        {currentChats.map((chat) => (
-          <div
+        {currentChats.map((chat, index) => (
+          <motion.div
             key={chat.id}
-            className={`flex items-center gap-4 p-4 mb-3 rounded-2xl cursor-pointer transition-all ${
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{
+              duration: 0.6,
+              delay: 0.3 + index * 0.15,
+              ease: "easeInOut",
+            }}
+            className={`relative flex items-center border-1 border-[var(--secondary)] gap-4 mb-3 rounded-tl-4xl rounded-bl-4xl rounded-tr-2xl rounded-br-2xl cursor-pointer transition-all active:brightness-80 ${
               chat.id === 1
                 ? "bg-blue-400 text-white"
                 : "bg-white text-gray-800 hover:bg-gray-50"
@@ -133,22 +154,18 @@ function Chats() {
             {/* Tid og Unread Badge */}
             <div className="flex flex-col items-end gap-1">
               <span
-                className={`text-sm ${
+                className={`text-sm mr-2 ${
                   chat.id === 1 ? "text-white" : "text-gray-500"
                 }`}
               >
                 {chat.time}
               </span>
-              {chat.unread > 0 && (
-                <div className="bg-blue-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center">
-                  {chat.unread}
-                </div>
-              )}
+              {chat.unread > 0 && <UnreadBadge count={chat.unread} />}
             </div>
-          </div>
+          </motion.div>
         ))}
       </div>
-    </div>
+    </motion.div>
   );
 }
 
