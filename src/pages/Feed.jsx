@@ -19,9 +19,10 @@ export default function Feed() {
       try {
         const postsCollection = collection(db, "posts");
         const postsSnapshot = await getDocs(postsCollection);
-        const postsList = postsSnapshot.docs.map((doc) => ({
+        const postsList = postsSnapshot.docs.map((doc, index) => ({
           id: doc.id,
           ...doc.data(),
+          senderId: String((index % 2) + 1), // Dummy: skifter mellem "1" og "2"
         }));
         setPosts(postsList);
       } catch (error) {
