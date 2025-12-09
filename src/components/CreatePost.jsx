@@ -59,21 +59,19 @@ export default function CreatePost({ open, onClose, allTags }) {
       <div
         ref={containerRef}
         className={`
-          fixed inset-0 bg-(--white)/80 z-40
-          transition-opacity duration-300
-          ${
-            open
-              ? "opacity-100 pointer-events-auto"
-              : "opacity-0 pointer-events-none"
-          }
-        `}
-        onClick={(e) => e.stopPropagation()}
+    fixed inset-0 bg-(--white)/80 z-40
+    transition-opacity duration-300
+    ${
+      open ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
+    }
+  `}
+        onClick={onClose}
       />
 
       <div
         className={`
           fixed inset-x-0 bottom-0 w-screen
-          bg-(--secondary) p-4 z-50 pb-20
+          bg-(--secondary) px-4 pt-8 z-50 pb-20
           transition-transform duration-300
           rounded-t-2xl
           ${open ? "translate-y-0" : "translate-y-full"}
