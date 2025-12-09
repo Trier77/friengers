@@ -6,6 +6,7 @@ import CalenderIcon from "../../public/icons/CalenderIcon";
 import MapPinIcon from "../../public/icons/MapPinIcon";
 import Tilmeld from "../components/Tilmeld";
 import { useNavigate } from "react-router";
+import Create from "../components/Create";
 
 export default function Feed() {
   const [posts, setPosts] = useState([]);
@@ -54,6 +55,7 @@ export default function Feed() {
 
   return (
     <div className="text-2xl p-4">
+      <Create allTags={allTags} />
       {/* Det her filtre funktion hell yeah */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
