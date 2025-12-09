@@ -5,9 +5,11 @@ import { motion } from "framer-motion";
 import CalenderIcon from "../../public/icons/CalenderIcon";
 import MapPinIcon from "../../public/icons/MapPinIcon";
 import Tilmeld from "../components/Tilmeld";
+import { useNavigate } from "react-router";
 
 export default function Feed() {
   const [posts, setPosts] = useState([]);
+  const navigate = useNavigate();
   const [expandedPosts, setExpandedPosts] = useState({});
   const [selectedTags, setSelectedTags] = useState([]);
   const [showFilter, setShowFilter] = useState(false); // toggle dropdown visibility
@@ -17,9 +19,10 @@ export default function Feed() {
       try {
         const postsCollection = collection(db, "posts");
         const postsSnapshot = await getDocs(postsCollection);
-        const postsList = postsSnapshot.docs.map((doc) => ({
+        const postsList = postsSnapshot.docs.map((doc, index) => ({
           id: doc.id,
           ...doc.data(),
+          senderId: String((index % 2) + 1), // Dummy: skifter mellem "1" og "2"
         }));
         setPosts(postsList);
       } catch (error) {
@@ -162,9 +165,19 @@ export default function Feed() {
                     {post.description}
                   </p>
 
-                  <div className="flex justify-between">
-                    <div>
-                      <p className="text-(--secondary) text-sm">Afsender</p>
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-center gap-2">
+                      <img
+                        src={
+                          "https://media.istockphoto.com/id/2151669184/vector/vector-flat-illustration-in-grayscale-avatar-user-profile-person-icon-gender-neutral.jpg?s=612x612&w=0&k=20&c=UEa7oHoOL30ynvmJzSCIPrwwopJdfqzBs0q69ezQoM8="
+                        }
+                        alt={"Afsender"}
+                        className="w-10 h-10 rounded-full object-cover cursor-pointer"
+                        onClick={() =>
+                          navigate(`/AndresProfil/${post.senderId}`)
+                        }
+                      />
+                      <p className="text-(--secondary) text-sm">{"Afsender"}</p>
                     </div>
                     <p className="text-(--secondary) text-sm">
                       {post.participants}
