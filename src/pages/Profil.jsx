@@ -43,12 +43,15 @@ export default function Profil() {
       </div>
       
       <h1>Din Profil</h1>
-
-      <img
+      <div >
+        <img className="w-100 border h-100 mask-circle"
         src={userData.profileImage}
         alt="Profilbillede"
-        style={{ width: 100, borderRadius: "50%" }}
+      
+        
       />
+      </div>
+      
 
       <p><strong>Navn:</strong> {userData.fuldenavn}</p>
       <p><strong>Studie:</strong> {userData.study}</p>
