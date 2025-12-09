@@ -87,7 +87,7 @@ export default function Feed() {
           <motion.div
             initial={{ opacity: 0, x: 0 }}
             animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.5 }}
+            transition={{ duration: 0.1 }}
             className="mt-2 flex flex-wrap gap-2 p-2 justify-end "
           >
             {allTags.map((tag) => (
@@ -117,7 +117,7 @@ export default function Feed() {
             key={post.id}
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.5 }}
+            transition={{ duration: 0.2 }}
           >
             <motion.div
               initial={{ opacity: 0 }}
