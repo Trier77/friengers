@@ -1,15 +1,17 @@
 import { useState } from "react";
-import { useNavigate } from "react-router"; // <-- for navigation
+import { NavLink, useNavigate } from "react-router"; 
 import { login, register } from "../auth";
+import ArrowLogin from "../../public/icons/ArrowLogin";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const navigate = useNavigate(); // <-- hook for navigation
+    const [error, setError] = useState("");
+  const navigate = useNavigate(); 
 
   const handleLogin = async () => {
     try {
-      const user = await login(email, password); // assuming login returns user or throws error
+      const user = await login(email, password); 
       if (user) {
         // Redirect to home screen
         navigate("/home");
@@ -29,25 +31,58 @@ export default function Login() {
   };
 
   return (
-    <div className="gap-5">
-      <input
-        className="border p-2"
-        placeholder="Email"
-        onChange={(e) => setEmail(e.target.value)}
-      />
-      <input
-        className="border p-2"
-        type="password"
-        placeholder="Password"
-        onChange={(e) => setPassword(e.target.value)}
-      />
-      <div className="gap-5 flex justify-center">
-        <button type="button" onClick={handleLogin}>
-          Login
-        </button>
-        <button type="button" onClick={handleRegister}>
-          Register
-        </button>
+    <div className="gap-5 flex flex-col items-center">
+      <div>
+        <input
+          className="p-2 rounded-2xl border-(--secondary) border-2 text-(--secondary) w-12/12 mb-3  focus:border-(--secondary)  focus:ring-2 focus:ring-blue-300 focus:outline-none"
+          placeholder="Email"
+          onChange={(e) => setEmail(e.target.value)}
+        />
+        <input
+          className="p-2 rounded-2xl border-(--secondary) border-2 text-(--secondary) w-12/12 mb-3  focus:border-(--secondary)  focus:ring-2 focus:ring-blue-300 focus:outline-none"
+          type="password"
+          placeholder="Adgangskode"
+          onChange={(e) => setPassword(e.target.value)}
+        />
+        <div className="gap-5 flex justify-start mb-2">
+          <label className="flex items-center gap-2 text-(--secondary)">
+            <input
+  type="checkbox"
+  className="
+    appearance-none h-5 w-5 border border-(--secondary) rounded-sm relative
+    checked:bg-[var(--secondary)]
+    checked:border-[var(--secondary)]
+    focus:ring-2 focus:ring-[var(--secondary)]
+    
+    before:content-[''] before:absolute before:inset-0
+    checked:before:content-['✕'] checked:before:flex checked:before:items-center checked:before:justify-center
+    checked:before:text-white checked:before:text-sm
+  "
+/>
+
+            <span>Forbliv logget ind</span>
+          </label>
+        </div>
+
+        <div className="flex flex-row">
+          <div>
+            <p className="text-(--secondary)">
+              Lav ny bruger med dit{" "}
+              <button type="button" onClick={handleRegister} className="font-bold">
+                AU-login
+              </button>{" "}
+              her <ArrowLogin className="inline-block align-baseline h-4" />
+            </p>
+          </div>
+
+          <button
+            type="button"
+            onClick={handleLogin}
+            className="bg-(--secondary) text-white font-bold px-4  rounded-2xl "
+          >
+            Login
+          </button>
+        </div>
       </div>
     </div>
   );
