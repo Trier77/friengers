@@ -2,7 +2,7 @@ export default function GroupIcon({ color = "--white", size = 7 }) {
   return (
     <svg
       width={size}
-      viewBox="0 0 7 7"
+      viewBox="0 0 16 7"
       fill="none"
       xmlns="http://www.w3.org/2000/svg"
     >
