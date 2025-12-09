@@ -1,7 +1,32 @@
+import { useEffect, useState } from "react";
+import { auth, db } from "../firebase";
+import { doc, getDoc } from "firebase/firestore";
 import { NavLink } from "react-router";
 import Settings from "./Settings";
 
 export default function Profil() {
+
+  const [userData, setUserData] = useState(null);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      const user = auth.currentUser;
+      if (!user) return;
+
+      const docRef = doc(db, "users", user.uid);
+      const snap = await getDoc(docRef);
+
+      if (snap.exists()) {
+        setUserData(snap.data());
+      }
+    };
+
+    fetchProfile();
+  }, []);
+
+  if (!userData) return <p>Henter profil...</p>;
+
+  
   return (
     <div>
       <div className="absolute right-10">
@@ -16,7 +41,20 @@ export default function Profil() {
           </svg>
         </NavLink>
       </div>
-      <p>Profil</p>
+      
+      <h1>Din Profil</h1>
+
+      <img
+        src={userData.profileImage}
+        alt="Profilbillede"
+        style={{ width: 100, borderRadius: "50%" }}
+      />
+
+      <p><strong>Navn:</strong> {userData.fuldenavn}</p>
+      <p><strong>Studie:</strong> {userData.study}</p>
+      <p><strong>Pronominer:</strong> {userData.pronouns}</p>
+      {/* <p><strong>Oprettet:</strong> {new Date(userData.createdAt.seconds * 1000).toLocaleDateString()}</p> */}
     </div>
+    
   );
 }
