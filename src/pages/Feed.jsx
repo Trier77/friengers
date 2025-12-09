@@ -1,7 +1,8 @@
 import { useEffect, useState } from "react";
 import { collection, getDocs } from "firebase/firestore";
-import { db } from "../firebase";
+import { auth, db } from "../firebase";
 import { motion } from "framer-motion";
+import { doc, getDoc } from "firebase/firestore";
 import CalenderIcon from "../../public/icons/CalenderIcon";
 import MapPinIcon from "../../public/icons/MapPinIcon";
 import Tilmeld from "../components/Tilmeld";
@@ -10,6 +11,7 @@ import Create from "../components/Create";
 
 export default function Feed() {
   const [posts, setPosts] = useState([]);
+
   const navigate = useNavigate();
   const [expandedPosts, setExpandedPosts] = useState({});
   const [selectedTags, setSelectedTags] = useState([]);
@@ -18,14 +20,23 @@ export default function Feed() {
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        const postsCollection = collection(db, "posts");
-        const postsSnapshot = await getDocs(postsCollection);
-        const postsList = postsSnapshot.docs.map((doc, index) => ({
-          id: doc.id,
-          ...doc.data(),
-          senderId: String((index % 2) + 1), // Dummy: skifter mellem "1" og "2"
-        }));
-        setPosts(postsList);
+        const postsSnapshot = await getDocs(collection(db, "posts"));
+
+        const postsWithUser = await Promise.all(
+          postsSnapshot.docs.map(async (postDoc) => {
+            const postData = postDoc.data();
+
+            const userSnap = await getDoc(doc(db, "users", postData.uid));
+
+            return {
+              id: postDoc.id,
+              ...postData,
+              author: userSnap.exists() ? userSnap.data() : null,
+            };
+          })
+        );
+
+        setPosts(postsWithUser);
       } catch (error) {
         console.error("Error fetching posts:", error);
       }
@@ -170,16 +181,15 @@ export default function Feed() {
                   <div className="flex justify-between items-center">
                     <div className="flex items-center gap-2">
                       <img
-                        src={
-                          "https://media.istockphoto.com/id/2151669184/vector/vector-flat-illustration-in-grayscale-avatar-user-profile-person-icon-gender-neutral.jpg?s=612x612&w=0&k=20&c=UEa7oHoOL30ynvmJzSCIPrwwopJdfqzBs0q69ezQoM8="
-                        }
-                        alt={"Afsender"}
-                        className="w-10 h-10 rounded-full object-cover cursor-pointer"
-                        onClick={() =>
-                          navigate(`/AndresProfil/${post.senderId}`)
-                        }
+                        src={post.author?.profileImage}
+                        alt="Afsender"
+                        className="w-8 h-8 rounded-full object-cover cursor-pointer"
+                        onClick={() => navigate(`/AndresProfil/${post.uid}`)}
                       />
-                      <p className="text-(--secondary) text-sm">{"Afsender"}</p>
+
+                      <p className="text-(--secondary) text-sm">
+                        {post.author?.fuldenavn}
+                      </p>
                     </div>
                     <p className="text-(--secondary) text-sm">
                       {post.participants}
