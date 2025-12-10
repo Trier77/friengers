@@ -5,7 +5,7 @@ import { useNavigate } from "react-router";
 import {
   collection,
   query,
-  getDocs,
+  onSnapshot,
   doc,
   getDoc,
   orderBy,
@@ -17,90 +17,76 @@ function Chats() {
   const [activeTab, setActiveTab] = useState("private");
   const [privateChats, setPrivateChats] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [debugInfo, setDebugInfo] = useState(null);
   const navigate = useNavigate();
   const currentUserId = auth.currentUser?.uid;
 
   useEffect(() => {
-    const fetchChats = async () => {
-      if (!currentUserId) return;
+    if (!currentUserId) return;
 
-      try {
-        console.log("🔍 Current User ID:", currentUserId);
+    console.log("🔄 Setting up real-time listener for chats");
 
-        // Hent alle chats
-        const chatsSnapshot = await getDocs(collection(db, "chats"));
-        console.log("📦 Total chats in database:", chatsSnapshot.docs.length);
+    // Lyt til ALLE chats i real-time
+    const chatsQuery = query(collection(db, "chats"));
 
-        const allChatIds = chatsSnapshot.docs.map((doc) => doc.id);
-        console.log("💬 All chat IDs:", allChatIds);
-
-        setDebugInfo({
-          totalChats: chatsSnapshot.docs.length,
-          allChatIds: allChatIds,
-          currentUserId: currentUserId,
-        });
+    const unsubscribe = onSnapshot(
+      chatsQuery,
+      async (snapshot) => {
+        console.log("📡 Chats updated! Total chats:", snapshot.docs.length);
 
         const chatList = [];
 
-        for (const chatDoc of chatsSnapshot.docs) {
+        for (const chatDoc of snapshot.docs) {
           const chatId = chatDoc.id;
-          console.log("🔎 Checking chat:", chatId);
+          const chatData = chatDoc.data();
 
           // Tjek om den nuværende bruger er en del af denne chat
-          if (!chatId.includes(currentUserId)) {
-            console.log("❌ User not in this chat");
-            continue;
-          }
-
-          console.log("✅ User IS in this chat!");
+          if (!chatId.includes(currentUserId)) continue;
 
           // Find den anden brugers ID
           const userIds = chatId.split("_");
-          console.log("👥 User IDs in chat:", userIds);
-
           const otherUserId = userIds.find((id) => id !== currentUserId);
-          console.log("👤 Other user ID:", otherUserId);
-
           if (!otherUserId) continue;
 
           // Hent den anden brugers data
           const otherUserDoc = await getDoc(doc(db, "users", otherUserId));
-          if (!otherUserDoc.exists()) {
-            console.log("⚠️ Other user not found in database");
-            continue;
-          }
+          if (!otherUserDoc.exists()) continue;
 
           const otherUserData = otherUserDoc.data();
-          console.log("👤 Other user data:", otherUserData);
 
-          // Hent den sidste besked fra denne chat
-          const messagesQuery = query(
-            collection(db, "chats", chatId, "messages"),
-            orderBy("timestamp", "desc"),
-            limit(1)
-          );
-          const messagesSnapshot = await getDocs(messagesQuery);
-          console.log("💌 Messages found:", messagesSnapshot.docs.length);
+          // Brug lastMessage fra chat-dokumentet hvis det findes
+          let lastMessage = chatData.lastMessage || "Ingen beskeder endnu";
+          let lastMessageTime = chatData.lastMessageTime;
+          let lastMessageSenderId = chatData.lastMessageSenderId;
 
-          let lastMessage = "Ingen beskeder endnu";
-          let lastMessageTime = null;
-          let unreadCount = 0;
+          // Hvis vi ikke har lastMessage i chat-dokumentet, hent den sidste besked
+          if (!chatData.lastMessage) {
+            const messagesQuery = query(
+              collection(db, "chats", chatId, "messages"),
+              orderBy("timestamp", "desc"),
+              limit(1)
+            );
 
-          if (!messagesSnapshot.empty) {
-            const lastMsg = messagesSnapshot.docs[0].data();
-            console.log("📝 Last message:", lastMsg);
-            lastMessage = lastMsg.text;
-            lastMessageTime = lastMsg.timestamp;
+            const messagesSnapshot = await getDocs(messagesQuery);
 
-            if (lastMsg.senderId !== currentUserId) {
-              unreadCount = 1;
-            }
-
-            if (lastMsg.senderId === currentUserId) {
-              lastMessage = `Dig: ${lastMessage}`;
+            if (!messagesSnapshot.empty) {
+              const lastMsg = messagesSnapshot.docs[0].data();
+              lastMessage = lastMsg.text;
+              lastMessageTime = lastMsg.timestamp;
+              lastMessageSenderId = lastMsg.senderId;
             }
           }
+
+          // Hvis beskeden er fra den nuværende bruger, tilføj "Dig: " præfix
+          if (lastMessageSenderId === currentUserId) {
+            lastMessage = `Dig: ${lastMessage}`;
+          }
+
+          // Beregn unread count - simpel version
+          // Du kan udvide dette senere med et mere avanceret system
+          const unreadCount =
+            lastMessageSenderId && lastMessageSenderId !== currentUserId
+              ? 1
+              : 0;
 
           // Formatér tid
           let timeDisplay = "";
@@ -142,8 +128,6 @@ function Chats() {
           });
         }
 
-        console.log("✅ Final chat list:", chatList);
-
         // Sortér chats efter tidsstempel (nyeste først)
         chatList.sort((a, b) => {
           if (!a.timestamp) return 1;
@@ -151,15 +135,21 @@ function Chats() {
           return b.timestamp.toDate() - a.timestamp.toDate();
         });
 
+        console.log("✅ Chat list updated:", chatList.length, "chats");
         setPrivateChats(chatList);
         setLoading(false);
-      } catch (error) {
-        console.error("❌ Error fetching chats:", error);
+      },
+      (error) => {
+        console.error("❌ Error listening to chats:", error);
         setLoading(false);
       }
-    };
+    );
 
-    fetchChats();
+    // Cleanup: Stop listening når komponenten unmounter
+    return () => {
+      console.log("🛑 Stopping chat listener");
+      unsubscribe();
+    };
   }, [currentUserId]);
 
   const groupChats = [];
@@ -233,19 +223,6 @@ function Chats() {
         </div>
       </motion.div>
 
-      {/* Debug Info */}
-      {debugInfo && (
-        <div className="px-4 mt-4 mb-4 bg-yellow-100 p-4 rounded text-xs">
-          <p>
-            <strong>Debug Info:</strong>
-          </p>
-          <p>Total chats: {debugInfo.totalChats}</p>
-          <p>Your ID: {debugInfo.currentUserId}</p>
-          <p>Chat IDs: {debugInfo.allChatIds.join(", ") || "None"}</p>
-          <p>Chats shown: {currentChats.length}</p>
-        </div>
-      )}
-
       {/* Chat Liste */}
       <div className="px-4 mt-4">
         {currentChats.length === 0 ? (
@@ -268,7 +245,7 @@ function Chats() {
                 ease: "easeInOut",
               }}
               className={`relative flex items-center border-1 border-[var(--secondary)] gap-4 mb-3 rounded-tl-4xl rounded-bl-4xl rounded-tr-2xl rounded-br-2xl cursor-pointer transition-all active:brightness-80 ${
-                index === 0 && chat.unread > 0
+                chat.unread > 0
                   ? "bg-blue-400 text-white"
                   : "bg-white text-gray-800 hover:bg-gray-50"
               }`}
@@ -283,7 +260,7 @@ function Chats() {
                 {chat.online && (
                   <div
                     className={`absolute bottom-0 right-0 w-4 h-4 rounded-full border-2 ${
-                      index === 0 && chat.unread > 0
+                      chat.unread > 0
                         ? "bg-blue-300 border-blue-400"
                         : "bg-green-400 border-white"
                     }`}
@@ -296,9 +273,7 @@ function Chats() {
                 <h3 className="font-semibold text-lg">{chat.name}</h3>
                 <p
                   className={`text-sm truncate ${
-                    index === 0 && chat.unread > 0
-                      ? "text-white/90"
-                      : "text-gray-500"
+                    chat.unread > 0 ? "text-white/90" : "text-gray-500"
                   }`}
                 >
                   {chat.message}
@@ -309,9 +284,7 @@ function Chats() {
               <div className="flex flex-col items-end gap-1">
                 <span
                   className={`text-sm mr-2 ${
-                    index === 0 && chat.unread > 0
-                      ? "text-white"
-                      : "text-gray-500"
+                    chat.unread > 0 ? "text-white" : "text-gray-500"
                   }`}
                 >
                   {chat.time}
