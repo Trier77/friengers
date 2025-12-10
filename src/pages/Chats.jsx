@@ -82,7 +82,6 @@ function Chats() {
           }
 
           // Beregn unread count - simpel version
-          // Du kan udvide dette senere med et mere avanceret system
           const unreadCount =
             lastMessageSenderId && lastMessageSenderId !== currentUserId
               ? 1
@@ -250,6 +249,9 @@ function Chats() {
                   : "bg-white text-gray-800 hover:bg-gray-50"
               }`}
             >
+              {/* UnreadBadge - bruger sin egen absolute positioning */}
+              {chat.unread > 0 && <UnreadBadge count={chat.unread} />}
+
               {/* Avatar med Online Status */}
               <div className="relative flex-shrink-0">
                 <img
@@ -280,16 +282,15 @@ function Chats() {
                 </p>
               </div>
 
-              {/* Tid og Unread Badge */}
-              <div className="flex flex-col items-end gap-1">
+              {/* Tid */}
+              <div className="flex flex-col items-end gap-1 mr-4">
                 <span
-                  className={`text-sm mr-2 ${
+                  className={`text-sm ${
                     chat.unread > 0 ? "text-white" : "text-gray-500"
                   }`}
                 >
                   {chat.time}
                 </span>
-                {chat.unread > 0 && <UnreadBadge count={chat.unread} />}
               </div>
             </motion.div>
           ))
