@@ -1,20 +1,19 @@
 import { useState } from "react";
-import { NavLink, useNavigate } from "react-router"; 
+import { NavLink, useNavigate } from "react-router";
 import { login, register } from "../auth";
 import ArrowLogin from "../../public/icons/ArrowLogin";
 
 export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-    const [error, setError] = useState("");
-  const navigate = useNavigate(); 
+  const navigate = useNavigate();
 
   const handleLogin = async () => {
     try {
-      const user = await login(email, password); 
+      const user = await login(email, password);
       if (user) {
         // Redirect to home screen
-        navigate("/home");
+        navigate("/");
       }
     } catch (error) {
       alert("Login failed: " + error.message);
@@ -47,8 +46,8 @@ export default function Login() {
         <div className="gap-5 flex justify-start mb-2">
           <label className="flex items-center gap-2 text-(--secondary)">
             <input
-  type="checkbox"
-  className="
+              type="checkbox"
+              className="
     appearance-none h-5 w-5 border border-(--secondary) rounded-sm relative
     checked:bg-[var(--secondary)]
     checked:border-[var(--secondary)]
@@ -58,7 +57,7 @@ export default function Login() {
     checked:before:content-['✕'] checked:before:flex checked:before:items-center checked:before:justify-center
     checked:before:text-white checked:before:text-sm
   "
-/>
+            />
 
             <span>Forbliv logget ind</span>
           </label>
@@ -68,7 +67,11 @@ export default function Login() {
           <div>
             <p className="text-(--secondary)">
               Lav ny bruger med dit{" "}
-              <button type="button" onClick={handleRegister} className="font-bold">
+              <button
+                type="button"
+                onClick={handleRegister}
+                className="font-bold"
+              >
                 AU-login
               </button>{" "}
               her <ArrowLogin className="inline-block align-baseline h-4" />
