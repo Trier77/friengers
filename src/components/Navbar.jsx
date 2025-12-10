@@ -1,7 +1,29 @@
-import React from "react";
+import { useEffect, useState } from "react";
+import { auth, db } from "../firebase";
+import { doc, getDoc } from "firebase/firestore";
 import { NavLink } from "react-router";
 
 export default function Navbar() {
+  const [userData, setUserData] = useState(null);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      const user = auth.currentUser;
+      if (!user) return;
+
+      const docRef = doc(db, "users", user.uid);
+      const snap = await getDoc(docRef);
+
+      if (snap.exists()) {
+        setUserData(snap.data());
+      }
+    };
+
+    fetchProfile();
+  }, []);
+
+  if (!userData) return <p>Henter profil...</p>;
+
   return (
     <div className="z-1000">
       <div
@@ -43,15 +65,13 @@ export default function Navbar() {
         {/* Profile Icon (circle) */}
         <NavLink to="/Profil">
           {({ isActive }) => (
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 20.23"
-              className={`h-10 ${
-                isActive ? "fill-(--secondary)" : "fill-(--primary)"
+            <img
+              src={userData.profileImage}
+              alt={userData.fuldenavnname}
+              className={`w-10 h-10 rounded-full object-cover ${
+                isActive ? "outline-5 outline-(--secondary)" : "outline-0"
               }`}
-            >
-              <circle cx="12" cy="10.115" r="10" />
-            </svg>
+            />
           )}
         </NavLink>
       </nav>
