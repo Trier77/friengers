@@ -11,6 +11,7 @@ import {
   getDoc,
   serverTimestamp,
   setDoc,
+  updateDoc,
 } from "firebase/firestore";
 import { db, auth } from "../firebase";
 
@@ -43,6 +44,28 @@ function IndividualChat() {
 
     fetchOtherUser();
   }, [chatId]);
+
+  // Markér chat som læst når du åbner den
+  useEffect(() => {
+    const markAsRead = async () => {
+      if (!currentUserId || !chatId) return;
+
+      const chatDocId = [currentUserId, chatId].sort().join("_");
+      const chatDocRef = doc(db, "chats", chatDocId);
+
+      try {
+        // Opdater chat dokumentet så vi ved hvem der sidst læste
+        await updateDoc(chatDocRef, {
+          [`lastReadBy_${currentUserId}`]: serverTimestamp(),
+        });
+        console.log("✅ Chat marked as read");
+      } catch (error) {
+        console.error("Error marking chat as read:", error);
+      }
+    };
+
+    markAsRead();
+  }, [currentUserId, chatId]);
 
   // Lyt til beskeder i real-time
   useEffect(() => {
@@ -82,8 +105,7 @@ function IndividualChat() {
       const chatDocId = [currentUserId, chatId].sort().join("_");
       console.log("📤 Sending message to chat:", chatDocId);
 
-      // VIGTIGT: Først skal vi sikre at chat-dokumentet eksisterer
-      // Hvis det ikke gør, opretter vi det
+      // Opret/opdater chat-dokumentet
       const chatDocRef = doc(db, "chats", chatDocId);
       await setDoc(
         chatDocRef,
@@ -92,13 +114,15 @@ function IndividualChat() {
           createdAt: serverTimestamp(),
           lastMessage: newMessage,
           lastMessageTime: serverTimestamp(),
+          lastMessageSenderId: currentUserId,
+          [`lastReadBy_${currentUserId}`]: serverTimestamp(), // Markér som læst for afsenderen
         },
         { merge: true }
-      ); // merge: true betyder "opdater hvis den findes, ellers opret"
+      );
 
       console.log("✅ Chat document created/updated");
 
-      // Nu kan vi tilføje beskeden
+      // Tilføj beskeden
       await addDoc(collection(db, "chats", chatDocId, "messages"), {
         text: newMessage,
         senderId: currentUserId,
