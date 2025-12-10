@@ -18,31 +18,27 @@ export default function Feed() {
 
   const userId = auth.currentUser?.uid;
 
+  const fetchPosts = async () => {
+    const postsSnapshot = await getDocs(collection(db, "posts"));
+    const postsWithUser = await Promise.all(
+      postsSnapshot.docs.map(async (postDoc) => {
+        const postData = postDoc.data();
+        const userSnap = await getDoc(doc(db, "users", postData.uid));
+        return {
+          id: postDoc.id,
+          ...postData,
+          author: userSnap.exists() ? userSnap.data() : null,
+        };
+      })
+    );
+    setPosts(postsWithUser);
+  };
+
   useEffect(() => {
-    const fetchPosts = async () => {
-      try {
-        const postsSnapshot = await getDocs(collection(db, "posts"));
-
-        const postsWithUser = await Promise.all(
-          postsSnapshot.docs.map(async (postDoc) => {
-            const postData = postDoc.data();
-            const userSnap = await getDoc(doc(db, "users", postData.uid));
-
-            return {
-              id: postDoc.id,
-              ...postData,
-              author: userSnap.exists() ? userSnap.data() : null,
-            };
-          })
-        );
-
-        setPosts(postsWithUser);
-      } catch (error) {
-        console.error("Error fetching posts:", error);
-      }
+    const fetchData = async () => {
+      await fetchPosts();
     };
-
-    fetchPosts();
+    fetchData();
   }, []);
 
   const toggleExpand = (id) => {
@@ -97,7 +93,7 @@ export default function Feed() {
         <div className="flex justify-between items-center text-sm font-bold bg-(--white) rounded-full px-2 gap-5">
           <div className="gap-2 flex items-center">
             <GroupsIcon color="--secondary" size={20} />
-            <p className="text-(--secondary)">{post.participants}</p>
+            <p className="text-(--secondary)">{post.participants.length}</p>
           </div>
           <div className="flex items-center gap-2">
             <CalenderIcon color="--secondary" size={10} />
@@ -197,13 +193,18 @@ export default function Feed() {
               <div className="flex gap-2">
                 <GroupsIcon color="--secondary" size={20} />
                 <p className="text-(--secondary) text-sm">
-                  {post.participants}
+                  {post.participants.length}
                 </p>
               </div>
             </div>
           </div>
         </div>
-        <Tilmeld className="absolute bottom-0 right-0 z-10" />
+        <Tilmeld
+          postId={post.id}
+          participants={post.participants}
+          onUpdate={fetchPosts}
+          className="absolute bottom-0 right-0 z-10"
+        />
       </motion.div>
     </motion.div>
   );
