@@ -203,13 +203,13 @@ function IndividualChat() {
             }`}
           >
             <div
-              className={`max-w-[70%] p-3 rounded-2xl ${
+              className={`max-w-[70%] p-3 rounded-2xl break-words ${
                 message.senderId === currentUserId
                   ? "bg-blue-500 text-white rounded-br-sm"
                   : "bg-gray-200 text-gray-800 rounded-bl-sm"
               }`}
             >
-              <p>{message.text}</p>
+              <p className="break-words whitespace-pre-wrap">{message.text}</p>
               {message.timestamp && (
                 <span
                   className={`text-xs mt-1 block ${
