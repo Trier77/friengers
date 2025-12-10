@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { useRef } from "react";
 import { collection, addDoc, Timestamp } from "firebase/firestore";
-import { db } from "../firebase";
+import { auth, db } from "../firebase";
 import CalendarIcon from "../../public/icons/CalenderIcon";
 import GroupsIcon from "../../public/icons/GroupsIcon";
 import MapPinIcon from "../../public/icons/MapPinIcon";
@@ -28,6 +28,13 @@ export default function CreatePost({ open, onClose, allTags }) {
   };
 
   const handlePublish = async () => {
+    const user = auth.currentUser;
+
+    if (!user) {
+      console.error("User not logged in");
+      return;
+    }
+
     try {
       await addDoc(collection(db, "posts"), {
         title,
@@ -36,13 +43,12 @@ export default function CreatePost({ open, onClose, allTags }) {
         participants,
         tags: selectedTags,
         time: Timestamp.fromDate(new Date(time)),
-        uid: "GG9tgK9dxjUMMpq48OrhnihCsn22", // midlertidig
+        uid: user.uid, // ✅ logged-in brugerens uid
         createdAt: Timestamp.now(),
       });
 
       onClose();
 
-      // reset form
       setTitle("");
       setDescription("");
       setLocation("");
