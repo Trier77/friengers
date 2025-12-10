@@ -1,98 +1,116 @@
 import { useParams, useNavigate } from "react-router";
 import { motion } from "framer-motion";
 import { useEffect, useRef, useState } from "react";
+import {
+  collection,
+  query,
+  onSnapshot,
+  addDoc,
+  orderBy,
+  doc,
+  getDoc,
+  serverTimestamp,
+  setDoc,
+} from "firebase/firestore";
+import { db, auth } from "../firebase";
 
 function IndividualChat() {
-  const { chatId } = useParams();
+  const { chatId } = useParams(); // Dette er nu den anden brugers ID
   const navigate = useNavigate();
   const messagesEndRef = useRef(null);
-  const [newMessage, setNewMessage] = useState(""); // Hvad man skriver lige nu
-  const [messages, setMessages] = useState([]); // Alle beskeder i chatten
-  const [isInputFocused, setIsInputFocused] = useState(false); // Om tastaturet er åbent eller ej
+  const [newMessage, setNewMessage] = useState("");
+  const [messages, setMessages] = useState([]);
+  const [isInputFocused, setIsInputFocused] = useState(false);
+  const [otherUser, setOtherUser] = useState(null);
+  const [loading, setLoading] = useState(true);
 
-  // Dummy data vi erstatter det senere når vi når til firebase osv.
-  const chatData = {
-    1: {
-      name: "Emma Sørensen",
-      avatar:
-        "https://img.freepik.com/free-photo/fair-haired-woman-looking-with-pleased-calm-expression_176420-15145.jpg",
-      messages: [
-        { id: 1, text: "Hej! Hvordan går det?", sender: "them", time: "9:30" },
-        { id: 2, text: "Godt! Og dig?", sender: "me", time: "9:31" },
-        { id: 3, text: "Hvis det passer?", sender: "them", time: "9:33" },
-      ],
-    },
-    2: {
-      name: "Jesper Madsen",
-      avatar:
-        "https://media.istockphoto.com/id/1200677760/photo/portrait-of-handsome-smiling-young-man-with-crossed-arms.jpg?s=612x612&w=0&k=20&c=g_ZmKDpK9VEEzWw4vJ6O577ENGLTOcrvYeiLxi8mVuo=",
+  const currentUserId = auth.currentUser?.uid;
 
-      messages: [
-        {
-          id: 1,
-          text: "Tak for hjælpen, endnu en gang!",
-          sender: "them",
-          time: "Tir.",
-        },
-      ],
-    },
-    3: {
-      name: "Jens Andersen",
-      avatar:
-        "https://t3.ftcdn.net/jpg/00/77/71/12/360_F_77711294_BA5QTjtgGPmLKCXGdtbAgZciL4kEwCnx.jpg",
-      messages: [
-        {
-          id: 1,
-          text: "Hey! Mega fedt du gider hjælpe mig. Det har været lidt uoverskueligtxD",
-          sender: "them",
-          time: "27/11",
-        },
-        {
-          id: 2,
-          text: "Jeg kender det så godt, jeg hader også bare når falaflerne ikke bliver ordentlig runde! Men du må gerne låne mit æbleskive-jern",
-          sender: "me",
-          time: "27/11",
-        },
-        {
-          id: 3,
-          text: "Tak! Jeg er hjemme om ca. 40 minutter vil jeg tro",
-          sender: "them",
-          time: "27/11",
-        },
-        { id: 4, text: "Super, så ses vi der!", sender: "me", time: "27/11" },
-      ],
-    },
-  };
-
-  const chat = chatData[chatId];
-
-  // starter beskeder fra dummy-data
+  // Hent den anden brugers info
   useEffect(() => {
-    if (chat) {
-      setMessages(chat.messages);
-    }
+    const fetchOtherUser = async () => {
+      try {
+        const userDoc = await getDoc(doc(db, "users", chatId));
+        if (userDoc.exists()) {
+          setOtherUser(userDoc.data());
+        }
+        setLoading(false);
+      } catch (error) {
+        console.error("Error fetching user:", error);
+        setLoading(false);
+      }
+    };
+
+    fetchOtherUser();
   }, [chatId]);
+
+  // Lyt til beskeder i real-time
+  useEffect(() => {
+    if (!currentUserId || !chatId) return;
+
+    // Opret en unik chat ID (altid samme rækkefølge)
+    const chatDocId = [currentUserId, chatId].sort().join("_");
+    console.log("👂 Listening to chat:", chatDocId);
+
+    // Lyt til beskeder
+    const messagesQuery = query(
+      collection(db, "chats", chatDocId, "messages"),
+      orderBy("timestamp", "asc")
+    );
+
+    const unsubscribe = onSnapshot(messagesQuery, (snapshot) => {
+      const msgs = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      console.log("📨 Messages received:", msgs.length);
+      setMessages(msgs);
+    });
+
+    return unsubscribe;
+  }, [currentUserId, chatId]);
 
   // Auto scroll
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
   }, [messages]);
 
-  const handleSendMessage = () => {
-    if (newMessage.trim() === "") return;
+  const handleSendMessage = async () => {
+    if (newMessage.trim() === "" || !currentUserId) return;
 
-    const newMsg = {
-      id: messages.length + 1,
-      text: newMessage,
-      sender: "me",
-      time: new Date().toLocaleTimeString("da-DK", {
-        hour: "2-digit",
-        minute: "2-digit",
-      }),
-    };
+    try {
+      const chatDocId = [currentUserId, chatId].sort().join("_");
+      console.log("📤 Sending message to chat:", chatDocId);
 
-    setMessages([...messages, newMsg]);
-    setNewMessage("");
+      // VIGTIGT: Først skal vi sikre at chat-dokumentet eksisterer
+      // Hvis det ikke gør, opretter vi det
+      const chatDocRef = doc(db, "chats", chatDocId);
+      await setDoc(
+        chatDocRef,
+        {
+          participants: [currentUserId, chatId],
+          createdAt: serverTimestamp(),
+          lastMessage: newMessage,
+          lastMessageTime: serverTimestamp(),
+        },
+        { merge: true }
+      ); // merge: true betyder "opdater hvis den findes, ellers opret"
+
+      console.log("✅ Chat document created/updated");
+
+      // Nu kan vi tilføje beskeden
+      await addDoc(collection(db, "chats", chatDocId, "messages"), {
+        text: newMessage,
+        senderId: currentUserId,
+        timestamp: serverTimestamp(),
+      });
+
+      console.log("✅ Message sent successfully!");
+      setNewMessage("");
+    } catch (error) {
+      console.error("❌ Error sending message:", error);
+      console.error("Error details:", error.code, error.message);
+    }
   };
 
   const handleKeyPress = (e) => {
@@ -101,8 +119,12 @@ function IndividualChat() {
     }
   };
 
-  if (!chat) {
-    return <div>Chat ikke fundet</div>;
+  if (loading) {
+    return <div className="p-4 text-center">Henter chat...</div>;
+  }
+
+  if (!otherUser) {
+    return <div className="p-4 text-center">Bruger ikke fundet</div>;
   }
 
   return (
@@ -130,37 +152,54 @@ function IndividualChat() {
           </svg>
         </button>
         <img
-          src={chat.avatar}
-          alt={chat.name}
+          src={otherUser.profileImage}
+          alt={otherUser.fuldenavn}
           className="w-10 h-10 rounded-full object-cover"
         />
-        <h2 className="font-semibold text-lg text-gray-800">{chat.name}</h2>
+        <h2 className="font-semibold text-lg text-gray-800">
+          {otherUser.kaldenavn || otherUser.fuldenavn}
+        </h2>
       </div>
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-3">
+        {messages.length === 0 && (
+          <div className="text-center text-gray-400 mt-8">
+            <p>Ingen beskeder endnu</p>
+            <p className="text-sm">Send den første besked! 💬</p>
+          </div>
+        )}
         {messages.map((message) => (
           <div
             key={message.id}
             className={`flex ${
-              message.sender === "me" ? "justify-end" : "justify-start"
+              message.senderId === currentUserId
+                ? "justify-end"
+                : "justify-start"
             }`}
           >
             <div
               className={`max-w-[70%] p-3 rounded-2xl ${
-                message.sender === "me"
+                message.senderId === currentUserId
                   ? "bg-blue-500 text-white rounded-br-sm"
                   : "bg-gray-200 text-gray-800 rounded-bl-sm"
               }`}
             >
               <p>{message.text}</p>
-              <span
-                className={`text-xs mt-1 block ${
-                  message.sender === "me" ? "text-blue-100" : "text-gray-400"
-                }`}
-              >
-                {message.time}
-              </span>
+              {message.timestamp && (
+                <span
+                  className={`text-xs mt-1 block ${
+                    message.senderId === currentUserId
+                      ? "text-blue-100"
+                      : "text-gray-400"
+                  }`}
+                >
+                  {message.timestamp?.toDate().toLocaleTimeString("da-DK", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </span>
+              )}
             </div>
           </div>
         ))}
@@ -182,18 +221,22 @@ function IndividualChat() {
             placeholder="Skriv en besked..."
             onFocus={() => {
               setIsInputFocused(true);
-              document.querySelector("nav").style.display = "none";
+              const nav = document.querySelector("nav");
+              if (nav) nav.style.display = "none";
               messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
             }}
             onBlur={() => {
-              setIsInputFocused(false);
-              document.querySelector("nav").style.display = "flex";
+              setTimeout(() => {
+                setIsInputFocused(false);
+                const nav = document.querySelector("nav");
+                if (nav) nav.style.display = "flex";
+              }, 100);
             }}
             className="flex-1 px-4 py-3 rounded-full border-2 border-gray-200 focus:outline-none focus:border-blue-400"
           />
           <button
-            onMouseDown={handleSendMessage}
-            className="bg-blue-500 text-white p-3 rounded-full"
+            onClick={handleSendMessage}
+            className="bg-blue-500 text-white p-3 rounded-full hover:bg-blue-600 transition-colors"
           >
             <svg
               className="w-6 h-6"
