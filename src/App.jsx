@@ -12,6 +12,7 @@ import Logo from "./components/Logo";
 import Login from "./pages/Login";
 import Settings from "./pages/Settings";
 import AndresProfil from "./pages/AndresProfil";
+import FirebaseTest from "./pages/Firebasetest";
 
 function App() {
   const [user, setUser] = useState(null);
@@ -46,6 +47,7 @@ function App() {
         <Route path="/Profil" element={<Profil />} />
         <Route path="/Chats/:chatId" element={<IndividualChat />} />
         <Route path="/Settings" element={<Settings />} />
+        <Route path="/test" element={<FirebaseTest />} />
       </Routes>
     </>
   );

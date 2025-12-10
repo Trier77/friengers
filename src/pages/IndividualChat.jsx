@@ -4,13 +4,13 @@ import { useEffect, useRef, useState } from "react";
 import {
   collection,
   query,
-  where,
   onSnapshot,
   addDoc,
   orderBy,
   doc,
   getDoc,
   serverTimestamp,
+  setDoc,
 } from "firebase/firestore";
 import { db, auth } from "../firebase";
 
@@ -50,6 +50,7 @@ function IndividualChat() {
 
     // Opret en unik chat ID (altid samme rækkefølge)
     const chatDocId = [currentUserId, chatId].sort().join("_");
+    console.log("👂 Listening to chat:", chatDocId);
 
     // Lyt til beskeder
     const messagesQuery = query(
@@ -62,6 +63,7 @@ function IndividualChat() {
         id: doc.id,
         ...doc.data(),
       }));
+      console.log("📨 Messages received:", msgs.length);
       setMessages(msgs);
     });
 
@@ -78,19 +80,36 @@ function IndividualChat() {
 
     try {
       const chatDocId = [currentUserId, chatId].sort().join("_");
-      console.log("💬 Writing to chat:", chatDocId);
-      console.log("💬 Project:", db.app.options.projectId);
+      console.log("📤 Sending message to chat:", chatDocId);
 
+      // VIGTIGT: Først skal vi sikre at chat-dokumentet eksisterer
+      // Hvis det ikke gør, opretter vi det
+      const chatDocRef = doc(db, "chats", chatDocId);
+      await setDoc(
+        chatDocRef,
+        {
+          participants: [currentUserId, chatId],
+          createdAt: serverTimestamp(),
+          lastMessage: newMessage,
+          lastMessageTime: serverTimestamp(),
+        },
+        { merge: true }
+      ); // merge: true betyder "opdater hvis den findes, ellers opret"
+
+      console.log("✅ Chat document created/updated");
+
+      // Nu kan vi tilføje beskeden
       await addDoc(collection(db, "chats", chatDocId, "messages"), {
         text: newMessage,
         senderId: currentUserId,
         timestamp: serverTimestamp(),
       });
 
-      console.log("✅ Message written successfully");
+      console.log("✅ Message sent successfully!");
       setNewMessage("");
     } catch (error) {
-      console.error("Error sending message:", error);
+      console.error("❌ Error sending message:", error);
+      console.error("Error details:", error.code, error.message);
     }
   };
 
@@ -144,6 +163,12 @@ function IndividualChat() {
 
       {/* Messages */}
       <div className="flex-1 overflow-y-auto p-4 space-y-3">
+        {messages.length === 0 && (
+          <div className="text-center text-gray-400 mt-8">
+            <p>Ingen beskeder endnu</p>
+            <p className="text-sm">Send den første besked! 💬</p>
+          </div>
+        )}
         {messages.map((message) => (
           <div
             key={message.id}
@@ -161,18 +186,20 @@ function IndividualChat() {
               }`}
             >
               <p>{message.text}</p>
-              <span
-                className={`text-xs mt-1 block ${
-                  message.senderId === currentUserId
-                    ? "text-blue-100"
-                    : "text-gray-400"
-                }`}
-              >
-                {message.timestamp?.toDate().toLocaleTimeString("da-DK", {
-                  hour: "2-digit",
-                  minute: "2-digit",
-                })}
-              </span>
+              {message.timestamp && (
+                <span
+                  className={`text-xs mt-1 block ${
+                    message.senderId === currentUserId
+                      ? "text-blue-100"
+                      : "text-gray-400"
+                  }`}
+                >
+                  {message.timestamp?.toDate().toLocaleTimeString("da-DK", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  })}
+                </span>
+              )}
             </div>
           </div>
         ))}
@@ -194,20 +221,22 @@ function IndividualChat() {
             placeholder="Skriv en besked..."
             onFocus={() => {
               setIsInputFocused(true);
-              document.querySelector("nav").style.display = "none";
+              const nav = document.querySelector("nav");
+              if (nav) nav.style.display = "none";
               messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
             }}
             onBlur={() => {
               setTimeout(() => {
                 setIsInputFocused(false);
-                document.querySelector("nav").style.display = "flex";
+                const nav = document.querySelector("nav");
+                if (nav) nav.style.display = "flex";
               }, 100);
             }}
             className="flex-1 px-4 py-3 rounded-full border-2 border-gray-200 focus:outline-none focus:border-blue-400"
           />
           <button
             onClick={handleSendMessage}
-            className="bg-blue-500 text-white p-3 rounded-full"
+            className="bg-blue-500 text-white p-3 rounded-full hover:bg-blue-600 transition-colors"
           >
             <svg
               className="w-6 h-6"
