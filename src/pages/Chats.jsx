@@ -1,49 +1,177 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import UnreadBadge from "../components/UnreadBadge";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router";
+import {
+  collection,
+  query,
+  getDocs,
+  doc,
+  getDoc,
+  orderBy,
+  limit,
+} from "firebase/firestore";
+import { db, auth } from "../firebase";
 
 function Chats() {
-  const [activeTab, setActiveTab] = useState("private"); // 'privat chat' eller 'gruppe chat'
+  const [activeTab, setActiveTab] = useState("private");
+  const [privateChats, setPrivateChats] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [debugInfo, setDebugInfo] = useState(null);
   const navigate = useNavigate();
+  const currentUserId = auth.currentUser?.uid;
 
-  // Dette er bare noget dummy data, indtil at vi når til det
-  const privateChats = [
-    {
-      id: 1,
-      name: "Emma Sørensen",
-      message: "Hvis det passer?",
-      time: "9:33",
-      avatar:
-        "https://img.freepik.com/free-photo/fair-haired-woman-looking-with-pleased-calm-expression_176420-15145.jpg?semt=ais_hybrid&w=740&q=80",
-      unread: 2,
-      online: true,
-    },
-    {
-      id: 2,
-      name: "Jesper Madsen",
-      message: "Tak for hjælpen, endnu en gang!",
-      time: "Tir.",
-      avatar:
-        "https://media.istockphoto.com/id/1200677760/photo/portrait-of-handsome-smiling-young-man-with-crossed-arms.jpg?s=612x612&w=0&k=20&c=g_ZmKDpK9VEEzWw4vJ6O577ENGLTOcrvYeiLxi8mVuo=",
-      unread: 0,
-      online: true,
-    },
-    {
-      id: 3,
-      name: "Jens Andersen",
-      message: "Dig: Super, så ses vi der!",
-      time: "27/11",
-      avatar:
-        "https://t3.ftcdn.net/jpg/00/77/71/12/360_F_77711294_BA5QTjtgGPmLKCXGdtbAgZciL4kEwCnx.jpg",
-      unread: 0,
-      online: true,
-    },
-  ];
+  useEffect(() => {
+    const fetchChats = async () => {
+      if (!currentUserId) return;
 
-  const groupChats = []; // Her skal vi tilføje gruppechat-data senere
+      try {
+        console.log("🔍 Current User ID:", currentUserId);
 
+        // Hent alle chats
+        const chatsSnapshot = await getDocs(collection(db, "chats"));
+        console.log("📦 Total chats in database:", chatsSnapshot.docs.length);
+
+        const allChatIds = chatsSnapshot.docs.map((doc) => doc.id);
+        console.log("💬 All chat IDs:", allChatIds);
+
+        setDebugInfo({
+          totalChats: chatsSnapshot.docs.length,
+          allChatIds: allChatIds,
+          currentUserId: currentUserId,
+        });
+
+        const chatList = [];
+
+        for (const chatDoc of chatsSnapshot.docs) {
+          const chatId = chatDoc.id;
+          console.log("🔎 Checking chat:", chatId);
+
+          // Tjek om den nuværende bruger er en del af denne chat
+          if (!chatId.includes(currentUserId)) {
+            console.log("❌ User not in this chat");
+            continue;
+          }
+
+          console.log("✅ User IS in this chat!");
+
+          // Find den anden brugers ID
+          const userIds = chatId.split("_");
+          console.log("👥 User IDs in chat:", userIds);
+
+          const otherUserId = userIds.find((id) => id !== currentUserId);
+          console.log("👤 Other user ID:", otherUserId);
+
+          if (!otherUserId) continue;
+
+          // Hent den anden brugers data
+          const otherUserDoc = await getDoc(doc(db, "users", otherUserId));
+          if (!otherUserDoc.exists()) {
+            console.log("⚠️ Other user not found in database");
+            continue;
+          }
+
+          const otherUserData = otherUserDoc.data();
+          console.log("👤 Other user data:", otherUserData);
+
+          // Hent den sidste besked fra denne chat
+          const messagesQuery = query(
+            collection(db, "chats", chatId, "messages"),
+            orderBy("timestamp", "desc"),
+            limit(1)
+          );
+          const messagesSnapshot = await getDocs(messagesQuery);
+          console.log("💌 Messages found:", messagesSnapshot.docs.length);
+
+          let lastMessage = "Ingen beskeder endnu";
+          let lastMessageTime = null;
+          let unreadCount = 0;
+
+          if (!messagesSnapshot.empty) {
+            const lastMsg = messagesSnapshot.docs[0].data();
+            console.log("📝 Last message:", lastMsg);
+            lastMessage = lastMsg.text;
+            lastMessageTime = lastMsg.timestamp;
+
+            if (lastMsg.senderId !== currentUserId) {
+              unreadCount = 1;
+            }
+
+            if (lastMsg.senderId === currentUserId) {
+              lastMessage = `Dig: ${lastMessage}`;
+            }
+          }
+
+          // Formatér tid
+          let timeDisplay = "";
+          if (lastMessageTime) {
+            const messageDate = lastMessageTime.toDate();
+            const now = new Date();
+            const diffInDays = Math.floor(
+              (now - messageDate) / (1000 * 60 * 60 * 24)
+            );
+
+            if (diffInDays === 0) {
+              timeDisplay = messageDate.toLocaleTimeString("da-DK", {
+                hour: "2-digit",
+                minute: "2-digit",
+              });
+            } else if (diffInDays === 1) {
+              timeDisplay = "I går";
+            } else if (diffInDays < 7) {
+              timeDisplay = messageDate.toLocaleDateString("da-DK", {
+                weekday: "short",
+              });
+            } else {
+              timeDisplay = messageDate.toLocaleDateString("da-DK", {
+                day: "2-digit",
+                month: "2-digit",
+              });
+            }
+          }
+
+          chatList.push({
+            id: otherUserId,
+            name: otherUserData.kaldenavn || otherUserData.fuldenavn,
+            message: lastMessage,
+            time: timeDisplay || "",
+            avatar: otherUserData.profileImage,
+            unread: unreadCount,
+            online: true,
+            timestamp: lastMessageTime,
+          });
+        }
+
+        console.log("✅ Final chat list:", chatList);
+
+        // Sortér chats efter tidsstempel (nyeste først)
+        chatList.sort((a, b) => {
+          if (!a.timestamp) return 1;
+          if (!b.timestamp) return -1;
+          return b.timestamp.toDate() - a.timestamp.toDate();
+        });
+
+        setPrivateChats(chatList);
+        setLoading(false);
+      } catch (error) {
+        console.error("❌ Error fetching chats:", error);
+        setLoading(false);
+      }
+    };
+
+    fetchChats();
+  }, [currentUserId]);
+
+  const groupChats = [];
   const currentChats = activeTab === "private" ? privateChats : groupChats;
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+        <p className="text-gray-500">Henter chats...</p>
+      </div>
+    );
+  }
 
   return (
     <motion.div
@@ -105,68 +233,94 @@ function Chats() {
         </div>
       </motion.div>
 
-      {/* Indbakke Liste */}
+      {/* Debug Info */}
+      {debugInfo && (
+        <div className="px-4 mt-4 mb-4 bg-yellow-100 p-4 rounded text-xs">
+          <p>
+            <strong>Debug Info:</strong>
+          </p>
+          <p>Total chats: {debugInfo.totalChats}</p>
+          <p>Your ID: {debugInfo.currentUserId}</p>
+          <p>Chat IDs: {debugInfo.allChatIds.join(", ") || "None"}</p>
+          <p>Chats shown: {currentChats.length}</p>
+        </div>
+      )}
+
+      {/* Chat Liste */}
       <div className="px-4 mt-4">
-        {currentChats.map((chat, index) => (
-          <motion.div
-            key={chat.id}
-            onClick={() => navigate(`/Chats/${chat.id}`)}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{
-              duration: 0.6,
-              delay: 0.3 + index * 0.15,
-              ease: "easeInOut",
-            }}
-            className={`relative flex items-center border-1 border-[var(--secondary)] gap-4 mb-3 rounded-tl-4xl rounded-bl-4xl rounded-tr-2xl rounded-br-2xl cursor-pointer transition-all active:brightness-80 ${
-              chat.id === 1
-                ? "bg-blue-400 text-white"
-                : "bg-white text-gray-800 hover:bg-gray-50"
-            }`}
-          >
-            {/* Avatar med Online Status */}
-            <div className="relative flex-shrink-0">
-              <img
-                src={chat.avatar}
-                alt={chat.name}
-                className="w-14 h-14 rounded-full object-cover"
-              />
-              {chat.online && (
-                <div
-                  className={`absolute bottom-0 right-0 w-4 h-4 rounded-full border-2 ${
-                    chat.id === 1
-                      ? "bg-blue-300 border-blue-400"
-                      : "bg-green-400 border-white"
+        {currentChats.length === 0 ? (
+          <div className="text-center text-gray-500 mt-8">
+            <p>Ingen chats endnu</p>
+            <p className="text-sm mt-2">
+              Start en samtale ved at besøge en profil
+            </p>
+          </div>
+        ) : (
+          currentChats.map((chat, index) => (
+            <motion.div
+              key={chat.id}
+              onClick={() => navigate(`/Chats/${chat.id}`)}
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{
+                duration: 0.6,
+                delay: 0.3 + index * 0.15,
+                ease: "easeInOut",
+              }}
+              className={`relative flex items-center border-1 border-[var(--secondary)] gap-4 mb-3 rounded-tl-4xl rounded-bl-4xl rounded-tr-2xl rounded-br-2xl cursor-pointer transition-all active:brightness-80 ${
+                index === 0 && chat.unread > 0
+                  ? "bg-blue-400 text-white"
+                  : "bg-white text-gray-800 hover:bg-gray-50"
+              }`}
+            >
+              {/* Avatar med Online Status */}
+              <div className="relative flex-shrink-0">
+                <img
+                  src={chat.avatar || "https://via.placeholder.com/56"}
+                  alt={chat.name}
+                  className="w-14 h-14 rounded-full object-cover"
+                />
+                {chat.online && (
+                  <div
+                    className={`absolute bottom-0 right-0 w-4 h-4 rounded-full border-2 ${
+                      index === 0 && chat.unread > 0
+                        ? "bg-blue-300 border-blue-400"
+                        : "bg-green-400 border-white"
+                    }`}
+                  ></div>
+                )}
+              </div>
+
+              {/* Chat Info */}
+              <div className="flex-1 min-w-0">
+                <h3 className="font-semibold text-lg">{chat.name}</h3>
+                <p
+                  className={`text-sm truncate ${
+                    index === 0 && chat.unread > 0
+                      ? "text-white/90"
+                      : "text-gray-500"
                   }`}
-                ></div>
-              )}
-            </div>
+                >
+                  {chat.message}
+                </p>
+              </div>
 
-            {/* Chat Info */}
-            <div className="flex-1 min-w-0">
-              <h3 className="font-semibold text-lg">{chat.name}</h3>
-              <p
-                className={`text-sm truncate ${
-                  chat.id === 1 ? "text-white/90" : "text-gray-500"
-                }`}
-              >
-                {chat.message}
-              </p>
-            </div>
-
-            {/* Tid og Unread Badge */}
-            <div className="flex flex-col items-end gap-1">
-              <span
-                className={`text-sm mr-2 ${
-                  chat.id === 1 ? "text-white" : "text-gray-500"
-                }`}
-              >
-                {chat.time}
-              </span>
-              {chat.unread > 0 && <UnreadBadge count={chat.unread} />}
-            </div>
-          </motion.div>
-        ))}
+              {/* Tid og Unread Badge */}
+              <div className="flex flex-col items-end gap-1">
+                <span
+                  className={`text-sm mr-2 ${
+                    index === 0 && chat.unread > 0
+                      ? "text-white"
+                      : "text-gray-500"
+                  }`}
+                >
+                  {chat.time}
+                </span>
+                {chat.unread > 0 && <UnreadBadge count={chat.unread} />}
+              </div>
+            </motion.div>
+          ))
+        )}
       </div>
     </motion.div>
   );
