@@ -1,25 +1,20 @@
-import { doc, updateDoc, arrayUnion, arrayRemove } from "firebase/firestore";
+import { doc, updateDoc, arrayUnion } from "firebase/firestore";
 import { auth, db } from "../firebase";
 import { useState, useRef } from "react";
 
-const toggleSignup = async (postId, participants) => {
+const sendJoinRequest = async (postId) => {
   const userId = auth.currentUser.uid;
   const postRef = doc(db, "posts", postId);
 
-  if (participants.includes(userId)) {
-    await updateDoc(postRef, {
-      participants: arrayRemove(userId),
-    });
-  } else {
-    await updateDoc(postRef, {
-      participants: arrayUnion(userId),
-    });
-  }
+  await updateDoc(postRef, {
+    requests: arrayUnion(userId),
+  });
 };
 
 export default function Tilmeld({
   postId,
   participants,
+  requests = [], // <-- tilføj requests som prop
   onUpdate,
   className = "",
 }) {
@@ -27,21 +22,16 @@ export default function Tilmeld({
   const [localParticipants, setLocalParticipants] = useState(
     Array.isArray(participants) ? participants : []
   );
-  const [progress, setProgress] = useState(0); // 0 til 100
+  const [progress, setProgress] = useState(0);
   const intervalRef = useRef(null);
 
   const isJoined = localParticipants.includes(userId);
+  const isRequested = requests.includes(userId); // <-- check om bruger allerede har sendt request
 
   const handleClick = async () => {
-    await toggleSignup(postId, localParticipants);
-
-    if (localParticipants.includes(userId)) {
-      setLocalParticipants(localParticipants.filter((id) => id !== userId));
-    } else {
-      setLocalParticipants([...localParticipants, userId]);
-    }
-
-    onUpdate();
+    if (isJoined || isRequested) return; // allerede deltager eller allerede bedt om at deltage
+    await sendJoinRequest(postId);
+    onUpdate(); // refetch posts
   };
 
   const handleMouseDown = () => {
