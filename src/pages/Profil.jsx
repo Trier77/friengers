@@ -3,10 +3,12 @@ import { auth, db } from "../firebase";
 import { doc, getDoc } from "firebase/firestore";
 import { NavLink } from "react-router";
 import Settings from "./Settings";
+import { motion } from "framer-motion";
 
 export default function Profil() {
 
   const [userData, setUserData] = useState(null);
+  const [activeTab, setActiveTab] = useState("active"); // 'privat chat' eller 'gruppe chat'
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -26,8 +28,36 @@ export default function Profil() {
 
   if (!userData) return <p>Henter profil...</p>;
 
+  const accountBio ={
   
+    bio: "Born and raised i Aarhus og læser biologi. Elsker fitness og programmering i min fritid. Altid villig til at give en hånd.",
+      
+      tasksCompleted: 14,
+      memberSince: "12/09-2022"
+      ,
+      activePosts: [
+        {
+          id: 1,
+          title: "Skab flyttes - hvem kan?",
+          tags: ["Praktisk", "Flytning"],
+          description:
+            "Hej! Jeg sidder og mangler en ekstra hånd til at flytte et skab fra min lejlighed på Christian X's vej ned til...",
+          participants: "0/2",
+          date: "9. Maj",
+          time: "Kl. 14:00",
+        },
+      ],
+    }
+  
+    // const opgaver = activeTab === "private" ? privateChats : groupChats;
+
   return (
+    <motion.div
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      transition={{ duration: 0.4 }}
+      className="min-h-screen bg-white pb-20"
+    >
     <div>
       <div className="absolute right-10">
         <NavLink to="/Settings">
@@ -41,20 +71,163 @@ export default function Profil() {
           </svg>
         </NavLink>
       </div>
-      
+{/*       
       <h1>Din Profil</h1>
-
-      <img
+      <div className="w-20 h-20 rounded-full">
+        <img className="w-full h-full rounded-full object-cover"
         src={userData.profileImage}
-        alt="Profilbillede"
-        style={{ width: 100, borderRadius: "50%" }}
+        alt="Profilbillede"    
+        
       />
-
-      <p><strong>Navn:</strong> {userData.fuldenavn}</p>
-      <p><strong>Studie:</strong> {userData.study}</p>
-      <p><strong>Pronominer:</strong> {userData.pronouns}</p>
-      {/* <p><strong>Oprettet:</strong> {new Date(userData.createdAt.seconds * 1000).toLocaleDateString()}</p> */}
+      </div>
+      
+      <div>
+      <h3>{userData.fuldenavn}</h3>
+      <h3>{userData.study}</h3>
+      <h3>{userData.pronouns}</h3>
+      </div>
+      
+      {/* <p><strong>Oprettet:</strong> {new Date(userData.createdAt.seconds * 1000).toLocaleDateString()}</p>*/}
     </div>
     
+    
+      {/* Header Section */}
+      <div className="bg-white pt-8 pb-6 px-6 relative">
+        
+        {/* Profile Info */}
+        <div className="flex items-center gap-4 mb-4">
+          {/* Avatar with border */}
+          <div className="relative">
+            <div className="w-20 h-20 rounded-full">
+              <img
+                src={userData.profileImage}
+                alt={userData.fuldenavnname}
+                className="w-full h-full rounded-full object-cover"
+              />
+            </div>
+                       
+          </div>
+
+          {/* Name and Study */}
+          <div>
+            <h1 className="text-2xl font-bold text-gray-900 whitespace-nowrap">
+              {userData.fuldenavn}
+            </h1>
+            <p className="text-blue-500 font-bold text-sm">{userData.study}</p>
+            <p className="text-sm text-blue-500/50">{userData.pronouns}</p>
+          </div>
+        </div>
+
+        {/* Bio */}
+        <p className="text-gray-700 text-sm mb-4">{accountBio.bio}</p>
+      </div>
+        
+        {/* <motion.div
+        initial={{ opacity: 0, y: -20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.1 }}
+        className="bg-white pt-6 pb-4 px-6"
+      > */}
+        
+
+        {/* Tab Buttons */}
+        <div className="flex gap-3 mt-6 ml-2 mr-2">
+          <button
+            onClick={() => setActiveTab("active")}
+            className={`flex-1 py-1 px-2 rounded-full font-semibold transition-colors ${
+              activeTab === "active"
+                ? "bg-blue-500 text-white"
+                : "bg-white text-blue-500 border-2 border-blue-500"
+            }`}
+          >
+            Aktive Opgaver
+          </button>
+          <button
+            onClick={() => setActiveTab("solved")}
+            className={`flex-1 py-1 px-2 rounded-full font-semibold transition-colors ${
+              activeTab === "solved"
+                ? "bg-blue-500 text-white"
+                : "bg-white text-blue-500 border-2 border-blue-500"
+            }`}
+          >
+            Løste Opgaver
+          </button>
+        </div>
+      {/* </motion.div> */}
+
+      {/* Active Posts Section */}
+      <div className="px-6 mt-6">
+        <h2 className="text-center font-bold text-gray-900 mb-4">
+          Aktive opgaver
+        </h2>
+
+        {accountBio.activePosts.length === 0 ? (
+          <p className="text-center text-gray-500">Ingen aktive opgaver</p>
+        ) : (
+          accountBio.activePosts.map((post) => (
+            <div
+              key={post.id}
+              className="bg-blue-900 rounded-3xl p-4 mb-4 text-white"
+            >
+              {/* Post Header */}
+              <div className="flex justify-between items-start mb-2">
+                <h3 className="text-lg font-bold flex-1">{post.title}</h3>
+                <div className="flex gap-2 text-xs">
+                  <span className="bg-white text-blue-900 px-3 py-1 rounded-full font-semibold">
+                    {post.date}
+                  </span>
+                  <span className="bg-white text-blue-900 px-3 py-1 rounded-full font-semibold">
+                    {post.time}
+                  </span>
+                </div>
+              </div>
+
+              {/* Tags */}
+              <div className="flex gap-2 mb-3">
+                {post.tags.map((tag, index) => (
+                  <span
+                    key={index}
+                    className="text-xs border border-white px-3 py-1 rounded-full"
+                  >
+                    {tag}
+                  </span>
+                ))}
+              </div>
+
+              {/* Description */}
+              <p className="text-sm mb-4">{post.description}</p>
+
+              {/* Footer */}
+              <div className="flex justify-between items-center">
+                <div className="flex items-center gap-2">
+                  <img
+                    src={userData.profileImage}
+                    alt={userData.kaldenavn}
+                    className="w-6 h-6 rounded-full"
+                  />
+                  <span className="text-sm">{accountBio.name}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <svg
+                    className="w-4 h-4"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
+                  </svg>
+                  <span className="text-sm">{post.participants}</span>
+                </div>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+
+      {/* Member Since */}
+      <div className="text-center mt-8 mb-4">
+        <p className="text-gray-400 text-sm">Oprettet</p>
+        <p className="text-gray-500 text-sm">{accountBio.memberSince}</p>
+      </div>
+    </motion.div>
   );
 }
