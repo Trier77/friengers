@@ -8,6 +8,7 @@ import Tilmeld from "../components/Tilmeld";
 import { useNavigate } from "react-router";
 import Create from "../components/Create";
 import GroupsIcon from "../../public/icons/GroupsIcon";
+import NotificationWrapper from "../components/NotificationWrapper";
 
 export default function Feed() {
   const [posts, setPosts] = useState([]);
@@ -203,7 +204,7 @@ export default function Feed() {
               <div className="flex gap-2">
                 <GroupsIcon color="--secondary" size={20} />
                 <p className="text-(--secondary) text-sm">
-                  {post.participants.length}
+                  {post.participants?.length || 0}
                 </p>
               </div>
             </div>
@@ -212,9 +213,11 @@ export default function Feed() {
         <Tilmeld
           postId={post.id}
           participants={post.participants}
+          requests={post.requests || []} // send requests med
           onUpdate={fetchPosts}
           className="absolute bottom-0 right-0 z-10"
         />
+        {post.uid === userId && <RequestsList post={post} />}
       </motion.div>
     </motion.div>
   );
@@ -222,6 +225,7 @@ export default function Feed() {
   // Og her er så den samlet return
   return (
     <div className="text-2xl p-4">
+      <NotificationWrapper />
       {myPosts.length > 0 &&
         myPosts.map((post, index) => renderMyPost(post, index))}
 
