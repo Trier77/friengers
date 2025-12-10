@@ -25,12 +25,12 @@ export default function NotificationWrapper() {
   }, []);
 
   return (
-    <div className="absolute top-5 right-10">
+    <div className="absolute top-10 right-10">
       <button onClick={toggleNotifications} className="relative">
-        <NotificationIcon color="--secondary" size={30} />
+        <NotificationIcon color="--primary" size={20} />
 
         {notifications.length > 0 && (
-          <span className="absolute top-0 right-0 bg-red-500 text-white rounded-full w-4 h-4 text-xs flex items-center justify-center">
+          <span className="absolute -top-2 -right-2 bg-(--secondary) text-white rounded-full w-4 h-4 font-bold text-xs flex items-center justify-center">
             {notifications.length}
           </span>
         )}

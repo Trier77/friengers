@@ -22,7 +22,7 @@ export default function Navbar() {
     fetchProfile();
   }, []);
 
-  if (!userData) return <p>Henter profil...</p>;
+  if (!userData) return null;
 
   return (
     <div className="z-1000">
