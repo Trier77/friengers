@@ -12,7 +12,7 @@ import GroupsIcon from "../../public/icons/GroupsIcon";
 export default function Feed() {
   const [posts, setPosts] = useState([]);
   const navigate = useNavigate();
-  const [expandedPosts, setExpandedPosts] = useState({});
+  const [expandedPostId, setExpandedPostId] = useState(null);
   const [selectedTags, setSelectedTags] = useState([]);
   const [showFilter, setShowFilter] = useState(false);
 
@@ -42,7 +42,7 @@ export default function Feed() {
   }, []);
 
   const toggleExpand = (id) => {
-    setExpandedPosts((prev) => ({ ...prev, [id]: !prev[id] }));
+    setExpandedPostId((prevId) => (prevId === id ? null : id));
   };
 
   const handleDropdownChange = (tag) => {
@@ -125,7 +125,13 @@ export default function Feed() {
           delay: 0.3 + index * 0.15,
           ease: "easeInOut",
         }}
-        className="mb-4 p-4 bg-(--primary) rounded-2xl gap-2 flex flex-col relative overflow-hidden"
+        className={`mb-4 p-4 bg-(--primary) rounded-2xl gap-2 flex flex-col relative overflow-hidden
+          
+          ${
+            expandedPostId === post.id
+              ? "outline-4 outline-(--secondary)"
+              : "line-clamp-3"
+          }`}
       >
         <div className="flex items-center justify-between">
           <h2 className="justify-start text-(--secondary) text-xl overskrift">
@@ -166,18 +172,22 @@ export default function Feed() {
           </ul>
         </div>
 
-        <div className="flex justify-between relative">
-          <div className="w-60 flex flex-col justify-between gap-2">
+        <div
+          className={`flex justify-between relative
+      
+        `}
+        >
+          <div className="flex flex-col justify-between gap-2">
             <p
-              className={`text-(--white) text-sm cursor-pointer overflow-hidden ${
-                expandedPosts[post.id] ? "" : "line-clamp-3"
+              className={`w-70 text-(--white) text-sm cursor-pointer overflow-hidden ${
+                expandedPostId === post.id ? "" : "line-clamp-3"
               }`}
               onClick={() => toggleExpand(post.id)}
             >
               {post.description}
             </p>
 
-            <div className="flex justify-between items-center">
+            <div className="w-60 flex justify-between items-center">
               <div className="flex items-center gap-2">
                 <img
                   src={post.author?.profileImage}
@@ -209,7 +219,7 @@ export default function Feed() {
     </motion.div>
   );
 
-  // Og her er så resten af Feed komponenten
+  // Og her er så den samlet return
   return (
     <div className="text-2xl p-4">
       {myPosts.length > 0 &&

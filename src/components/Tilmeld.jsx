@@ -78,7 +78,7 @@ export default function Tilmeld({
       onMouseLeave={handleMouseUp}
       onTouchStart={handleMouseDown}
       onTouchEnd={handleMouseUp}
-      className={`w-20 h-20 rounded-tl-full overflow-hidden border border-gray-300 ${className}`}
+      className={`w-20 h-20 rounded-tl-full overflow-hidden ${className}`}
     >
       {/* Background */}
       <div
