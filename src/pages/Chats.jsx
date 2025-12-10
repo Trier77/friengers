@@ -10,6 +10,7 @@ import {
   getDoc,
   orderBy,
   limit,
+  getDocs,
 } from "firebase/firestore";
 import { db, auth } from "../firebase";
 
@@ -23,7 +24,7 @@ function Chats() {
   useEffect(() => {
     if (!currentUserId) return;
 
-    console.log("🔄 Setting up real-time listener for chats");
+    console.log("🔄 Current User ID:", currentUserId);
 
     // Lyt til ALLE chats i real-time
     const chatsQuery = query(collection(db, "chats"));
@@ -53,27 +54,24 @@ function Chats() {
 
           const otherUserData = otherUserDoc.data();
 
-          // Brug lastMessage fra chat-dokumentet hvis det findes
-          let lastMessage = chatData.lastMessage || "Ingen beskeder endnu";
-          let lastMessageTime = chatData.lastMessageTime;
-          let lastMessageSenderId = chatData.lastMessageSenderId;
+          // Hent den sidste besked
+          const messagesQuery = query(
+            collection(db, "chats", chatId, "messages"),
+            orderBy("timestamp", "desc"),
+            limit(1)
+          );
 
-          // Hvis vi ikke har lastMessage i chat-dokumentet, hent den sidste besked
-          if (!chatData.lastMessage) {
-            const messagesQuery = query(
-              collection(db, "chats", chatId, "messages"),
-              orderBy("timestamp", "desc"),
-              limit(1)
-            );
+          const messagesSnapshot = await getDocs(messagesQuery);
 
-            const messagesSnapshot = await getDocs(messagesQuery);
+          let lastMessage = "Ingen beskeder endnu";
+          let lastMessageTime = null;
+          let lastMessageSenderId = null;
 
-            if (!messagesSnapshot.empty) {
-              const lastMsg = messagesSnapshot.docs[0].data();
-              lastMessage = lastMsg.text;
-              lastMessageTime = lastMsg.timestamp;
-              lastMessageSenderId = lastMsg.senderId;
-            }
+          if (!messagesSnapshot.empty) {
+            const lastMsg = messagesSnapshot.docs[0].data();
+            lastMessage = lastMsg.text;
+            lastMessageTime = lastMsg.timestamp;
+            lastMessageSenderId = lastMsg.senderId;
           }
 
           // Hvis beskeden er fra den nuværende bruger, tilføj "Dig: " præfix
@@ -81,11 +79,28 @@ function Chats() {
             lastMessage = `Dig: ${lastMessage}`;
           }
 
-          // Beregn unread count - simpel version
-          const unreadCount =
-            lastMessageSenderId && lastMessageSenderId !== currentUserId
-              ? 1
-              : 0;
+          // Tjek om chatten er ulæst
+          // En chat er ulæst hvis:
+          // 1. Den sidste besked IKKE er fra dig
+          // 2. Og du ikke har læst chatten siden den sidste besked
+          let unreadCount = 0;
+
+          if (lastMessageSenderId && lastMessageSenderId !== currentUserId) {
+            const lastReadTime = chatData[`lastReadBy_${currentUserId}`];
+
+            // Hvis du aldrig har læst chatten, eller hvis den sidste besked er nyere end hvornår du sidst læste
+            if (
+              !lastReadTime ||
+              (lastMessageTime &&
+                lastMessageTime.toMillis() > lastReadTime.toMillis())
+            ) {
+              unreadCount = 1;
+            }
+          }
+
+          console.log(
+            `Chat ${otherUserData.kaldenavn}: unread = ${unreadCount}`
+          );
 
           // Formatér tid
           let timeDisplay = "";
@@ -134,7 +149,7 @@ function Chats() {
           return b.timestamp.toDate() - a.timestamp.toDate();
         });
 
-        console.log("✅ Chat list updated:", chatList.length, "chats");
+        console.log("✅ Final chat list:", chatList);
         setPrivateChats(chatList);
         setLoading(false);
       },
@@ -144,7 +159,6 @@ function Chats() {
       }
     );
 
-    // Cleanup: Stop listening når komponenten unmounter
     return () => {
       console.log("🛑 Stopping chat listener");
       unsubscribe();
@@ -249,7 +263,7 @@ function Chats() {
                   : "bg-white text-gray-800 hover:bg-gray-50"
               }`}
             >
-              {/* UnreadBadge - bruger sin egen absolute positioning */}
+              {/* UnreadBadge - bruger din originale komponent */}
               {chat.unread > 0 && <UnreadBadge count={chat.unread} />}
 
               {/* Avatar med Online Status */}
