@@ -86,7 +86,7 @@ export default function Feed() {
           delay: 0.3 + index * 0.15,
           ease: "easeInOut",
         }}
-        className="flex text-(--secondary) justify-between bg-(--secondary) rounded-full p-4"
+        className="flex text-(--secondary) justify-between items-center bg-(--secondary) rounded-full px-4 py-3"
       >
         <h3 className="justify-start text-(--white) text-xl overskrift">
           {post.title}
@@ -224,7 +224,7 @@ export default function Feed() {
 
   // Og her er så den samlet return
   return (
-    <div className="text-2xl p-4">
+    <div className="p-4">
       <NotificationWrapper />
       {myPosts.length > 0 &&
         myPosts.map((post, index) => renderMyPost(post, index))}
@@ -240,7 +240,7 @@ export default function Feed() {
         <div className="flex justify-end">
           <button
             onClick={() => setShowFilter((prev) => !prev)}
-            className="px-4 py-2 text-lg text-(--primary)"
+            className="px-4 pt-2 text-lg text-(--primary)"
           >
             Filter {showFilter ? "▲" : "▼"}
           </button>
@@ -251,7 +251,7 @@ export default function Feed() {
             initial={{ opacity: 0, x: 0 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.1 }}
-            className="mt-2 flex flex-wrap gap-2 p-2 justify-end"
+            className="flex flex-wrap gap-2 justify-end"
           >
             {allTags.map((tag) => (
               <button
