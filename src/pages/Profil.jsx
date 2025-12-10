@@ -4,6 +4,7 @@ import { doc, getDoc } from "firebase/firestore";
 import { NavLink } from "react-router";
 import Settings from "./Settings";
 import { motion } from "framer-motion";
+import OwnPost from "../components/Post";
 
 export default function Profil() {
   const [userData, setUserData] = useState(null);
@@ -153,6 +154,9 @@ export default function Profil() {
         <h2 className="text-center font-bold text-gray-900 mb-4">
           Aktive opgaver
         </h2>
+
+        <OwnPost user={accountBio} className="mt-4" />
+
 
         {accountBio.activePosts.length === 0 ? (
           <p className="text-center text-gray-500">Ingen aktive opgaver</p>

@@ -49,9 +49,9 @@ export default function Login() {
               type="checkbox"
               className="
     appearance-none h-5 w-5 border border-(--secondary) rounded-sm relative
-    checked:bg-[var(--secondary)]
-    checked:border-[var(--secondary)]
-    focus:ring-2 focus:ring-[var(--secondary)]
+    checked:bg-(--secondary)
+    checked:border-(--secondary)
+    focus:ring-2 focus:ring-(--secondary)
     
     before:content-[''] before:absolute before:inset-0
     checked:before:content-['✕'] checked:before:flex checked:before:items-center checked:before:justify-center
