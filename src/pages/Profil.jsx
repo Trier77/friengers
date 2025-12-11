@@ -5,16 +5,20 @@ import { NavLink } from "react-router";
 import Settings from "./Settings";
 import { motion } from "framer-motion";
 import OwnPost from "../components/Post";
+import Tilmeld from "../components/Tilmeld";
+
 import { updateDoc } from "firebase/firestore";
 import GroupsIcon from "../../public/icons/GroupsIcon";
 import CalenderIcon from "../../public/icons/CalenderIcon";
 import MapPinIcon from "../../public/icons/MapPinIcon";
+import { useNavigate } from "react-router";
 
 export default function Profil() {
   const [userData, setUserData] = useState(null);
   const [activeTab, setActiveTab] = useState("active");
   const [expandedPostId, setExpandedPostId] = useState(null);
   const [selectedTags, setSelectedTags] = useState([]);
+  const navigate = useNavigate();
 
   const [bio, setBio] = useState("");
   const [posts, setPosts] = useState([]);
@@ -23,28 +27,41 @@ export default function Profil() {
 
   const fetchPosts = async () => {
     const postsSnapshot = await getDocs(collection(db, "posts"));
+    const userCache = {};
+
     const postsWithUser = await Promise.all(
       postsSnapshot.docs.map(async (postDoc) => {
         const postData = postDoc.data();
         const userSnap = await getDoc(doc(db, "users", postData.uid));
+
+        const participantsArray = Array.isArray(postData.participants)
+          ? postData.participants
+          : [];
+
+        const participantsData = await Promise.all(
+          participantsArray.map(async (uid) => {
+            if (!userCache[uid]) {
+              const snap = await getDoc(doc(db, "users", uid));
+              userCache[uid] = snap.exists() ? snap.data().fuldenavn : "Ukendt";
+            }
+            return userCache[uid];
+          })
+        );
+
         return {
           id: postDoc.id,
           ...postData,
           author: userSnap.exists() ? userSnap.data() : null,
+          participantsNames: participantsData,
         };
       })
     );
+
     setPosts(postsWithUser);
   };
 
   const toggleExpand = (id) => {
     setExpandedPostId((prevId) => (prevId === id ? null : id));
-  };
-
-  const handleDropdownChange = (tag) => {
-    setSelectedTags((prev) =>
-      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
-    );
   };
 
   useEffect(() => {
@@ -75,6 +92,13 @@ export default function Profil() {
   if (!userData) return <p>Henter profil...</p>;
 
   const myPosts = posts.filter((post) => post.uid === userId);
+
+  const joinedPosts = posts.filter(
+    (post) =>
+      Array.isArray(post.participants) &&
+      post.participants.includes(userId) &&
+      post.uid !== userId
+  );
 
   function timeAgo(date) {
     const seconds = Math.floor((Date.now() - date.getTime()) / 1000);
@@ -109,20 +133,16 @@ export default function Profil() {
       className="mb-4"
     >
       <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{
-          duration: 0.6,
-          delay: 0.3 + index * 0.15,
-          ease: "easeInOut",
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{
+          opacity:
+            expandedPostId === null ? 1 : expandedPostId === post.id ? 1 : 0.5, // lavere opacity for ikke-aktuelle
+          scale:
+            expandedPostId === null ? 1 : expandedPostId === post.id ? 1 : 0.95, // lidt mindre
         }}
-        className={`mb-4 p-4 bg-(--secondary) rounded-2xl gap-2 flex flex-col relative overflow-hidden
-          
-          ${
-            expandedPostId === post.id
-              ? "outline-4 outline-(--secondary)"
-              : "line-clamp-3"
-          }`}
+        transition={{ duration: 0.3 }}
+        onClick={() => toggleExpand(post.id)}
+        className="mb-4 p-4 bg-(--secondary) rounded-2xl gap-2 flex flex-col relative overflow-hidden"
       >
         <div className="flex items-center justify-between">
           <h2 className="justify-start text-(--white) text-xl overskrift">
@@ -155,7 +175,6 @@ export default function Profil() {
                     ? "text-(--secondary) font-bold"
                     : ""
                 }`}
-                onClick={() => handleDropdownChange(tag)}
               >
                 {tag}
               </li>
@@ -167,7 +186,6 @@ export default function Profil() {
             className={` text-(--white) text-sm cursor-pointer overflow-hidden ${
               expandedPostId === post.id ? "" : "line-clamp-3"
             }`}
-            onClick={() => toggleExpand(post.id)}
           >
             {post.description}
           </p>
@@ -183,7 +201,128 @@ export default function Profil() {
               </p>
             </div>
           </div>
+          <div
+            className={`flex gap-2 ${
+              expandedPostId === post.id ? "block" : "hidden"
+            }`}
+            onClick={() => toggleExpand(post.id)}
+          >
+            {post.participantsNames.length > 0 ? (
+              <p className="text-(--white) text-sm">
+                {post.participantsNames.join(", ")}
+              </p>
+            ) : (
+              <p className="text-(--white) text-sm">Ingen deltagere endnu</p>
+            )}
+          </div>
         </div>
+      </motion.div>
+    </motion.div>
+  );
+
+  const renderOthersPost = (post, index) => (
+    <motion.div
+      key={post.id}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="mb-4"
+    >
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{
+          opacity:
+            expandedPostId === null ? 1 : expandedPostId === post.id ? 1 : 0.5, // lavere opacity for ikke-aktuelle
+          scale:
+            expandedPostId === null ? 1 : expandedPostId === post.id ? 1 : 0.95, // lidt mindre
+        }}
+        transition={{ duration: 0.3 }}
+        onClick={() => toggleExpand(post.id)}
+        className={`mb-4 p-4 bg-(--primary) rounded-2xl gap-2 flex flex-col relative overflow-hidden
+          
+          `}
+      >
+        <div className="flex items-center justify-between">
+          <h2 className="justify-start text-(--secondary) text-xl overskrift">
+            {post.title}
+          </h2>
+          <div className="bg-(--white) rounded-full px-2 flex gap-4 font-bold text-sm text-(--secondary)">
+            <div className="flex items-center gap-2">
+              <MapPinIcon color="--secondary" size={10} />{" "}
+              <p>{post.location}</p>
+            </div>
+            <div className="flex items-center gap-2">
+              <CalenderIcon color="--secondary" size={10} />
+              <p>
+                {post.time?.toDate().toLocaleDateString(undefined, {
+                  day: "2-digit",
+                  month: "2-digit",
+                })}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <ul className="flex gap-1 text-(--white) text-xs">
+            {post.tags.map((tag, index) => (
+              <li
+                key={index}
+                className={`border border-(--secondary) py-1 rounded-2xl px-3 cursor-pointer ${
+                  selectedTags.includes(tag)
+                    ? "bg-(--white) text-(--secondary) font-bold"
+                    : ""
+                }`}
+              >
+                {tag}
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div
+          className={`flex justify-between relative
+      
+        `}
+        >
+          <div className="flex flex-col justify-between gap-2">
+            <p
+              className={`w-70 text-(--white) text-sm cursor-pointer overflow-hidden ${
+                expandedPostId === post.id ? "" : "line-clamp-3"
+              }`}
+            >
+              {post.description}
+            </p>
+
+            <div className="w-60 flex justify-between items-center">
+              <div className="flex items-center gap-2">
+                <img
+                  src={post.author?.profileImage}
+                  alt="Afsender"
+                  className="w-8 h-8 rounded-full object-cover cursor-pointer"
+                  onClick={() => navigate(`/AndresProfil/${post.uid}`)}
+                />
+
+                <p className="text-(--secondary) text-sm">
+                  {post.author?.fuldenavn}
+                </p>
+              </div>
+              <div className="flex gap-2">
+                <GroupsIcon color="--secondary" size={20} />
+                <p className="text-(--secondary) text-sm">
+                  {post.participants?.length || 0}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <Tilmeld
+          postId={post.id}
+          participants={post.participants}
+          requests={post.requests || []} // send requests med
+          onUpdate={fetchPosts}
+          className="absolute bottom-0 right-0 z-10"
+        />
       </motion.div>
     </motion.div>
   );
@@ -266,8 +405,8 @@ export default function Profil() {
           onClick={() => setActiveTab("active")}
           className={`flex-1 py-1 px-2 rounded-full font-semibold transition-colors ${
             activeTab === "active"
-              ? "bg-blue-500 text-white"
-              : "bg-white text-blue-500 border-2 border-blue-500"
+              ? "bg-(--secondary) text-(--white)"
+              : "bg-(--white) text-(--secondary) border-2 border-(--secondary)"
           }`}
         >
           Aktive Opgaver
@@ -276,8 +415,8 @@ export default function Profil() {
           onClick={() => setActiveTab("solved")}
           className={`flex-1 py-1 px-2 rounded-full font-semibold transition-colors ${
             activeTab === "solved"
-              ? "bg-blue-500 text-white"
-              : "bg-white text-blue-500 border-2 border-blue-500"
+              ? "bg-(--secondary) text-(--white)"
+              : "bg-(--white) text-(--secondary) border-2 border-(--secondary)"
           }`}
         >
           Løste Opgaver
@@ -291,8 +430,9 @@ export default function Profil() {
       </div>
 
       {/* Member Since */}
-      <div className="text-center mt-8 mb-4">
-        <p className="text-gray-400 text-sm">Oprettet</p>
+      <div className="mt-6">
+        {joinedPosts.length > 0 &&
+          joinedPosts.map((post, index) => renderOthersPost(post, index))}
       </div>
     </motion.div>
   );

@@ -362,15 +362,16 @@ function Chats() {
                     alt={chat.name}
                     className="w-14 h-14 rounded-full object-cover"
                   />
-                  {chat.online && (
-                    <div
-                      className={`absolute bottom-0 right-0 w-4 h-4 rounded-full border-2 ${
-                        chat.unread > 0
-                          ? "bg-blue-300 border-blue-400"
-                          : "bg-green-400 border-white"
-                      }`}
-                    ></div>
-                  )}
+
+                  <div
+                    className={`absolute bottom-0 right-0 w-4 h-4 rounded-full border-2 border-white ${
+                      chat.online
+                        ? chat.unread > 0
+                          ? "bg-blue-300"
+                          : "bg-green-400"
+                        : "bg-gray-400"
+                    }`}
+                  ></div>
                 </div>
 
                 {/* Chat Info */}
