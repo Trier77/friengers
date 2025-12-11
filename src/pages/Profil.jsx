@@ -6,6 +6,7 @@ import {
   doc,
   getDoc,
   deleteDoc,
+  addDoc,
 } from "firebase/firestore";
 import { NavLink } from "react-router";
 import Settings from "./Settings";
@@ -106,7 +107,8 @@ export default function Profil() {
     (post) =>
       Array.isArray(post.participants) &&
       post.participants.includes(userId) &&
-      post.uid !== userId
+      post.uid !== userId &&
+      post.active !== false
   );
 
   function timeAgo(date) {
@@ -144,16 +146,27 @@ export default function Profil() {
     }
   };
 
-  const markAsDone = async (postId) => {
+  const markAsDone = async (postId, postTitle) => {
     try {
       const postRef = doc(db, "posts", postId);
-      await updateDoc(postRef, { active: false }); // sæt til "færdig"
+      await updateDoc(postRef, { active: false });
+
+      // Opret en notification
+      await addDoc(collection(db, "notifications"), {
+        userId, // send til den, der ejer posten
+        type: "taskDone",
+        postId,
+        postTitle,
+        createdAt: new Date(),
+      });
+
       setPosts((prevPosts) =>
         prevPosts.map((post) =>
           post.id === postId ? { ...post, active: false } : post
         )
       );
-      console.log("Post markeret som færdig!");
+
+      console.log("Post markeret som færdig og notification sendt!");
     } catch (error) {
       console.error("Fejl ved opdatering af post:", error);
     }
@@ -279,10 +292,10 @@ export default function Profil() {
             onClick={() => {
               if (
                 window.confirm(
-                  "Er du sikker på, at du vil markere denne opgave søm løst?"
+                  "Er du sikker på, at du vil markere denne opgave som løst?"
                 )
               ) {
-                markAsDone(post.id);
+                markAsDone(post.id, post.title);
               }
             }}
           >

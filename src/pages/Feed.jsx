@@ -55,8 +55,6 @@ export default function Feed() {
     );
   };
 
-  const myPosts = posts.filter((post) => post.uid === userId);
-
   const filteredPosts =
     selectedTags.length > 0
       ? posts.filter(
@@ -67,10 +65,12 @@ export default function Feed() {
       : [];
 
   const otherPosts = posts.filter(
-    (post) => post.uid !== userId && !filteredPosts.includes(post)
+    (post) => post.uid !== userId && post.active !== false
   );
 
-  const postsToShow = selectedTags.length > 0 ? filteredPosts : otherPosts;
+  const myPosts = posts.filter(
+    (post) => post.uid === userId && post.active !== false
+  );
 
   // Det her er hvordan vores egne post skal se ud
   const renderMyPost = (post, index) => (
