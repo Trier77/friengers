@@ -1,4 +1,4 @@
-function Toggle({ enabled, setEnabled }) {
+export default function Toggle({ enabled, setEnabled }) {
   return (
     <button
       onClick={() => setEnabled(!enabled)}
