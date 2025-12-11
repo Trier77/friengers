@@ -78,7 +78,7 @@ export default function Feed() {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
       className="mb-4"
-    > 
+    >
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -92,8 +92,6 @@ export default function Feed() {
         <h3 className="justify-start text-(--white) text-xl overskrift">
           {post.title}
         </h3>
-        
-        
 
         <div className="flex justify-between items-center text-sm font-bold bg-(--white) rounded-full px-2 gap-5">
           <div className="gap-2 flex items-center">
@@ -126,9 +124,9 @@ export default function Feed() {
         initial={{ opacity: 0 }}
         animate={{
           opacity:
-            expandedPostId === null ? 1 : expandedPostId === post.id ? 1 : 0.5, // lavere opacity for ikke-aktuelle
+            expandedPostId === null ? 1 : expandedPostId === post.id ? 1 : 0.5,
           scale:
-            expandedPostId === null ? 1 : expandedPostId === post.id ? 1 : 0.95, // lidt mindre
+            expandedPostId === null ? 1 : expandedPostId === post.id ? 1 : 0.95,
         }}
         transition={{ duration: 0.3 }}
         onClick={() => toggleExpand(post.id)}
@@ -189,20 +187,19 @@ export default function Feed() {
               {post.description}
             </p>
 
-              {expandedPostId === post.id && post.imageUrls && (
-                <div className="flex gap-2 overflow-x-auto mt-2">
-                  {post.imageUrls.map((url, i) => (
-                    <img
-                      key={i}
-                      src={url}
-                      alt="Post billede"
-                      className="h-40 w-auto rounded-xl cursor-pointer"
-                      onClick={() => setPreviewImage(url)}
-                    />
-                  ))}
-                </div>
-              )}
-                
+            {expandedPostId === post.id && post.imageUrls && (
+              <div className="flex gap-2 overflow-x-auto mt-2">
+                {post.imageUrls.map((url, i) => (
+                  <img
+                    key={i}
+                    src={url}
+                    alt="Post billede"
+                    className="h-40 w-auto rounded-xl cursor-pointer"
+                    onClick={() => setPreviewImage(url)}
+                  />
+                ))}
+              </div>
+            )}
 
             <div className="w-60 flex justify-between items-center">
               <div className="flex items-center gap-2">
@@ -227,13 +224,31 @@ export default function Feed() {
           </div>
         </div>
 
-        <Tilmeld
-          postId={post.id}
-          participants={post.participants}
-          requests={post.requests || []} // send requests med
-          onUpdate={fetchPosts}
-          className="absolute bottom-0 right-0 z-10"
-        />
+        <motion.div
+          className="absolute bottom-0 right-0 z-10 rounded-tl-full overflow-hidden"
+          style={{
+            pointerEvents: expandedPostId === post.id ? "auto" : "none",
+            originX: 1, // højre
+            originY: 1, // bund
+          }}
+          animate={{
+            scale:
+              expandedPostId === null
+                ? 1
+                : expandedPostId === post.id
+                ? 1
+                : 0.5,
+          }}
+          transition={{ duration: 0.3 }}
+        >
+          <Tilmeld
+            postId={post.id}
+            participants={post.participants}
+            requests={post.requests || []}
+            onUpdate={fetchPosts}
+          />
+        </motion.div>
+
         {post.uid === userId && <RequestsList post={post} />}
       </motion.div>
     </motion.div>
@@ -296,21 +311,20 @@ export default function Feed() {
 
       {otherPosts.map((post, index) => renderPost(post, index))}
 
-
       {previewImage && (
-  <div
-    className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50"
-    onClick={() => setPreviewImage(null)}
-  >
-    <div className="max-w-3xl max-h-[90vh]">
-      <img
-        src={previewImage}
-        alt="Preview"
-        className="w-full h-full object-contain rounded-xl"
-      />
-    </div>
-  </div>
-)}
+        <div
+          className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50"
+          onClick={() => setPreviewImage(null)}
+        >
+          <div className="max-w-3xl max-h-[90vh]">
+            <img
+              src={previewImage}
+              alt="Preview"
+              className="w-full h-full object-contain rounded-xl"
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }
