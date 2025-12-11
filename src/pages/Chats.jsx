@@ -18,6 +18,7 @@ import { isUserOnline } from "../hooks/Useonlinestatus";
 function Chats() {
   const [activeTab, setActiveTab] = useState("private");
   const [privateChats, setPrivateChats] = useState([]);
+  const [groupChats, setGroupChats] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState("");
   const navigate = useNavigate();
@@ -36,150 +37,256 @@ function Chats() {
       async (snapshot) => {
         console.log("📡 Chats updated! Total chats:", snapshot.docs.length);
 
-        const chatList = [];
+        const privateChatList = [];
+        const groupChatList = [];
 
         for (const chatDoc of snapshot.docs) {
           const chatId = chatDoc.id;
           const chatData = chatDoc.data();
 
-          // Tjek om den nuværende bruger er en del af denne chat
-          if (!chatId.includes(currentUserId)) continue;
+          // Tjek om dette er en gruppechat
+          if (chatData.isGroupChat) {
+            // Gruppechat logik
+            if (!chatData.participants?.includes(currentUserId)) continue;
 
-          // Find den anden brugers ID
-          const userIds = chatId.split("_");
-          const otherUserId = userIds.find((id) => id !== currentUserId);
-          if (!otherUserId) continue;
-
-          // Hent den anden brugers data
-          const otherUserDoc = await getDoc(doc(db, "users", otherUserId));
-          if (!otherUserDoc.exists()) continue;
-
-          const otherUserData = otherUserDoc.data();
-
-          // Hent den sidste besked
-          const messagesQuery = query(
-            collection(db, "chats", chatId, "messages"),
-            orderBy("timestamp", "desc"),
-            limit(1)
-          );
-
-          const messagesSnapshot = await getDocs(messagesQuery);
-
-          let lastMessage = "Ingen beskeder endnu";
-          let lastMessageTime = null;
-          let lastMessageSenderId = null;
-
-          if (!messagesSnapshot.empty) {
-            const lastMsg = messagesSnapshot.docs[0].data();
-            lastMessage = lastMsg.text;
-            lastMessageTime = lastMsg.timestamp;
-            lastMessageSenderId = lastMsg.senderId;
-          }
-
-          // Hvis beskeden er fra den nuværende bruger, tilføj "Dig: " præfix
-          if (lastMessageSenderId === currentUserId) {
-            lastMessage = `Dig: ${lastMessage}`;
-          }
-
-          // Tæl hvor mange ulæste beskeder der er
-          // ENKLERE METODE UDEN INDEX: Hent ALLE beskeder og filtrer i JavaScript
-          let unreadCount = 0;
-
-          if (lastMessageSenderId && lastMessageSenderId !== currentUserId) {
-            const lastReadTime = chatData[`lastReadBy_${currentUserId}`];
-
-            if (
-              !lastReadTime ||
-              (lastMessageTime &&
-                lastMessageTime.toMillis() > lastReadTime.toMillis())
-            ) {
-              // Hent alle beskeder (sorteret efter tid)
-              const allMessagesQuery = query(
-                collection(db, "chats", chatId, "messages"),
-                orderBy("timestamp", "asc")
-              );
-
-              const allMessagesSnapshot = await getDocs(allMessagesQuery);
-
-              // Filtrer i JavaScript i stedet for med Firebase query
-              allMessagesSnapshot.docs.forEach((msgDoc) => {
-                const msg = msgDoc.data();
-
-                // Tæl kun beskeder fra den anden bruger
-                if (msg.senderId === otherUserId) {
-                  // Hvis du aldrig har læst chatten, tæl alle
-                  if (!lastReadTime) {
-                    unreadCount++;
-                  }
-                  // Ellers tæl kun beskeder efter du sidst læste
-                  else if (
-                    msg.timestamp &&
-                    msg.timestamp.toMillis() > lastReadTime.toMillis()
-                  ) {
-                    unreadCount++;
-                  }
-                }
-              });
-
-              console.log(
-                `📬 ${otherUserData.kaldenavn}: ${unreadCount} ulæste beskeder`
-              );
-            }
-          }
-
-          // Formatér tid
-          let timeDisplay = "";
-          if (lastMessageTime) {
-            const messageDate = lastMessageTime.toDate();
-            const now = new Date();
-            const diffInDays = Math.floor(
-              (now - messageDate) / (1000 * 60 * 60 * 24)
+            // Hent den sidste besked
+            const messagesQuery = query(
+              collection(db, "chats", chatId, "messages"),
+              orderBy("timestamp", "desc"),
+              limit(1)
             );
 
-            if (diffInDays === 0) {
-              timeDisplay = messageDate.toLocaleTimeString("da-DK", {
-                hour: "2-digit",
-                minute: "2-digit",
-              });
-            } else if (diffInDays === 1) {
-              timeDisplay = "I går";
-            } else if (diffInDays < 7) {
-              timeDisplay = messageDate.toLocaleDateString("da-DK", {
-                weekday: "short",
-              });
-            } else {
-              timeDisplay = messageDate.toLocaleDateString("da-DK", {
-                day: "2-digit",
-                month: "2-digit",
-              });
-            }
-          }
+            const messagesSnapshot = await getDocs(messagesQuery);
 
-          chatList.push({
-            id: otherUserId,
-            name: otherUserData.kaldenavn || otherUserData.fuldenavn,
-            fuldenavn: otherUserData.fuldenavn,
-            message: lastMessage,
-            time: timeDisplay || "",
-            avatar: otherUserData.profileImage,
-            unread: unreadCount,
-            online: isUserOnline(
-              otherUserData.isOnline,
-              otherUserData.lastActive
-            ),
-            timestamp: lastMessageTime,
-          });
+            let lastMessage = "Ingen beskeder endnu";
+            let lastMessageTime = null;
+            let lastMessageSenderId = null;
+
+            if (!messagesSnapshot.empty) {
+              const lastMsg = messagesSnapshot.docs[0].data();
+              lastMessage = lastMsg.text;
+              lastMessageTime = lastMsg.timestamp;
+              lastMessageSenderId = lastMsg.senderId;
+            }
+
+            // Hvis beskeden er fra den nuværende bruger, tilføj "Dig: " præfix
+            if (lastMessageSenderId === currentUserId) {
+              lastMessage = `Dig: ${lastMessage}`;
+            }
+
+            // Tæl ulæste beskeder
+            let unreadCount = 0;
+
+            if (lastMessageSenderId && lastMessageSenderId !== currentUserId) {
+              const lastReadTime = chatData[`lastReadBy_${currentUserId}`];
+
+              if (
+                !lastReadTime ||
+                (lastMessageTime &&
+                  lastMessageTime.toMillis() > lastReadTime.toMillis())
+              ) {
+                const allMessagesQuery = query(
+                  collection(db, "chats", chatId, "messages"),
+                  orderBy("timestamp", "asc")
+                );
+
+                const allMessagesSnapshot = await getDocs(allMessagesQuery);
+
+                allMessagesSnapshot.docs.forEach((msgDoc) => {
+                  const msg = msgDoc.data();
+
+                  if (msg.senderId !== currentUserId) {
+                    if (!lastReadTime) {
+                      unreadCount++;
+                    } else if (
+                      msg.timestamp &&
+                      msg.timestamp.toMillis() > lastReadTime.toMillis()
+                    ) {
+                      unreadCount++;
+                    }
+                  }
+                });
+
+                console.log(
+                  `📬 ${chatData.chatName}: ${unreadCount} ulæste beskeder`
+                );
+              }
+            }
+
+            // Formatér tid
+            let timeDisplay = "";
+            if (lastMessageTime) {
+              const messageDate = lastMessageTime.toDate();
+              const now = new Date();
+              const diffInDays = Math.floor(
+                (now - messageDate) / (1000 * 60 * 60 * 24)
+              );
+
+              if (diffInDays === 0) {
+                timeDisplay = messageDate.toLocaleTimeString("da-DK", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                });
+              } else if (diffInDays === 1) {
+                timeDisplay = "I går";
+              } else if (diffInDays < 7) {
+                timeDisplay = messageDate.toLocaleDateString("da-DK", {
+                  weekday: "short",
+                });
+              } else {
+                timeDisplay = messageDate.toLocaleDateString("da-DK", {
+                  day: "2-digit",
+                  month: "2-digit",
+                });
+              }
+            }
+
+            groupChatList.push({
+              id: chatId,
+              name: chatData.chatName || "Gruppechat",
+              message: lastMessage,
+              time: timeDisplay || "",
+              avatar: null, // Gruppechats har ikke avatar
+              unread: unreadCount,
+              timestamp: lastMessageTime,
+              participantCount: chatData.participants?.length || 0,
+              isGroupChat: true,
+            });
+          } else {
+            // Private chat logik (som før)
+            if (!chatId.includes(currentUserId)) continue;
+
+            const userIds = chatId.split("_");
+            const otherUserId = userIds.find((id) => id !== currentUserId);
+            if (!otherUserId) continue;
+
+            const otherUserDoc = await getDoc(doc(db, "users", otherUserId));
+            if (!otherUserDoc.exists()) continue;
+
+            const otherUserData = otherUserDoc.data();
+
+            const messagesQuery = query(
+              collection(db, "chats", chatId, "messages"),
+              orderBy("timestamp", "desc"),
+              limit(1)
+            );
+
+            const messagesSnapshot = await getDocs(messagesQuery);
+
+            let lastMessage = "Ingen beskeder endnu";
+            let lastMessageTime = null;
+            let lastMessageSenderId = null;
+
+            if (!messagesSnapshot.empty) {
+              const lastMsg = messagesSnapshot.docs[0].data();
+              lastMessage = lastMsg.text;
+              lastMessageTime = lastMsg.timestamp;
+              lastMessageSenderId = lastMsg.senderId;
+            }
+
+            if (lastMessageSenderId === currentUserId) {
+              lastMessage = `Dig: ${lastMessage}`;
+            }
+
+            let unreadCount = 0;
+
+            if (lastMessageSenderId && lastMessageSenderId !== currentUserId) {
+              const lastReadTime = chatData[`lastReadBy_${currentUserId}`];
+
+              if (
+                !lastReadTime ||
+                (lastMessageTime &&
+                  lastMessageTime.toMillis() > lastReadTime.toMillis())
+              ) {
+                const allMessagesQuery = query(
+                  collection(db, "chats", chatId, "messages"),
+                  orderBy("timestamp", "asc")
+                );
+
+                const allMessagesSnapshot = await getDocs(allMessagesQuery);
+
+                allMessagesSnapshot.docs.forEach((msgDoc) => {
+                  const msg = msgDoc.data();
+
+                  if (msg.senderId === otherUserId) {
+                    if (!lastReadTime) {
+                      unreadCount++;
+                    } else if (
+                      msg.timestamp &&
+                      msg.timestamp.toMillis() > lastReadTime.toMillis()
+                    ) {
+                      unreadCount++;
+                    }
+                  }
+                });
+
+                console.log(
+                  `📬 ${otherUserData.kaldenavn}: ${unreadCount} ulæste beskeder`
+                );
+              }
+            }
+
+            let timeDisplay = "";
+            if (lastMessageTime) {
+              const messageDate = lastMessageTime.toDate();
+              const now = new Date();
+              const diffInDays = Math.floor(
+                (now - messageDate) / (1000 * 60 * 60 * 24)
+              );
+
+              if (diffInDays === 0) {
+                timeDisplay = messageDate.toLocaleTimeString("da-DK", {
+                  hour: "2-digit",
+                  minute: "2-digit",
+                });
+              } else if (diffInDays === 1) {
+                timeDisplay = "I går";
+              } else if (diffInDays < 7) {
+                timeDisplay = messageDate.toLocaleDateString("da-DK", {
+                  weekday: "short",
+                });
+              } else {
+                timeDisplay = messageDate.toLocaleDateString("da-DK", {
+                  day: "2-digit",
+                  month: "2-digit",
+                });
+              }
+            }
+
+            privateChatList.push({
+              id: otherUserId,
+              name: otherUserData.kaldenavn || otherUserData.fuldenavn,
+              fuldenavn: otherUserData.fuldenavn,
+              message: lastMessage,
+              time: timeDisplay || "",
+              avatar: otherUserData.profileImage,
+              unread: unreadCount,
+              online: isUserOnline(
+                otherUserData.isOnline,
+                otherUserData.lastActive
+              ),
+              timestamp: lastMessageTime,
+            });
+          }
         }
 
         // Sortér chats efter tidsstempel (nyeste først)
-        chatList.sort((a, b) => {
+        privateChatList.sort((a, b) => {
           if (!a.timestamp) return 1;
           if (!b.timestamp) return -1;
           return b.timestamp.toDate() - a.timestamp.toDate();
         });
 
-        console.log("✅ Final chat list:", chatList);
-        setPrivateChats(chatList);
+        groupChatList.sort((a, b) => {
+          if (!a.timestamp) return 1;
+          if (!b.timestamp) return -1;
+          return b.timestamp.toDate() - a.timestamp.toDate();
+        });
+
+        console.log("✅ Final private chat list:", privateChatList);
+        console.log("✅ Final group chat list:", groupChatList);
+        setPrivateChats(privateChatList);
+        setGroupChats(groupChatList);
         setLoading(false);
       },
       (error) => {
@@ -193,8 +300,6 @@ function Chats() {
       unsubscribe();
     };
   }, [currentUserId]);
-
-  const groupChats = [];
 
   // Filtrer chats baseret på søgning
   const getFilteredChats = () => {
@@ -323,9 +428,14 @@ function Chats() {
               </>
             ) : (
               <>
-                <p>Ingen chats endnu</p>
+                <p>
+                  Ingen {activeTab === "private" ? "private" : "gruppe"} chats
+                  endnu
+                </p>
                 <p className="text-sm mt-2">
-                  Start en samtale ved at besøge en profil
+                  {activeTab === "private"
+                    ? "Start en samtale ved at besøge en profil"
+                    : "Gruppechats oprettes automatisk når du godkender deltagere"}
                 </p>
               </>
             )}
@@ -341,7 +451,13 @@ function Chats() {
             {currentChats.map((chat, index) => (
               <motion.div
                 key={chat.id}
-                onClick={() => navigate(`/Chats/${chat.id}`)}
+                onClick={() =>
+                  navigate(
+                    chat.isGroupChat
+                      ? `/GroupChat/${chat.id}`
+                      : `/Chats/${chat.id}`
+                  )
+                }
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 transition={{
@@ -358,28 +474,48 @@ function Chats() {
                 {/* UnreadBadge */}
                 {chat.unread > 0 && <UnreadBadge count={chat.unread} />}
 
-                {/* Avatar med Online Status */}
+                {/* Avatar eller Gruppe Ikon */}
                 <div className="relative flex-shrink-0">
-                  <img
-                    src={chat.avatar || "https://via.placeholder.com/56"}
-                    alt={chat.name}
-                    className="w-14 h-14 rounded-full object-cover"
-                  />
-
-                  <div
-                    className={`absolute bottom-0 right-0 w-4 h-4 rounded-full border-2 border-white ${
-                      chat.online
-                        ? chat.unread > 0
-                          ? "bg-blue-300"
-                          : "bg-green-400"
-                        : "bg-gray-400"
-                    }`}
-                  ></div>
+                  {chat.isGroupChat ? (
+                    <div className="w-14 h-14 rounded-full bg-blue-500 flex items-center justify-center">
+                      <svg
+                        className="w-8 h-8 text-white"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
+                      </svg>
+                    </div>
+                  ) : (
+                    <>
+                      <img
+                        src={chat.avatar || "https://via.placeholder.com/56"}
+                        alt={chat.name}
+                        className="w-14 h-14 rounded-full object-cover"
+                      />
+                      <div
+                        className={`absolute bottom-0 right-0 w-4 h-4 rounded-full border-2 border-white ${
+                          chat.online
+                            ? chat.unread > 0
+                              ? "bg-blue-300"
+                              : "bg-green-400"
+                            : "bg-gray-400"
+                        }`}
+                      ></div>
+                    </>
+                  )}
                 </div>
 
                 {/* Chat Info */}
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold text-lg">{chat.name}</h3>
+                  <div className="flex items-center gap-2">
+                    <h3 className="font-semibold text-lg">{chat.name}</h3>
+                    {chat.isGroupChat && (
+                      <span className="text-xs bg-blue-200 text-blue-700 px-2 py-0.5 rounded-full">
+                        {chat.participantCount} deltagere
+                      </span>
+                    )}
+                  </div>
                   <p
                     className={`text-sm truncate ${
                       chat.unread > 0 ? "text-white/90" : "text-gray-500"

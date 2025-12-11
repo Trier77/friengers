@@ -16,7 +16,7 @@ export default function CreatePost({ open, onClose }) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [location, setLocation] = useState("");
-  const [participants, setParticipants] = useState(1);
+  const [participantsCount, setParticipantsCount] = useState(1); // ← OMDØBT fra participants til participantsCount
   const [time, setTime] = useState("");
   const [selectedTags, setSelectedTags] = useState([]);
   const [imageFile, setImageFile] = useState([]);
@@ -58,11 +58,13 @@ export default function CreatePost({ open, onClose }) {
         imageUrls.push(url);
       }
 
+      // ✅ VIGTIGT: participants skal være et TOMT ARRAY, ikke et nummer!
       await addDoc(collection(db, "posts"), {
         title,
         description,
         location,
-        participants,
+        participants: [], // ← RETTET: Tom array i stedet for nummer
+        maxParticipants: participantsCount, // ← NYT FELT: Gem det ønskede antal her
         tags: selectedTags,
         time: Timestamp.fromDate(new Date(time)),
         uid: user.uid,
@@ -70,11 +72,16 @@ export default function CreatePost({ open, onClose }) {
         createdAt: Timestamp.now(),
       });
 
+      console.log(
+        "✅ Post created with participants: [] and maxParticipants:",
+        participantsCount
+      );
+
       // Reset form
       setTitle("");
       setDescription("");
       setLocation("");
-      setParticipants(1);
+      setParticipantsCount(1);
       setTime("");
       setSelectedTags([]);
       setImageFile([]);
@@ -179,8 +186,8 @@ export default function CreatePost({ open, onClose }) {
               onFocus={handleFocus}
               type="number"
               min="1"
-              value={participants}
-              onChange={(e) => setParticipants(Number(e.target.value))}
+              value={participantsCount}
+              onChange={(e) => setParticipantsCount(Number(e.target.value))}
             />
           </div>
         </div>
