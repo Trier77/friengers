@@ -126,9 +126,9 @@ export default function Feed() {
         initial={{ opacity: 0 }}
         animate={{
           opacity:
-            expandedPostId === null ? 1 : expandedPostId === post.id ? 1 : 0.5, // lavere opacity for ikke-aktuelle
+            expandedPostId === null ? 1 : expandedPostId === post.id ? 1 : 0.5,
           scale:
-            expandedPostId === null ? 1 : expandedPostId === post.id ? 1 : 0.95, // lidt mindre
+            expandedPostId === null ? 1 : expandedPostId === post.id ? 1 : 0.95,
         }}
         transition={{ duration: 0.3 }}
         onClick={() => toggleExpand(post.id)}
@@ -226,13 +226,31 @@ export default function Feed() {
           </div>
         </div>
 
-        <Tilmeld
-          postId={post.id}
-          participants={post.participants}
-          requests={post.requests || []} // send requests med
-          onUpdate={fetchPosts}
-          className="absolute bottom-0 right-0 z-10"
-        />
+        <motion.div
+          className="absolute bottom-0 right-0 z-10 rounded-tl-full overflow-hidden"
+          style={{
+            pointerEvents: expandedPostId === post.id ? "auto" : "none",
+            originX: 1, // højre
+            originY: 1, // bund
+          }}
+          animate={{
+            scale:
+              expandedPostId === null
+                ? 1
+                : expandedPostId === post.id
+                ? 1
+                : 0.5,
+          }}
+          transition={{ duration: 0.3 }}
+        >
+          <Tilmeld
+            postId={post.id}
+            participants={post.participants}
+            requests={post.requests || []}
+            onUpdate={fetchPosts}
+          />
+        </motion.div>
+
         {post.uid === userId && <RequestsList post={post} />}
       </motion.div>
     </motion.div>
