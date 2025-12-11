@@ -266,8 +266,8 @@ export default function Profil() {
           onClick={() => setActiveTab("active")}
           className={`flex-1 py-1 px-2 rounded-full font-semibold transition-colors ${
             activeTab === "active"
-              ? "bg-blue-500 text-white"
-              : "bg-white text-blue-500 border-2 border-blue-500"
+              ? "bg-(--secondary) text-(--white)"
+              : "bg-(--white) text-(--secondary) border-2 border-(--secondary)"
           }`}
         >
           Aktive Opgaver
@@ -276,8 +276,8 @@ export default function Profil() {
           onClick={() => setActiveTab("solved")}
           className={`flex-1 py-1 px-2 rounded-full font-semibold transition-colors ${
             activeTab === "solved"
-              ? "bg-blue-500 text-white"
-              : "bg-white text-blue-500 border-2 border-blue-500"
+              ? "bg-(--secondary) text-(--white)"
+              : "bg-(--white) text-(--secondary) border-2 border-(--secondary)"
           }`}
         >
           Løste Opgaver
