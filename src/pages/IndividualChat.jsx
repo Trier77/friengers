@@ -15,7 +15,7 @@ import {
 import { db, auth } from "../firebase";
 
 function IndividualChat() {
-  const { chatId } = useParams(); // Dette er nu den anden brugers ID
+  const { chatId } = useParams();
   const navigate = useNavigate();
   const messagesEndRef = useRef(null);
   const [newMessage, setNewMessage] = useState("");
@@ -53,15 +53,13 @@ function IndividualChat() {
       const chatDocRef = doc(db, "chats", chatDocId);
 
       try {
-        // ✅ VIGTIGT: Brug setDoc med merge i stedet for updateDoc
-        // Dette opretter dokumentet hvis det ikke findes, og opdaterer hvis det gør
         await setDoc(
           chatDocRef,
           {
             participants: [currentUserId, chatId],
             [`lastReadBy_${currentUserId}`]: serverTimestamp(),
           },
-          { merge: true } // merge: true = opret hvis ikke findes, opdater hvis den gør
+          { merge: true }
         );
         console.log("✅ Chat marked as read");
       } catch (error) {
@@ -76,11 +74,9 @@ function IndividualChat() {
   useEffect(() => {
     if (!currentUserId || !chatId) return;
 
-    // Opret en unik chat ID (altid samme rækkefølge)
     const chatDocId = [currentUserId, chatId].sort().join("_");
     console.log("👂 Listening to chat:", chatDocId);
 
-    // Lyt til beskeder
     const messagesQuery = query(
       collection(db, "chats", chatDocId, "messages"),
       orderBy("timestamp", "asc")
@@ -98,9 +94,23 @@ function IndividualChat() {
     return unsubscribe;
   }, [currentUserId, chatId]);
 
-  // Auto scroll
+  // ✅ Initial scroll når chatten åbnes (instant)
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    if (!loading && messages.length > 0) {
+      setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "instant" });
+        console.log("📜 Initial scroll to bottom");
+      }, 100);
+    }
+  }, [loading]); // Kører når loading er færdig
+
+  // ✅ Auto scroll når nye beskeder kommer (smooth)
+  useEffect(() => {
+    if (messages.length > 0) {
+      setTimeout(() => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+      }, 50);
+    }
   }, [messages]);
 
   const handleSendMessage = async () => {
@@ -110,7 +120,6 @@ function IndividualChat() {
       const chatDocId = [currentUserId, chatId].sort().join("_");
       console.log("📤 Sending message to chat:", chatDocId);
 
-      // ✅ Opret/opdater chat-dokumentet FØRST
       const chatDocRef = doc(db, "chats", chatDocId);
       await setDoc(
         chatDocRef,
@@ -120,14 +129,13 @@ function IndividualChat() {
           lastMessage: newMessage,
           lastMessageTime: serverTimestamp(),
           lastMessageSenderId: currentUserId,
-          [`lastReadBy_${currentUserId}`]: serverTimestamp(), // Markér som læst for afsenderen
+          [`lastReadBy_${currentUserId}`]: serverTimestamp(),
         },
-        { merge: true } // ✅ VIGTIGT: merge: true sikrer at dokumentet oprettes hvis det ikke findes
+        { merge: true }
       );
 
       console.log("✅ Chat document created/updated");
 
-      // Tilføj beskeden
       await addDoc(collection(db, "chats", chatDocId, "messages"), {
         text: newMessage,
         senderId: currentUserId,
@@ -232,6 +240,7 @@ function IndividualChat() {
             </div>
           </div>
         ))}
+        {/* ✅ Dette er ankerpunktet som vi scroller til */}
         <div ref={messagesEndRef} />
       </div>
 
