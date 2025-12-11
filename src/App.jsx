@@ -43,7 +43,6 @@ function App() {
       <Navbar />
       <div className="pb-36">
         <Routes>
-          <Route path="/login" element={<Login />} />
           <Route path="/" element={<Feed />} />
           <Route path="/Chats" element={<Chats />} />
           <Route path="/AndresProfil/:userId" element={<AndresProfil />} />
