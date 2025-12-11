@@ -4,7 +4,7 @@ import { db, auth } from "../firebase";
 
 /**
  * Hook der tracker brugerens online status
- * Opdaterer "lastActive" i Firebase hver 2. minut når brugeren er aktiv
+ * Opdaterer "lastActive" i Firebase hver 2. minut når brugeren er til stede
  */
 export function useOnlineStatus() {
   useEffect(() => {
