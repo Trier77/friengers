@@ -13,8 +13,10 @@ import Login from "./pages/Login";
 import Settings from "./pages/Settings";
 import AndresProfil from "./pages/AndresProfil";
 import FirebaseTest from "./pages/Firebasetest";
+import { useOnlineStatus } from "./hooks/Useonlinestatus";
 
 function App() {
+  useOnlineStatus();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
 

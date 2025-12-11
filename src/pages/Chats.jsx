@@ -13,6 +13,7 @@ import {
   getDocs,
 } from "firebase/firestore";
 import { db, auth } from "../firebase";
+import { isUserOnline } from "../hooks/Useonlinestatus";
 
 function Chats() {
   const [activeTab, setActiveTab] = useState("private");
@@ -162,7 +163,7 @@ function Chats() {
             time: timeDisplay || "",
             avatar: otherUserData.profileImage,
             unread: unreadCount,
-            online: true,
+            online: isUserOnline(otherUserData.lastActive),
             timestamp: lastMessageTime,
           });
         }
