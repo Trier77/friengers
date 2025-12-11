@@ -77,7 +77,7 @@ export default function Feed() {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
       className="mb-4"
-    >
+    > 
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -91,6 +91,9 @@ export default function Feed() {
         <h3 className="justify-start text-(--white) text-xl overskrift">
           {post.title}
         </h3>
+        
+        
+
         <div className="flex justify-between items-center text-sm font-bold bg-(--white) rounded-full px-2 gap-5">
           <div className="gap-2 flex items-center">
             <GroupsIcon color="--secondary" size={20} />
@@ -185,6 +188,11 @@ export default function Feed() {
               {post.description}
             </p>
 
+              {expandedPostId=== post.id && post.imageUrl && (<img
+                src={post.imageUrl}
+                alt="Post Billede"
+                className="w-40 h-40 rounded-xl mt-2" />)}
+
             <div className="w-60 flex justify-between items-center">
               <div className="flex items-center gap-2">
                 <img
@@ -207,6 +215,7 @@ export default function Feed() {
             </div>
           </div>
         </div>
+
         <Tilmeld
           postId={post.id}
           participants={post.participants}
