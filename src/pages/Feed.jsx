@@ -120,19 +120,17 @@ export default function Feed() {
     >
       <motion.div
         initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{
-          duration: 0.6,
-          delay: 0.3 + index * 0.15,
-          ease: "easeInOut",
+        animate={{
+          opacity:
+            expandedPostId === null ? 1 : expandedPostId === post.id ? 1 : 0.5, // lavere opacity for ikke-aktuelle
+          scale:
+            expandedPostId === null ? 1 : expandedPostId === post.id ? 1 : 0.95, // lidt mindre
         }}
+        transition={{ duration: 0.3 }}
+        onClick={() => toggleExpand(post.id)}
         className={`mb-4 p-4 bg-(--primary) rounded-2xl gap-2 flex flex-col relative overflow-hidden
           
-          ${
-            expandedPostId === post.id
-              ? "outline-4 outline-(--secondary)"
-              : "line-clamp-3"
-          }`}
+          `}
       >
         <div className="flex items-center justify-between">
           <h2 className="justify-start text-(--secondary) text-xl overskrift">
@@ -183,7 +181,6 @@ export default function Feed() {
               className={`w-70 text-(--white) text-sm cursor-pointer overflow-hidden ${
                 expandedPostId === post.id ? "" : "line-clamp-3"
               }`}
-              onClick={() => toggleExpand(post.id)}
             >
               {post.description}
             </p>

@@ -23,28 +23,41 @@ export default function Profil() {
 
   const fetchPosts = async () => {
     const postsSnapshot = await getDocs(collection(db, "posts"));
+    const userCache = {};
+
     const postsWithUser = await Promise.all(
       postsSnapshot.docs.map(async (postDoc) => {
         const postData = postDoc.data();
         const userSnap = await getDoc(doc(db, "users", postData.uid));
+
+        const participantsArray = Array.isArray(postData.participants)
+          ? postData.participants
+          : [];
+
+        const participantsData = await Promise.all(
+          participantsArray.map(async (uid) => {
+            if (!userCache[uid]) {
+              const snap = await getDoc(doc(db, "users", uid));
+              userCache[uid] = snap.exists() ? snap.data().fuldenavn : "Ukendt";
+            }
+            return userCache[uid];
+          })
+        );
+
         return {
           id: postDoc.id,
           ...postData,
           author: userSnap.exists() ? userSnap.data() : null,
+          participantsNames: participantsData,
         };
       })
     );
+
     setPosts(postsWithUser);
   };
 
   const toggleExpand = (id) => {
     setExpandedPostId((prevId) => (prevId === id ? null : id));
-  };
-
-  const handleDropdownChange = (tag) => {
-    setSelectedTags((prev) =>
-      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag]
-    );
   };
 
   useEffect(() => {
@@ -109,20 +122,16 @@ export default function Profil() {
       className="mb-4"
     >
       <motion.div
-        initial={{ opacity: 0 }}
-        animate={{ opacity: 1 }}
-        transition={{
-          duration: 0.6,
-          delay: 0.3 + index * 0.15,
-          ease: "easeInOut",
+        initial={{ opacity: 0, scale: 0.95 }}
+        animate={{
+          opacity:
+            expandedPostId === null ? 1 : expandedPostId === post.id ? 1 : 0.5, // lavere opacity for ikke-aktuelle
+          scale:
+            expandedPostId === null ? 1 : expandedPostId === post.id ? 1 : 0.95, // lidt mindre
         }}
-        className={`mb-4 p-4 bg-(--secondary) rounded-2xl gap-2 flex flex-col relative overflow-hidden
-          
-          ${
-            expandedPostId === post.id
-              ? "outline-4 outline-(--secondary)"
-              : "line-clamp-3"
-          }`}
+        transition={{ duration: 0.3 }}
+        onClick={() => toggleExpand(post.id)}
+        className="mb-4 p-4 bg-(--secondary) rounded-2xl gap-2 flex flex-col relative overflow-hidden"
       >
         <div className="flex items-center justify-between">
           <h2 className="justify-start text-(--white) text-xl overskrift">
@@ -155,7 +164,6 @@ export default function Profil() {
                     ? "text-(--secondary) font-bold"
                     : ""
                 }`}
-                onClick={() => handleDropdownChange(tag)}
               >
                 {tag}
               </li>
@@ -167,7 +175,6 @@ export default function Profil() {
             className={` text-(--white) text-sm cursor-pointer overflow-hidden ${
               expandedPostId === post.id ? "" : "line-clamp-3"
             }`}
-            onClick={() => toggleExpand(post.id)}
           >
             {post.description}
           </p>
@@ -182,6 +189,20 @@ export default function Profil() {
                 {post.participants?.length || 0}
               </p>
             </div>
+          </div>
+          <div
+            className={`flex gap-2 ${
+              expandedPostId === post.id ? "block" : "hidden"
+            }`}
+            onClick={() => toggleExpand(post.id)}
+          >
+            {post.participantsNames.length > 0 ? (
+              <p className="text-(--white) text-sm">
+                {post.participantsNames.join(", ")}
+              </p>
+            ) : (
+              <p className="text-(--white) text-sm">Ingen deltagere endnu</p>
+            )}
           </div>
         </div>
       </motion.div>
