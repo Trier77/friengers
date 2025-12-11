@@ -41,16 +41,18 @@ function App() {
     <>
       <Logo />
       <Navbar />
-      <Routes>
-        <Route path="/login" element={<Login />} />
-        <Route path="/" element={<Feed />} />
-        <Route path="/Chats" element={<Chats />} />
-        <Route path="/AndresProfil/:userId" element={<AndresProfil />} />
-        <Route path="/Profil" element={<Profil />} />
-        <Route path="/Chats/:chatId" element={<IndividualChat />} />
-        <Route path="/Settings" element={<Settings />} />
-        <Route path="/test" element={<FirebaseTest />} />
-      </Routes>
+      <div className="pb-36">
+        <Routes>
+          <Route path="/login" element={<Login />} />
+          <Route path="/" element={<Feed />} />
+          <Route path="/Chats" element={<Chats />} />
+          <Route path="/AndresProfil/:userId" element={<AndresProfil />} />
+          <Route path="/Profil" element={<Profil />} />
+          <Route path="/Chats/:chatId" element={<IndividualChat />} />
+          <Route path="/Settings" element={<Settings />} />
+          <Route path="/test" element={<FirebaseTest />} />
+        </Routes>
+      </div>
     </>
   );
 }
