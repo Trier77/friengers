@@ -9,8 +9,10 @@ import Publish from "./Publish";
 import ImagePicker from "./ImagePicker";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { storage } from "../firebase";
+import useTags from "./Tags";
 
-export default function CreatePost({ open, onClose, allTags }) {
+export default function CreatePost({ open, onClose }) {
+  const { tags: allTags, loading: tagsLoading } = useTags();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [location, setLocation] = useState("");
@@ -21,7 +23,7 @@ export default function CreatePost({ open, onClose, allTags }) {
   const [isPublishing, setIsPublishing] = useState(false);
 
   const containerRef = useRef(null);
-  
+
   const handleFocus = (e) => {
     e.target.scrollIntoView({ behavior: "smooth", block: "center" });
   };
@@ -55,7 +57,6 @@ export default function CreatePost({ open, onClose, allTags }) {
         const url = await getDownloadURL(snap.ref);
         imageUrls.push(url);
       }
-
 
       await addDoc(collection(db, "posts"), {
         title,
@@ -94,7 +95,11 @@ export default function CreatePost({ open, onClose, allTags }) {
         className={`
           fixed inset-0 bg-(--white)/80 z-40
           transition-opacity duration-300
-          ${open ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}
+          ${
+            open
+              ? "opacity-100 pointer-events-auto"
+              : "opacity-0 pointer-events-none"
+          }
         `}
         onClick={onClose}
       />
@@ -128,19 +133,20 @@ export default function CreatePost({ open, onClose, allTags }) {
         </div>
 
         <div className="flex flex-wrap gap-2 mb-4">
-          {allTags.map((tag) => (
-            <button
-              key={tag}
-              onClick={() => toggleTag(tag)}
-              className={`px-3 py-1 rounded-2xl text-xs font-bold ${
-                selectedTags.includes(tag)
-                  ? "bg-(--white) text-(--secondary)"
-                  : "border border-(--white) text-(--white)"
-              }`}
-            >
-              {tag}
-            </button>
-          ))}
+          {!tagsLoading &&
+            allTags.map((tag) => (
+              <button
+                key={tag}
+                onClick={() => toggleTag(tag)}
+                className={`px-3 py-1 rounded-2xl text-xs font-bold ${
+                  selectedTags.includes(tag)
+                    ? "bg-(--white) text-(--secondary)"
+                    : "border border-(--white) text-(--white)"
+                }`}
+              >
+                {tag}
+              </button>
+            ))}
         </div>
 
         <div className="flex flex-column justify-between text-(--white) text-sm pb-5 gap-10">
@@ -165,7 +171,7 @@ export default function CreatePost({ open, onClose, allTags }) {
               onChange={(e) => setTime(e.target.value)}
             />
           </div>
-          
+
           <div className="relative flex items-center w-20 text-[--white] gap-2">
             <GroupsIcon color="--white" size={20} />
             <input
@@ -179,15 +185,13 @@ export default function CreatePost({ open, onClose, allTags }) {
           </div>
         </div>
 
-        <ImagePicker 
-          onImagesSelect={(files) => setImageFile((prev) => [...prev, ...files])} 
-          
+        <ImagePicker
+          onImagesSelect={(files) =>
+            setImageFile((prev) => [...prev, ...files])
+          }
         />
 
-        <Publish 
-          handlePublish={handlePublish} 
-          isPublishing={isPublishing}
-        />
+        <Publish handlePublish={handlePublish} isPublishing={isPublishing} />
       </div>
     </>
   );
