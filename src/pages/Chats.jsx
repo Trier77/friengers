@@ -1,49 +1,267 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import UnreadBadge from "../components/UnreadBadge";
 import { motion } from "framer-motion";
 import { useNavigate } from "react-router";
+import {
+  collection,
+  query,
+  onSnapshot,
+  doc,
+  getDoc,
+  orderBy,
+  limit,
+  getDocs,
+  where,
+} from "firebase/firestore";
+import { db, auth } from "../firebase";
 
 function Chats() {
-  const [activeTab, setActiveTab] = useState("private"); // 'privat chat' eller 'gruppe chat'
+  const [activeTab, setActiveTab] = useState("private");
+  const [privateChats, setPrivateChats] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [error, setError] = useState(null);
   const navigate = useNavigate();
+  const currentUserId = auth.currentUser?.uid;
 
-  // Dette er bare noget dummy data, indtil at vi når til det
-  const privateChats = [
-    {
-      id: 1,
-      name: "Emma Sørensen",
-      message: "Hvis det passer?",
-      time: "9:33",
-      avatar:
-        "https://img.freepik.com/free-photo/fair-haired-woman-looking-with-pleased-calm-expression_176420-15145.jpg?semt=ais_hybrid&w=740&q=80",
-      unread: 2,
-      online: true,
-    },
-    {
-      id: 2,
-      name: "Jesper Madsen",
-      message: "Tak for hjælpen, endnu en gang!",
-      time: "Tir.",
-      avatar:
-        "https://media.istockphoto.com/id/1200677760/photo/portrait-of-handsome-smiling-young-man-with-crossed-arms.jpg?s=612x612&w=0&k=20&c=g_ZmKDpK9VEEzWw4vJ6O577ENGLTOcrvYeiLxi8mVuo=",
-      unread: 0,
-      online: true,
-    },
-    {
-      id: 3,
-      name: "Jens Andersen",
-      message: "Dig: Super, så ses vi der!",
-      time: "27/11",
-      avatar:
-        "https://t3.ftcdn.net/jpg/00/77/71/12/360_F_77711294_BA5QTjtgGPmLKCXGdtbAgZciL4kEwCnx.jpg",
-      unread: 0,
-      online: true,
-    },
-  ];
+  useEffect(() => {
+    if (!currentUserId) {
+      console.error("❌ No current user!");
+      setLoading(false);
+      return;
+    }
 
-  const groupChats = []; // Her skal vi tilføje gruppechat-data senere
+    console.log("🔄 Current User ID:", currentUserId);
 
-  const currentChats = activeTab === "private" ? privateChats : groupChats;
+    // Lyt til ALLE chats i real-time
+    const chatsQuery = query(collection(db, "chats"));
+
+    const unsubscribe = onSnapshot(
+      chatsQuery,
+      async (snapshot) => {
+        try {
+          console.log("📡 Chats updated! Total chats:", snapshot.docs.length);
+
+          const chatList = [];
+
+          for (const chatDoc of snapshot.docs) {
+            try {
+              const chatId = chatDoc.id;
+              const chatData = chatDoc.data();
+
+              console.log("🔍 Processing chat:", chatId);
+
+              // Tjek om den nuværende bruger er en del af denne chat
+              if (!chatId.includes(currentUserId)) {
+                console.log("⏭️ Skipping - user not in chat");
+                continue;
+              }
+
+              // Find den anden brugers ID
+              const userIds = chatId.split("_");
+              const otherUserId = userIds.find((id) => id !== currentUserId);
+              if (!otherUserId) {
+                console.log("⚠️ No other user found");
+                continue;
+              }
+
+              console.log("👤 Other user ID:", otherUserId);
+
+              // Hent den anden brugers data
+              const otherUserDoc = await getDoc(doc(db, "users", otherUserId));
+              if (!otherUserDoc.exists()) {
+                console.log("⚠️ Other user doc doesn't exist");
+                continue;
+              }
+
+              const otherUserData = otherUserDoc.data();
+              console.log(
+                "✅ Got user data:",
+                otherUserData.kaldenavn || otherUserData.fuldenavn
+              );
+
+              // Hent den sidste besked
+              const messagesQuery = query(
+                collection(db, "chats", chatId, "messages"),
+                orderBy("timestamp", "desc"),
+                limit(1)
+              );
+
+              const messagesSnapshot = await getDocs(messagesQuery);
+
+              let lastMessage = "Ingen beskeder endnu";
+              let lastMessageTime = null;
+              let lastMessageSenderId = null;
+
+              if (!messagesSnapshot.empty) {
+                const lastMsg = messagesSnapshot.docs[0].data();
+                lastMessage = lastMsg.text;
+                lastMessageTime = lastMsg.timestamp;
+                lastMessageSenderId = lastMsg.senderId;
+              }
+
+              // Hvis beskeden er fra den nuværende bruger, tilføj "Dig: " præfix
+              if (lastMessageSenderId === currentUserId) {
+                lastMessage = `Dig: ${lastMessage}`;
+              }
+
+              // Tæl hvor mange ulæste beskeder der er
+              let unreadCount = 0;
+
+              if (
+                lastMessageSenderId &&
+                lastMessageSenderId !== currentUserId
+              ) {
+                const lastReadTime = chatData[`lastReadBy_${currentUserId}`];
+
+                if (
+                  !lastReadTime ||
+                  (lastMessageTime &&
+                    lastMessageTime.toMillis() > lastReadTime.toMillis())
+                ) {
+                  let unreadQuery;
+
+                  if (lastReadTime) {
+                    unreadQuery = query(
+                      collection(db, "chats", chatId, "messages"),
+                      where("senderId", "==", otherUserId),
+                      where("timestamp", ">", lastReadTime),
+                      orderBy("timestamp", "asc")
+                    );
+                  } else {
+                    unreadQuery = query(
+                      collection(db, "chats", chatId, "messages"),
+                      where("senderId", "==", otherUserId),
+                      orderBy("timestamp", "asc")
+                    );
+                  }
+
+                  const unreadSnapshot = await getDocs(unreadQuery);
+                  unreadCount = unreadSnapshot.size;
+                }
+              }
+
+              // Formatér tid
+              let timeDisplay = "";
+              if (lastMessageTime) {
+                const messageDate = lastMessageTime.toDate();
+                const now = new Date();
+                const diffInDays = Math.floor(
+                  (now - messageDate) / (1000 * 60 * 60 * 24)
+                );
+
+                if (diffInDays === 0) {
+                  timeDisplay = messageDate.toLocaleTimeString("da-DK", {
+                    hour: "2-digit",
+                    minute: "2-digit",
+                  });
+                } else if (diffInDays === 1) {
+                  timeDisplay = "I går";
+                } else if (diffInDays < 7) {
+                  timeDisplay = messageDate.toLocaleDateString("da-DK", {
+                    weekday: "short",
+                  });
+                } else {
+                  timeDisplay = messageDate.toLocaleDateString("da-DK", {
+                    day: "2-digit",
+                    month: "2-digit",
+                  });
+                }
+              }
+
+              chatList.push({
+                id: otherUserId,
+                name: otherUserData.kaldenavn || otherUserData.fuldenavn,
+                fuldenavn: otherUserData.fuldenavn,
+                message: lastMessage,
+                time: timeDisplay || "",
+                avatar: otherUserData.profileImage,
+                unread: unreadCount,
+                online: true,
+                timestamp: lastMessageTime,
+              });
+
+              console.log("✅ Added chat to list");
+            } catch (chatError) {
+              console.error("❌ Error processing individual chat:", chatError);
+              // Continue med næste chat i stedet for at stoppe hele processen
+            }
+          }
+
+          // Sortér chats efter tidsstempel (nyeste først)
+          chatList.sort((a, b) => {
+            if (!a.timestamp) return 1;
+            if (!b.timestamp) return -1;
+            return b.timestamp.toDate() - a.timestamp.toDate();
+          });
+
+          console.log("✅ Final chat list:", chatList.length, "chats");
+          setPrivateChats(chatList);
+          setLoading(false);
+          setError(null);
+        } catch (err) {
+          console.error("❌ Error in snapshot handler:", err);
+          setError(err.message);
+          setLoading(false);
+        }
+      },
+      (err) => {
+        console.error("❌ Error listening to chats:", err);
+        setError(err.message);
+        setLoading(false);
+      }
+    );
+
+    return () => {
+      console.log("🛑 Stopping chat listener");
+      unsubscribe();
+    };
+  }, [currentUserId]);
+
+  const groupChats = [];
+
+  // Filtrer chats baseret på søgning
+  const getFilteredChats = () => {
+    const chats = activeTab === "private" ? privateChats : groupChats;
+
+    if (!searchQuery.trim()) {
+      return chats;
+    }
+
+    const lowerQuery = searchQuery.toLowerCase();
+
+    return chats.filter((chat) => {
+      const nameMatch = chat.name.toLowerCase().includes(lowerQuery);
+      const fullNameMatch = chat.fuldenavn?.toLowerCase().includes(lowerQuery);
+
+      return nameMatch || fullNameMatch;
+    });
+  };
+
+  const currentChats = getFilteredChats();
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-4">
+        <p className="text-gray-500 mb-4">Henter chats...</p>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex flex-col items-center justify-center p-4">
+        <p className="text-red-500 mb-2">Der opstod en fejl:</p>
+        <p className="text-sm text-red-400">{error}</p>
+        <button
+          onClick={() => window.location.reload()}
+          className="mt-4 px-4 py-2 bg-blue-500 text-white rounded"
+        >
+          Genindlæs
+        </button>
+      </div>
+    );
+  }
 
   return (
     <motion.div
@@ -62,22 +280,45 @@ function Chats() {
         <div className="relative">
           <input
             type="text"
-            placeholder="Search"
+            placeholder="Søg efter navn..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full px-6 py-3 rounded-full border-2 border-blue-200 focus:outline-none focus:border-blue-400 text-gray-600"
           />
-          <svg
-            className="absolute right-6 top-1/2 -translate-y-1/2 w-6 h-6 text-blue-400"
-            fill="none"
-            stroke="currentColor"
-            viewBox="0 0 24 24"
-          >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              strokeWidth={2}
-              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
-            />
-          </svg>
+          {searchQuery ? (
+            <button
+              onClick={() => setSearchQuery("")}
+              className="absolute right-6 top-1/2 -translate-y-1/2"
+            >
+              <svg
+                className="w-6 h-6 text-gray-400 hover:text-gray-600"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M6 18L18 6M6 6l12 12"
+                />
+              </svg>
+            </button>
+          ) : (
+            <svg
+              className="absolute right-6 top-1/2 -translate-y-1/2 w-6 h-6 text-blue-400"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+              />
+            </svg>
+          )}
         </div>
 
         {/* Tab Buttons */}
@@ -105,68 +346,101 @@ function Chats() {
         </div>
       </motion.div>
 
-      {/* Indbakke Liste */}
+      {/* Chat Liste */}
       <div className="px-4 mt-4">
-        {currentChats.map((chat, index) => (
-          <motion.div
-            key={chat.id}
-            onClick={() => navigate(`/Chats/${chat.id}`)}
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{
-              duration: 0.6,
-              delay: 0.3 + index * 0.15,
-              ease: "easeInOut",
-            }}
-            className={`relative flex items-center border-1 border-[var(--secondary)] gap-4 mb-3 rounded-tl-4xl rounded-bl-4xl rounded-tr-2xl rounded-br-2xl cursor-pointer transition-all active:brightness-80 ${
-              chat.id === 1
-                ? "bg-blue-400 text-white"
-                : "bg-white text-gray-800 hover:bg-gray-50"
-            }`}
-          >
-            {/* Avatar med Online Status */}
-            <div className="relative flex-shrink-0">
-              <img
-                src={chat.avatar}
-                alt={chat.name}
-                className="w-14 h-14 rounded-full object-cover"
-              />
-              {chat.online && (
-                <div
-                  className={`absolute bottom-0 right-0 w-4 h-4 rounded-full border-2 ${
-                    chat.id === 1
-                      ? "bg-blue-300 border-blue-400"
-                      : "bg-green-400 border-white"
-                  }`}
-                ></div>
-              )}
-            </div>
-
-            {/* Chat Info */}
-            <div className="flex-1 min-w-0">
-              <h3 className="font-semibold text-lg">{chat.name}</h3>
-              <p
-                className={`text-sm truncate ${
-                  chat.id === 1 ? "text-white/90" : "text-gray-500"
-                }`}
-              >
-                {chat.message}
+        {currentChats.length === 0 ? (
+          <div className="text-center text-gray-500 mt-8">
+            {searchQuery ? (
+              <>
+                <p>Ingen resultater for "{searchQuery}"</p>
+                <button
+                  onClick={() => setSearchQuery("")}
+                  className="text-blue-500 text-sm mt-2 underline"
+                >
+                  Ryd søgning
+                </button>
+              </>
+            ) : (
+              <>
+                <p>Ingen chats endnu</p>
+                <p className="text-sm mt-2">
+                  Start en samtale ved at besøge en profil
+                </p>
+              </>
+            )}
+          </div>
+        ) : (
+          <>
+            {searchQuery && (
+              <p className="text-sm text-gray-500 mb-3">
+                Viser {currentChats.length} resultat
+                {currentChats.length !== 1 ? "er" : ""} for "{searchQuery}"
               </p>
-            </div>
-
-            {/* Tid og Unread Badge */}
-            <div className="flex flex-col items-end gap-1">
-              <span
-                className={`text-sm mr-2 ${
-                  chat.id === 1 ? "text-white" : "text-gray-500"
+            )}
+            {currentChats.map((chat, index) => (
+              <motion.div
+                key={chat.id}
+                onClick={() => navigate(`/Chats/${chat.id}`)}
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                transition={{
+                  duration: 0.6,
+                  delay: 0.3 + index * 0.15,
+                  ease: "easeInOut",
+                }}
+                className={`relative flex items-center border-1 border-[var(--secondary)] gap-4 mb-3 rounded-tl-4xl rounded-bl-4xl rounded-tr-2xl rounded-br-2xl cursor-pointer transition-all active:brightness-80 ${
+                  chat.unread > 0
+                    ? "bg-blue-400 text-white"
+                    : "bg-white text-gray-800 hover:bg-gray-50"
                 }`}
               >
-                {chat.time}
-              </span>
-              {chat.unread > 0 && <UnreadBadge count={chat.unread} />}
-            </div>
-          </motion.div>
-        ))}
+                {/* UnreadBadge */}
+                {chat.unread > 0 && <UnreadBadge count={chat.unread} />}
+
+                {/* Avatar med Online Status */}
+                <div className="relative flex-shrink-0">
+                  <img
+                    src={chat.avatar || "https://via.placeholder.com/56"}
+                    alt={chat.name}
+                    className="w-14 h-14 rounded-full object-cover"
+                  />
+                  {chat.online && (
+                    <div
+                      className={`absolute bottom-0 right-0 w-4 h-4 rounded-full border-2 ${
+                        chat.unread > 0
+                          ? "bg-blue-300 border-blue-400"
+                          : "bg-green-400 border-white"
+                      }`}
+                    ></div>
+                  )}
+                </div>
+
+                {/* Chat Info */}
+                <div className="flex-1 min-w-0">
+                  <h3 className="font-semibold text-lg">{chat.name}</h3>
+                  <p
+                    className={`text-sm truncate ${
+                      chat.unread > 0 ? "text-white/90" : "text-gray-500"
+                    }`}
+                  >
+                    {chat.message}
+                  </p>
+                </div>
+
+                {/* Tid */}
+                <div className="flex flex-col items-end gap-1 mr-4">
+                  <span
+                    className={`text-sm ${
+                      chat.unread > 0 ? "text-white" : "text-gray-500"
+                    }`}
+                  >
+                    {chat.time}
+                  </span>
+                </div>
+              </motion.div>
+            ))}
+          </>
+        )}
       </div>
     </motion.div>
   );
