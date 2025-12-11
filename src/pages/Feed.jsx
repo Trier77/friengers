@@ -16,6 +16,7 @@ export default function Feed() {
   const [expandedPostId, setExpandedPostId] = useState(null);
   const [selectedTags, setSelectedTags] = useState([]);
   const [showFilter, setShowFilter] = useState(false);
+  const [previewImage, setPreviewImage] = useState(null);
 
   const userId = auth.currentUser?.uid;
 
@@ -188,10 +189,20 @@ export default function Feed() {
               {post.description}
             </p>
 
-              {expandedPostId=== post.id && post.imageUrl && (<img
-                src={post.imageUrl}
-                alt="Post Billede"
-                className="w-40 h-40 rounded-xl mt-2" />)}
+              {expandedPostId === post.id && post.imageUrls && (
+                <div className="flex gap-2 overflow-x-auto mt-2">
+                  {post.imageUrls.map((url, i) => (
+                    <img
+                      key={i}
+                      src={url}
+                      alt="Post billede"
+                      className="h-40 w-auto rounded-xl cursor-pointer"
+                      onClick={() => setPreviewImage(url)}
+                    />
+                  ))}
+                </div>
+              )}
+                
 
             <div className="w-60 flex justify-between items-center">
               <div className="flex items-center gap-2">
@@ -284,6 +295,22 @@ export default function Feed() {
       )}
 
       {otherPosts.map((post, index) => renderPost(post, index))}
+
+
+      {previewImage && (
+  <div
+    className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50"
+    onClick={() => setPreviewImage(null)}
+  >
+    <div className="max-w-3xl max-h-[90vh]">
+      <img
+        src={previewImage}
+        alt="Preview"
+        className="w-full h-full object-contain rounded-xl"
+      />
+    </div>
+  </div>
+)}
     </div>
   );
 }

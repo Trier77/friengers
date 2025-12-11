@@ -1,36 +1,50 @@
 import { useState } from "react";
 
-export default function ImagePicker({ onImageSelect }) {
-  const [preview, setPreview] = useState(null);
+export default function ImagePicker({ onImagesSelect }) {
+  const [previews, setPreviews] = useState([]);
 
-  const handleFile = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
+  const handleFiles = (e) => {
+    const files = Array.from(e.target.files);
+    if (!files.length) return;
 
-    setPreview(URL.createObjectURL(file));
-    onImageSelect(file);  // send filen tilbage til CreatePost
+    // Lav previews
+    const newPreviews = files.map((file) => ({
+      file,
+      url: URL.createObjectURL(file)
+    }));
+
+    setPreviews((prev) => [...prev, ...newPreviews]);
+
+    // Send ALLE filer tilbage til CreatePost
+    onImagesSelect(files);
   };
 
   return (
     <div className="mb-4">
-      {/* File input */}
-      <label className="block text-white font-semibold mb-2">Add Image</label>
+      <label className="block text-white font-semibold mb-2">
+        Add images
+      </label>
 
       <input
         type="file"
         accept="image/*"
-        capture="environment"
-        onChange={handleFile}
+        multiple
+        onChange={handleFiles}
         className="text-white"
       />
 
-      {/* Preview */}
-      {preview && (
-        <img
-          src={preview}
-          alt="preview"
-          className="mt-3 w-full h-auto rounded-xl"
-        />
+      {/* PREVIEW GALLERY */}
+      {previews.length > 0 && (
+        <div className="flex gap-3 mt-3 overflow-x-auto">
+          {previews.map((img, i) => (
+            <img
+              key={i}
+              src={img.url}
+              alt="preview"
+              className="h-24 w-auto rounded-xl object-cover"
+            />
+          ))}
+        </div>
       )}
     </div>
   );

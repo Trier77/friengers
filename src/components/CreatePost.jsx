@@ -17,7 +17,7 @@ export default function CreatePost({ open, onClose, allTags }) {
   const [participants, setParticipants] = useState(1);
   const [time, setTime] = useState("");
   const [selectedTags, setSelectedTags] = useState([]);
-  const [imageFile, setImageFile] = useState(null);
+  const [imageFile, setImageFile] = useState([]);
   const [isPublishing, setIsPublishing] = useState(false);
 
   const containerRef = useRef(null);
@@ -43,18 +43,19 @@ export default function CreatePost({ open, onClose, allTags }) {
     setIsPublishing(true);
 
     try {
-      let imageUrl = null;
+      let imageUrls = [];
 
-      // Upload billede hvis der er et
-      if (imageFile) {
+      for (const file of imageFile) {
         const imageRef = ref(
           storage,
-          `posts/${user.uid}/${Date.now()}-${imageFile.name}`
+          `posts/${user.uid}/${Date.now()}-${file.name}`
         );
 
-        const snap = await uploadBytes(imageRef, imageFile);
-        imageUrl = await getDownloadURL(snap.ref);
+        const snap = await uploadBytes(imageRef, file);
+        const url = await getDownloadURL(snap.ref);
+        imageUrls.push(url);
       }
+
 
       await addDoc(collection(db, "posts"), {
         title,
@@ -64,7 +65,7 @@ export default function CreatePost({ open, onClose, allTags }) {
         tags: selectedTags,
         time: Timestamp.fromDate(new Date(time)),
         uid: user.uid,
-        imageUrl: imageUrl,
+        imageUrls,
         createdAt: Timestamp.now(),
       });
 
@@ -75,7 +76,7 @@ export default function CreatePost({ open, onClose, allTags }) {
       setParticipants(1);
       setTime("");
       setSelectedTags([]);
-      setImageFile(null);
+      setImageFile([]);
 
       onClose();
     } catch (error) {
@@ -179,8 +180,8 @@ export default function CreatePost({ open, onClose, allTags }) {
         </div>
 
         <ImagePicker 
-          onImageSelect={(file) => setImageFile(file)} 
-          imageFile={imageFile}
+          onImagesSelect={(files) => setImageFile((prev) => [...prev, ...files])} 
+          
         />
 
         <Publish 
