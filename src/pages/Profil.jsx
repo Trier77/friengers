@@ -219,7 +219,7 @@ export default function Profil() {
           </div>
           <div className="flex flex-col gap-3">
             <p
-              className={` text-(--white) text-sm cursor-pointer overflow-hidden ${
+              className={` text-(--white) text-sm cursor-pointer overflow-hidden whitespace-pre-wrap ${
                 expandedPostId === post.id ? "" : "line-clamp-3"
               }`}
             >
