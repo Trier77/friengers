@@ -1,6 +1,12 @@
 import { useEffect, useState } from "react";
 import { auth, db } from "../firebase";
-import { collection, getDocs, doc, getDoc } from "firebase/firestore";
+import {
+  collection,
+  getDocs,
+  doc,
+  getDoc,
+  deleteDoc,
+} from "firebase/firestore";
 import { NavLink } from "react-router";
 import Settings from "./Settings";
 import { motion } from "framer-motion";
@@ -12,6 +18,7 @@ import GroupsIcon from "../../public/icons/GroupsIcon";
 import CalenderIcon from "../../public/icons/CalenderIcon";
 import MapPinIcon from "../../public/icons/MapPinIcon";
 import { useNavigate } from "react-router";
+import ColorCircle from "../components/ColorCircle";
 
 export default function Profil() {
   const [userData, setUserData] = useState(null);
@@ -91,7 +98,9 @@ export default function Profil() {
 
   if (!userData) return <p>Henter profil...</p>;
 
-  const myPosts = posts.filter((post) => post.uid === userId);
+  const myPosts = posts.filter(
+    (post) => post.uid === userId && post.active !== false
+  );
 
   const joinedPosts = posts.filter(
     (post) =>
@@ -124,13 +133,39 @@ export default function Profil() {
     return "lige nu";
   }
 
-  const renderMyPost = (post, index) => (
+  const deletePost = async (postId) => {
+    try {
+      await deleteDoc(doc(db, "posts", postId));
+      // Opdater den lokale state, så UI også opdateres
+      setPosts((prevPosts) => prevPosts.filter((post) => post.id !== postId));
+      console.log("Post slettet!");
+    } catch (error) {
+      console.error("Fejl ved sletning af post:", error);
+    }
+  };
+
+  const markAsDone = async (postId) => {
+    try {
+      const postRef = doc(db, "posts", postId);
+      await updateDoc(postRef, { active: false }); // sæt til "færdig"
+      setPosts((prevPosts) =>
+        prevPosts.map((post) =>
+          post.id === postId ? { ...post, active: false } : post
+        )
+      );
+      console.log("Post markeret som færdig!");
+    } catch (error) {
+      console.error("Fejl ved opdatering af post:", error);
+    }
+  };
+
+  const renderMyPost = (post) => (
     <motion.div
       key={post.id}
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="mb-4"
+      className=""
     >
       <motion.div
         initial={{ opacity: 0, scale: 0.95 }}
@@ -142,85 +177,123 @@ export default function Profil() {
         }}
         transition={{ duration: 0.3 }}
         onClick={() => toggleExpand(post.id)}
-        className="mb-4 p-4 bg-(--secondary) rounded-2xl gap-2 flex flex-col relative overflow-hidden"
+        className="flex flex-col relative overflow-hidden mb-4"
       >
-        <div className="flex items-center justify-between">
-          <h2 className="justify-start text-(--white) text-xl overskrift">
-            {post.title}
-          </h2>
-          <div className="bg-(--white) rounded-full px-2 flex gap-4 font-bold text-sm text-(--secondary)">
-            <div className="flex items-center gap-2">
-              <MapPinIcon color="--secondary" size={10} />{" "}
-              <p>{post.location}</p>
+        <div className="p-4 bg-(--secondary) rounded-2xl gap-2 flex flex-col relative overflow-hidden">
+          <div className="flex items-center justify-between">
+            <h2 className="justify-start text-(--white) text-xl overskrift">
+              {post.title}
+            </h2>
+            <div className="bg-(--white) rounded-full px-2 flex gap-4 font-bold text-sm text-(--secondary)">
+              <div className="flex items-center gap-2">
+                <MapPinIcon color="--secondary" size={10} />{" "}
+                <p>{post.location}</p>
+              </div>
+              <div className="flex items-center gap-2">
+                <CalenderIcon color="--secondary" size={10} />
+                <p>
+                  {post.time?.toDate().toLocaleDateString(undefined, {
+                    day: "2-digit",
+                    month: "2-digit",
+                  })}
+                </p>
+              </div>
             </div>
-            <div className="flex items-center gap-2">
-              <CalenderIcon color="--secondary" size={10} />
-              <p>
-                {post.time?.toDate().toLocaleDateString(undefined, {
-                  day: "2-digit",
-                  month: "2-digit",
-                })}
-              </p>
+          </div>
+
+          <div>
+            <ul className="flex flex-wrap gap-1 text-(--secondary) font-bold text-xs ">
+              {post.tags.map((tag, index) => (
+                <li
+                  key={index}
+                  className={`bg-(--white) py-1 rounded-2xl px-3 cursor-pointer ${
+                    selectedTags.includes(tag)
+                      ? "text-(--secondary) font-bold"
+                      : ""
+                  }`}
+                >
+                  {tag}
+                </li>
+              ))}
+            </ul>
+          </div>
+          <div className="flex flex-col gap-3">
+            <p
+              className={` text-(--white) text-sm cursor-pointer overflow-hidden ${
+                expandedPostId === post.id ? "" : "line-clamp-3"
+              }`}
+            >
+              {post.description}
+            </p>
+
+            <div className="flex justify-between items-center">
+              <div className="text-(--white) font-bold">
+                <p>{post.createdAt ? timeAgo(post.createdAt.toDate()) : ""}</p>
+              </div>
+              <div className="flex gap-2">
+                <GroupsIcon color="--white" size={20} />
+                <p className="text-(--white) text-sm">
+                  {post.participants?.length || 0}
+                </p>
+              </div>
+            </div>
+            <div
+              className={`flex gap-2 ${
+                expandedPostId === post.id ? "block" : "hidden"
+              }`}
+              onClick={() => toggleExpand(post.id)}
+            >
+              {post.participantsNames.length > 0 ? (
+                <p className="text-(--white) text-sm">
+                  {post.participantsNames.join(", ")}
+                </p>
+              ) : (
+                <p className="text-(--white) text-sm">Ingen deltagere endnu</p>
+              )}
             </div>
           </div>
         </div>
-
-        <div>
-          <ul className="flex flex-wrap gap-1 text-(--secondary) font-bold text-xs ">
-            {post.tags.map((tag, index) => (
-              <li
-                key={index}
-                className={`bg-(--white) py-1 rounded-2xl px-3 cursor-pointer ${
-                  selectedTags.includes(tag)
-                    ? "text-(--secondary) font-bold"
-                    : ""
-                }`}
-              >
-                {tag}
-              </li>
-            ))}
-          </ul>
-        </div>
-        <div className="flex flex-col gap-3">
-          <p
-            className={` text-(--white) text-sm cursor-pointer overflow-hidden ${
-              expandedPostId === post.id ? "" : "line-clamp-3"
-            }`}
+        <div
+          className={`flex justify-between ${
+            expandedPostId === post.id ? "block" : "hidden"
+          } px-8`}
+          onClick={() => toggleExpand(post.id)}
+        >
+          <button
+            className="text-sm uppercase text-(--primary) font-bold px-3 py-1 rounded-b-xl"
+            onClick={() => {
+              if (
+                window.confirm(
+                  "Er du sikker på, at du vil slette denne opgave?"
+                )
+              ) {
+                deletePost(post.id);
+              }
+            }}
           >
-            {post.description}
-          </p>
+            Slet
+          </button>
 
-          <div className="flex justify-between items-center">
-            <div className="text-(--white) font-bold">
-              <p>{post.createdAt ? timeAgo(post.createdAt.toDate()) : ""}</p>
-            </div>
-            <div className="flex gap-2">
-              <GroupsIcon color="--white" size={20} />
-              <p className="text-(--white) text-sm">
-                {post.participants?.length || 0}
-              </p>
-            </div>
-          </div>
-          <div
-            className={`flex gap-2 ${
-              expandedPostId === post.id ? "block" : "hidden"
-            }`}
-            onClick={() => toggleExpand(post.id)}
+          <button
+            className="border-2 text-sm uppercase border-t-0 bg-(--primary) text-(--white) font-bold px-5 py-2 rounded-b-xl"
+            onClick={() => {
+              if (
+                window.confirm(
+                  "Er du sikker på, at du vil markere denne opgave søm løst?"
+                )
+              ) {
+                markAsDone(post.id);
+              }
+            }}
           >
-            {post.participantsNames.length > 0 ? (
-              <p className="text-(--white) text-sm">
-                {post.participantsNames.join(", ")}
-              </p>
-            ) : (
-              <p className="text-(--white) text-sm">Ingen deltagere endnu</p>
-            )}
-          </div>
+            Marker som færdig
+          </button>
         </div>
       </motion.div>
     </motion.div>
   );
 
-  const renderOthersPost = (post, index) => (
+  const renderOthersPost = (post) => (
     <motion.div
       key={post.id}
       initial={{ opacity: 0, y: 20 }}
@@ -332,10 +405,12 @@ export default function Profil() {
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.4 }}
-      className="min-h-screen pb-20 p-4"
+      className="relative p-4 overflow-hidden"
     >
+      <ColorCircle />
+
       {/* Header Section */}
-      <div className=" pt-8 pb-6 relative">
+      <div className="pb-4 relative">
         {/* Profile Info */}
         <div className="flex items-center gap-4 mb-4">
           {/* Avatar with border */}
@@ -356,7 +431,7 @@ export default function Profil() {
             </h1>
             <p className="text-blue-500 font-bold text-sm">{userData.study}</p>
             <p className="text-sm text-blue-500/50">{userData.pronouns}</p>
-            <div className="absolute right-0 top-10">
+            <div className="absolute right-0 top-2">
               <NavLink to="/Settings">
                 <svg
                   className="w-6 h-6 text-[#002546]" // w-6/h-6 svarer nogenlunde til 24px
@@ -373,7 +448,7 @@ export default function Profil() {
 
         {/* Bio */}
         <input
-          className="w-full text-(--secondary) mb-2"
+          className="w-full text-(--secondary)"
           placeholder="Skriv din beskrivelse her..."
           value={bio}
           onChange={(e) => setBio(e.target.value)}
@@ -399,40 +474,40 @@ export default function Profil() {
         />
       </div>
 
-      {/* Tab Buttons */}
-      <div className="flex gap-3 mt-6 ml-2 mr-2">
-        <button
-          onClick={() => setActiveTab("active")}
-          className={`flex-1 py-1 px-2 rounded-full font-semibold transition-colors ${
-            activeTab === "active"
-              ? "bg-(--secondary) text-(--white)"
-              : "bg-(--white) text-(--secondary) border-2 border-(--secondary)"
-          }`}
-        >
-          Aktive Opgaver
-        </button>
-        <button
-          onClick={() => setActiveTab("solved")}
-          className={`flex-1 py-1 px-2 rounded-full font-semibold transition-colors ${
-            activeTab === "solved"
-              ? "bg-(--secondary) text-(--white)"
-              : "bg-(--white) text-(--secondary) border-2 border-(--secondary)"
-          }`}
-        >
-          Løste Opgaver
-        </button>
-      </div>
+      <div className="flex flex-col justify-center pt-10">
+        {/* Tab Buttons */}
+        <div className="flex gap-3 px-10 mt-6 justify-center">
+          <button
+            onClick={() => setActiveTab("active")}
+            className={`flex-1 py-2 px-6 rounded-full font-semibold transition-colors ${
+              activeTab === "active"
+                ? "bg-(--secondary) text-(--white)"
+                : "text-(--secondary) border-2 border-(--secondary"
+            }`}
+          >
+            Oprettet
+          </button>
+          <button
+            onClick={() => setActiveTab("group")}
+            className={`flex-1 py-2 px-6 rounded-full font-semibold transition-colors ${
+              activeTab === "group"
+                ? "bg-(--secondary) text-(--white)"
+                : "text-(--secondary) border-2 border-(--secondary"
+            }`}
+          >
+            Tilmeldt
+          </button>
+        </div>
 
-      {/* Active Posts Section */}
-      <div className="mt-6">
-        {myPosts.length > 0 &&
-          myPosts.map((post, index) => renderMyPost(post, index))}
-      </div>
+        <div className="mt-6">
+          {activeTab === "active" &&
+            myPosts.length > 0 &&
+            myPosts.map((post, index) => renderMyPost(post, index))}
 
-      {/* Member Since */}
-      <div className="mt-6">
-        {joinedPosts.length > 0 &&
-          joinedPosts.map((post, index) => renderOthersPost(post, index))}
+          {activeTab === "group" &&
+            joinedPosts.length > 0 &&
+            joinedPosts.map((post, index) => renderOthersPost(post, index))}
+        </div>
       </div>
     </motion.div>
   );
