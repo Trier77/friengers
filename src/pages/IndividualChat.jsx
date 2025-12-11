@@ -11,7 +11,6 @@ import {
   getDoc,
   serverTimestamp,
   setDoc,
-  updateDoc,
 } from "firebase/firestore";
 import { db, auth } from "../firebase";
 
@@ -54,10 +53,16 @@ function IndividualChat() {
       const chatDocRef = doc(db, "chats", chatDocId);
 
       try {
-        // Opdater chat dokumentet så vi ved hvem der sidst læste
-        await updateDoc(chatDocRef, {
-          [`lastReadBy_${currentUserId}`]: serverTimestamp(),
-        });
+        // ✅ VIGTIGT: Brug setDoc med merge i stedet for updateDoc
+        // Dette opretter dokumentet hvis det ikke findes, og opdaterer hvis det gør
+        await setDoc(
+          chatDocRef,
+          {
+            participants: [currentUserId, chatId],
+            [`lastReadBy_${currentUserId}`]: serverTimestamp(),
+          },
+          { merge: true } // merge: true = opret hvis ikke findes, opdater hvis den gør
+        );
         console.log("✅ Chat marked as read");
       } catch (error) {
         console.error("Error marking chat as read:", error);
@@ -105,7 +110,7 @@ function IndividualChat() {
       const chatDocId = [currentUserId, chatId].sort().join("_");
       console.log("📤 Sending message to chat:", chatDocId);
 
-      // Opret/opdater chat-dokumentet
+      // ✅ Opret/opdater chat-dokumentet FØRST
       const chatDocRef = doc(db, "chats", chatDocId);
       await setDoc(
         chatDocRef,
@@ -117,7 +122,7 @@ function IndividualChat() {
           lastMessageSenderId: currentUserId,
           [`lastReadBy_${currentUserId}`]: serverTimestamp(), // Markér som læst for afsenderen
         },
-        { merge: true }
+        { merge: true } // ✅ VIGTIGT: merge: true sikrer at dokumentet oprettes hvis det ikke findes
       );
 
       console.log("✅ Chat document created/updated");
