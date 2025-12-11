@@ -29,7 +29,7 @@ export default function GroupChatPrompt({ postId, postTitle, onClose }) {
 
       await setDoc(groupChatRef, {
         postId: postId,
-        chatName: `Gruppechat: ${postTitle}`,
+        chatName: postTitle, // ← Bare titlen, ingen præfix
         participants: [currentUserId],
         createdAt: serverTimestamp(),
         createdBy: currentUserId,
