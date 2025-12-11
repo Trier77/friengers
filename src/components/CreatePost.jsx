@@ -6,6 +6,9 @@ import CalendarIcon from "../../public/icons/CalenderIcon";
 import GroupsIcon from "../../public/icons/GroupsIcon";
 import MapPinIcon from "../../public/icons/MapPinIcon";
 import Publish from "./Publish";
+import ImagePicker from "./ImagePicker";
+import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
+import { storage } from "../firebase";
 
 export default function CreatePost({ open, onClose, allTags }) {
   const [title, setTitle] = useState("");
@@ -14,10 +17,12 @@ export default function CreatePost({ open, onClose, allTags }) {
   const [participants, setParticipants] = useState(1);
   const [time, setTime] = useState("");
   const [selectedTags, setSelectedTags] = useState([]);
+  const [imageFile, setImageFile] = useState(null);
+  const [isPublishing, setIsPublishing] = useState(false);
 
   const containerRef = useRef(null);
+  
   const handleFocus = (e) => {
-    // Scroll the focused input into view
     e.target.scrollIntoView({ behavior: "smooth", block: "center" });
   };
 
@@ -35,7 +40,22 @@ export default function CreatePost({ open, onClose, allTags }) {
       return;
     }
 
+    setIsPublishing(true);
+
     try {
+      let imageUrl = null;
+
+      // Upload billede hvis der er et
+      if (imageFile) {
+        const imageRef = ref(
+          storage,
+          `posts/${user.uid}/${Date.now()}-${imageFile.name}`
+        );
+
+        const snap = await uploadBytes(imageRef, imageFile);
+        imageUrl = await getDownloadURL(snap.ref);
+      }
+
       await addDoc(collection(db, "posts"), {
         title,
         description,
@@ -43,20 +63,26 @@ export default function CreatePost({ open, onClose, allTags }) {
         participants,
         tags: selectedTags,
         time: Timestamp.fromDate(new Date(time)),
-        uid: user.uid, // ✅ logged-in brugerens uid
+        uid: user.uid,
+        imageUrl: imageUrl,
         createdAt: Timestamp.now(),
       });
 
-      onClose();
-
+      // Reset form
       setTitle("");
       setDescription("");
       setLocation("");
       setParticipants(1);
       setTime("");
       setSelectedTags([]);
+      setImageFile(null);
+
+      onClose();
     } catch (error) {
       console.error("Error creating post:", error);
+      alert("Der opstod en fejl ved oprettelsen af opslaget");
+    } finally {
+      setIsPublishing(false);
     }
   };
 
@@ -65,12 +91,10 @@ export default function CreatePost({ open, onClose, allTags }) {
       <div
         ref={containerRef}
         className={`
-    fixed inset-0 bg-(--white)/80 z-40
-    transition-opacity duration-300
-    ${
-      open ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"
-    }
-  `}
+          fixed inset-0 bg-(--white)/80 z-40
+          transition-opacity duration-300
+          ${open ? "opacity-100 pointer-events-auto" : "opacity-0 pointer-events-none"}
+        `}
         onClick={onClose}
       />
 
@@ -80,6 +104,7 @@ export default function CreatePost({ open, onClose, allTags }) {
           bg-(--secondary) px-4 pt-8 z-50 pb-20
           transition-transform duration-300
           rounded-t-2xl
+          max-h-[85vh] overflow-y-auto
           ${open ? "translate-y-0" : "translate-y-full"}
         `}
         onClick={(e) => e.stopPropagation()}
@@ -119,7 +144,7 @@ export default function CreatePost({ open, onClose, allTags }) {
 
         <div className="flex flex-column justify-between text-(--white) text-sm pb-5 gap-10">
           <div className="relative flex items-center gap-2">
-            <MapPinIcon color={time ? "--white" : "--white"} size={20} />
+            <MapPinIcon color="--white" size={20} />
             <input
               className="w-full"
               onFocus={handleFocus}
@@ -130,7 +155,7 @@ export default function CreatePost({ open, onClose, allTags }) {
           </div>
 
           <div className="relative flex items-center gap-2">
-            <CalendarIcon color={time ? "--white" : "--white"} size={20} />
+            <CalendarIcon color="--white" size={20} />
             <input
               className="w-full no-spinner"
               onFocus={handleFocus}
@@ -139,8 +164,9 @@ export default function CreatePost({ open, onClose, allTags }) {
               onChange={(e) => setTime(e.target.value)}
             />
           </div>
+          
           <div className="relative flex items-center w-20 text-[--white] gap-2">
-            <GroupsIcon color={time ? "--white" : "--white"} size={20} />
+            <GroupsIcon color="--white" size={20} />
             <input
               className="w-full"
               onFocus={handleFocus}
@@ -152,7 +178,15 @@ export default function CreatePost({ open, onClose, allTags }) {
           </div>
         </div>
 
-        <Publish handlePublish={handlePublish} />
+        <ImagePicker 
+          onImageSelect={(file) => setImageFile(file)} 
+          imageFile={imageFile}
+        />
+
+        <Publish 
+          handlePublish={handlePublish} 
+          isPublishing={isPublishing}
+        />
       </div>
     </>
   );
