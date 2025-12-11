@@ -182,7 +182,7 @@ export default function Feed() {
         >
           <div className="flex flex-col justify-between gap-2">
             <p
-              className={`w-70 text-(--white) text-sm cursor-pointer overflow-hidden ${
+              className={`w-70 text-(--white) text-sm cursor-pointer overflow-hidden whitespace-pre-wrap ${
                 expandedPostId === post.id ? "" : "line-clamp-3"
               }`}
             >
@@ -236,7 +236,7 @@ export default function Feed() {
           animate={{
             scale:
               expandedPostId === null
-                ? 1
+                ? 0.8
                 : expandedPostId === post.id
                 ? 1
                 : 0.5,
