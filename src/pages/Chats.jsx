@@ -163,7 +163,10 @@ function Chats() {
             time: timeDisplay || "",
             avatar: otherUserData.profileImage,
             unread: unreadCount,
-            online: isUserOnline(otherUserData.lastActive),
+            online: isUserOnline(
+              otherUserData.isOnline,
+              otherUserData.lastActive
+            ),
             timestamp: lastMessageTime,
           });
         }
