@@ -11,6 +11,7 @@ import Toggle from "../components/Toggle";
 import { useState, useEffect } from "react";
 import { useContext } from "react";
 import { SettingsContext } from "../context/SettingsContext";
+import { logout } from "../auth";
 
 
 export default function Settings() {
@@ -19,9 +20,14 @@ export default function Settings() {
   const { darkMode, setDarkMode, notifications, setNotifications } =
     useContext(SettingsContext);
 
-  const handleLogout = () => {
-    localStorage.removeItem("user");
-    navigate("/login");
+   const handleLogout = async () => {
+    try {
+      await logout(); // Firebase logout  
+      localStorage.removeItem("user"); // Hvis du selv gemmer noget
+      navigate("/login");
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
   };
 
   return (
