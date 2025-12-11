@@ -5,16 +5,20 @@ import { NavLink } from "react-router";
 import Settings from "./Settings";
 import { motion } from "framer-motion";
 import OwnPost from "../components/Post";
+import Tilmeld from "../components/Tilmeld";
+
 import { updateDoc } from "firebase/firestore";
 import GroupsIcon from "../../public/icons/GroupsIcon";
 import CalenderIcon from "../../public/icons/CalenderIcon";
 import MapPinIcon from "../../public/icons/MapPinIcon";
+import { useNavigate } from "react-router";
 
 export default function Profil() {
   const [userData, setUserData] = useState(null);
   const [activeTab, setActiveTab] = useState("active");
   const [expandedPostId, setExpandedPostId] = useState(null);
   const [selectedTags, setSelectedTags] = useState([]);
+  const navigate = useNavigate();
 
   const [bio, setBio] = useState("");
   const [posts, setPosts] = useState([]);
@@ -88,6 +92,13 @@ export default function Profil() {
   if (!userData) return <p>Henter profil...</p>;
 
   const myPosts = posts.filter((post) => post.uid === userId);
+
+  const joinedPosts = posts.filter(
+    (post) =>
+      Array.isArray(post.participants) &&
+      post.participants.includes(userId) &&
+      post.uid !== userId
+  );
 
   function timeAgo(date) {
     const seconds = Math.floor((Date.now() - date.getTime()) / 1000);
@@ -209,6 +220,113 @@ export default function Profil() {
     </motion.div>
   );
 
+  const renderOthersPost = (post, index) => (
+    <motion.div
+      key={post.id}
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.5 }}
+      className="mb-4"
+    >
+      <motion.div
+        initial={{ opacity: 0 }}
+        animate={{
+          opacity:
+            expandedPostId === null ? 1 : expandedPostId === post.id ? 1 : 0.5, // lavere opacity for ikke-aktuelle
+          scale:
+            expandedPostId === null ? 1 : expandedPostId === post.id ? 1 : 0.95, // lidt mindre
+        }}
+        transition={{ duration: 0.3 }}
+        onClick={() => toggleExpand(post.id)}
+        className={`mb-4 p-4 bg-(--primary) rounded-2xl gap-2 flex flex-col relative overflow-hidden
+          
+          `}
+      >
+        <div className="flex items-center justify-between">
+          <h2 className="justify-start text-(--secondary) text-xl overskrift">
+            {post.title}
+          </h2>
+          <div className="bg-(--white) rounded-full px-2 flex gap-4 font-bold text-sm text-(--secondary)">
+            <div className="flex items-center gap-2">
+              <MapPinIcon color="--secondary" size={10} />{" "}
+              <p>{post.location}</p>
+            </div>
+            <div className="flex items-center gap-2">
+              <CalenderIcon color="--secondary" size={10} />
+              <p>
+                {post.time?.toDate().toLocaleDateString(undefined, {
+                  day: "2-digit",
+                  month: "2-digit",
+                })}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        <div>
+          <ul className="flex gap-1 text-(--white) text-xs">
+            {post.tags.map((tag, index) => (
+              <li
+                key={index}
+                className={`border border-(--secondary) py-1 rounded-2xl px-3 cursor-pointer ${
+                  selectedTags.includes(tag)
+                    ? "bg-(--white) text-(--secondary) font-bold"
+                    : ""
+                }`}
+              >
+                {tag}
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <div
+          className={`flex justify-between relative
+      
+        `}
+        >
+          <div className="flex flex-col justify-between gap-2">
+            <p
+              className={`w-70 text-(--white) text-sm cursor-pointer overflow-hidden ${
+                expandedPostId === post.id ? "" : "line-clamp-3"
+              }`}
+            >
+              {post.description}
+            </p>
+
+            <div className="w-60 flex justify-between items-center">
+              <div className="flex items-center gap-2">
+                <img
+                  src={post.author?.profileImage}
+                  alt="Afsender"
+                  className="w-8 h-8 rounded-full object-cover cursor-pointer"
+                  onClick={() => navigate(`/AndresProfil/${post.uid}`)}
+                />
+
+                <p className="text-(--secondary) text-sm">
+                  {post.author?.fuldenavn}
+                </p>
+              </div>
+              <div className="flex gap-2">
+                <GroupsIcon color="--secondary" size={20} />
+                <p className="text-(--secondary) text-sm">
+                  {post.participants?.length || 0}
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <Tilmeld
+          postId={post.id}
+          participants={post.participants}
+          requests={post.requests || []} // send requests med
+          onUpdate={fetchPosts}
+          className="absolute bottom-0 right-0 z-10"
+        />
+      </motion.div>
+    </motion.div>
+  );
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -312,8 +430,9 @@ export default function Profil() {
       </div>
 
       {/* Member Since */}
-      <div className="text-center mt-8 mb-4">
-        <p className="text-gray-400 text-sm">Oprettet</p>
+      <div className="mt-6">
+        {joinedPosts.length > 0 &&
+          joinedPosts.map((post, index) => renderOthersPost(post, index))}
       </div>
     </motion.div>
   );
