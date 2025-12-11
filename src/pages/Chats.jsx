@@ -141,12 +141,43 @@ function Chats() {
               }
             }
 
+            // Hent deltager profilbilleder (max 3)
+            const participantAvatars = [];
+            const maxAvatars = 3;
+            const participantsToShow = chatData.participants.slice(
+              0,
+              maxAvatars
+            );
+
+            for (const participantId of participantsToShow) {
+              try {
+                const userDoc = await getDoc(doc(db, "users", participantId));
+                if (userDoc.exists()) {
+                  participantAvatars.push({
+                    uid: participantId,
+                    profileImage:
+                      userDoc.data().profileImage ||
+                      "https://via.placeholder.com/56",
+                    name:
+                      userDoc.data().kaldenavn ||
+                      userDoc.data().fuldenavn ||
+                      "Ukendt",
+                  });
+                }
+              } catch (error) {
+                console.error("Fejl ved hentning af deltager:", error);
+              }
+            }
+
             groupChatList.push({
               id: chatId,
-              name: chatData.chatName || "Gruppechat",
+              name: (chatData.chatName || "Gruppechat").replace(
+                "Gruppechat: ",
+                ""
+              ), // ← Fjern præfix
               message: lastMessage,
               time: timeDisplay || "",
-              avatar: null, // Gruppechats har ikke avatar
+              participantAvatars: participantAvatars,
               unread: unreadCount,
               timestamp: lastMessageTime,
               participantCount: chatData.participants?.length || 0,
@@ -474,17 +505,58 @@ function Chats() {
                 {/* UnreadBadge */}
                 {chat.unread > 0 && <UnreadBadge count={chat.unread} />}
 
-                {/* Avatar eller Gruppe Ikon */}
+                {/* Avatar eller Gruppe Avatars */}
                 <div className="relative flex-shrink-0">
                   {chat.isGroupChat ? (
-                    <div className="w-14 h-14 rounded-full bg-blue-500 flex items-center justify-center">
-                      <svg
-                        className="w-8 h-8 text-white"
-                        fill="currentColor"
-                        viewBox="0 0 20 20"
-                      >
-                        <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
-                      </svg>
+                    // Overlappende profilbilleder for gruppechat
+                    <div
+                      className="relative flex items-center"
+                      style={{ width: "70px", height: "56px" }}
+                    >
+                      {chat.participantAvatars &&
+                      chat.participantAvatars.length > 0 ? (
+                        <>
+                          {chat.participantAvatars
+                            .slice(0, 3)
+                            .map((participant, idx) => (
+                              <img
+                                key={participant.uid}
+                                src={participant.profileImage}
+                                alt={participant.name}
+                                className="absolute w-14 h-14 rounded-full object-cover"
+                                style={{
+                                  left: `${idx * 16}px`,
+                                  zIndex: 3 - idx,
+                                }}
+                              />
+                            ))}
+                          {/* Hvis flere end 3 deltagere, vis +X */}
+                          {chat.participantCount > 3 && (
+                            <div
+                              className="absolute w-14 h-14 rounded-full bg-blue-500 border-2 border-white flex items-center justify-center"
+                              style={{
+                                left: "48px",
+                                zIndex: 0,
+                              }}
+                            >
+                              <span className="text-white text-xs font-bold">
+                                +{chat.participantCount - 3}
+                              </span>
+                            </div>
+                          )}
+                        </>
+                      ) : (
+                        // Fallback hvis ingen avatars kunne hentes
+                        <div className="w-14 h-14 rounded-full bg-blue-500 flex items-center justify-center">
+                          <svg
+                            className="w-8 h-8 text-white"
+                            fill="currentColor"
+                            viewBox="0 0 20 20"
+                          >
+                            <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
+                          </svg>
+                        </div>
+                      )}
                     </div>
                   ) : (
                     <>
@@ -508,14 +580,9 @@ function Chats() {
 
                 {/* Chat Info */}
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <h3 className="font-semibold text-lg">{chat.name}</h3>
-                    {chat.isGroupChat && (
-                      <span className="text-xs bg-blue-200 text-blue-700 px-2 py-0.5 rounded-full">
-                        {chat.participantCount} deltagere
-                      </span>
-                    )}
-                  </div>
+                  <h3 className="font-semibold text-lg truncate">
+                    {chat.name}
+                  </h3>
                   <p
                     className={`text-sm truncate ${
                       chat.unread > 0 ? "text-white/90" : "text-gray-500"

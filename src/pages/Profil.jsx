@@ -137,38 +137,95 @@ export default function Profil() {
 
   const deletePost = async (postId) => {
     try {
+      console.log("🗑️ Sletter post:", postId);
+
+      // 1. Slet selve opslaget
       await deleteDoc(doc(db, "posts", postId));
-      // Opdater den lokale state, så UI også opdateres
+      console.log("✅ Post slettet");
+
+      // 2. Tjek om der er en tilhørende gruppechat
+      const groupChatId = `group_${postId}`;
+      const groupChatRef = doc(db, "chats", groupChatId);
+
+      const groupChatSnap = await getDoc(groupChatRef);
+
+      if (groupChatSnap.exists()) {
+        console.log("📬 Fandt gruppechat, sletter...");
+
+        // 2a. Slet alle beskeder i gruppechatten først
+        const messagesRef = collection(db, "chats", groupChatId, "messages");
+        const messagesSnap = await getDocs(messagesRef);
+
+        console.log(`🗑️ Sletter ${messagesSnap.docs.length} beskeder...`);
+
+        for (const messageDoc of messagesSnap.docs) {
+          await deleteDoc(messageDoc.ref);
+        }
+
+        // 2b. Slet selve gruppechat dokumentet
+        await deleteDoc(groupChatRef);
+        console.log("✅ Gruppechat og alle beskeder slettet");
+      } else {
+        console.log("ℹ️ Ingen gruppechat fundet");
+      }
+
+      // 3. Opdater den lokale state
       setPosts((prevPosts) => prevPosts.filter((post) => post.id !== postId));
-      console.log("Post slettet!");
+
+      console.log("🎉 Alt slettet succesfuldt!");
     } catch (error) {
-      console.error("Fejl ved sletning af post:", error);
+      console.error("❌ Fejl ved sletning:", error);
+      alert("Der opstod en fejl ved sletning. Prøv igen.");
     }
   };
 
-  const markAsDone = async (postId, postTitle) => {
+  const markAsDone = async (postId) => {
     try {
+      console.log("✅ Markerer post som færdig:", postId);
+
+      // 1. Markér opslaget som inaktivt
       const postRef = doc(db, "posts", postId);
       await updateDoc(postRef, { active: false });
 
-      // Opret en notification
-      await addDoc(collection(db, "notifications"), {
-        userId, // send til den, der ejer posten
-        type: "taskDone",
-        postId,
-        postTitle,
-        createdAt: new Date(),
-      });
-
+      // 2. Opdater lokal state
       setPosts((prevPosts) =>
         prevPosts.map((post) =>
           post.id === postId ? { ...post, active: false } : post
         )
       );
 
-      console.log("Post markeret som færdig og notification sendt!");
+      console.log("✅ Post markeret som færdig");
+
+      // 3. Tjek om der er en tilhørende gruppechat
+      const groupChatId = `group_${postId}`;
+      const groupChatRef = doc(db, "chats", groupChatId);
+
+      const groupChatSnap = await getDoc(groupChatRef);
+
+      if (groupChatSnap.exists()) {
+        console.log("📬 Fandt gruppechat, sletter...");
+
+        // 3a. Slet alle beskeder i gruppechatten først
+        const messagesRef = collection(db, "chats", groupChatId, "messages");
+        const messagesSnap = await getDocs(messagesRef);
+
+        console.log(`🗑️ Sletter ${messagesSnap.docs.length} beskeder...`);
+
+        for (const messageDoc of messagesSnap.docs) {
+          await deleteDoc(messageDoc.ref);
+        }
+
+        // 3b. Slet selve gruppechat dokumentet
+        await deleteDoc(groupChatRef);
+        console.log("✅ Gruppechat og alle beskeder slettet");
+      } else {
+        console.log("ℹ️ Ingen gruppechat fundet");
+      }
+
+      console.log("🎉 Opgave markeret som færdig og gruppechat slettet!");
     } catch (error) {
-      console.error("Fejl ved opdatering af post:", error);
+      console.error("❌ Fejl ved opdatering:", error);
+      alert("Der opstod en fejl. Prøv igen.");
     }
   };
 
