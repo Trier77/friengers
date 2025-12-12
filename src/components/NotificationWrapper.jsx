@@ -1,6 +1,5 @@
 import useNotifications from "./useNotifications";
-import { useRef, useEffect } from "react";
-import { useState } from "react";
+import { useRef, useEffect, useState } from "react";
 import NotificationIcon from "../../public/icons/NotificationIcon";
 import NotificationsPopup from "./NotificationsPopup";
 
@@ -8,9 +7,9 @@ export default function NotificationWrapper() {
   const [isOpen, setIsOpen] = useState(false);
   const notifications = useNotifications();
 
-  const toggleNotifications = () => setIsOpen(!isOpen);
-
   const wrapperRef = useRef();
+
+  const toggleNotifications = () => setIsOpen((prev) => !prev);
 
   useEffect(() => {
     const handleClickOutside = (event) => {
@@ -19,13 +18,11 @@ export default function NotificationWrapper() {
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
-    return () => {
-      document.removeEventListener("mousedown", handleClickOutside);
-    };
+    return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
   return (
-    <div className="absolute top-10 right-10">
+    <div ref={wrapperRef} className="absolute top-10 right-10">
       <button onClick={toggleNotifications} className="relative">
         <NotificationIcon color="--primary" size={20} />
 
@@ -36,7 +33,12 @@ export default function NotificationWrapper() {
         )}
       </button>
 
-      {isOpen && <NotificationsPopup />}
+      {isOpen && (
+        <NotificationsPopup 
+          notifications={notifications} 
+          closePopup={() => setIsOpen(false)} 
+        />
+      )}
     </div>
   );
 }

@@ -6,10 +6,25 @@ const sendJoinRequest = async (postId) => {
   const userId = auth.currentUser.uid;
   const postRef = doc(db, "posts", postId);
 
+  const userSnap = await getDoc(doc(db, "users", userId));
+  const userData = userSnap.exists() ? userSnap.data() : {};
+
   await updateDoc(postRef, {
+    // Tilføj til active requests
     requests: arrayUnion(userId),
+
+    // Tilføj til notifications-historik
+    notifications: arrayUnion({
+      requesterUid: userId,
+      requesterName: userData.kaldenavn || userData.fuldenavn || userId,
+      requesterImage: userData.profileImage || null,
+      postTitle: (await getDoc(postRef)).data().title || "",
+      status: "pending",
+      createdAt: Date.now(),
+    }),
   });
 };
+
 
 export default function Tilmeld({
   postId,

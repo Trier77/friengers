@@ -8,17 +8,37 @@ import {
 import { db } from "../firebase";
 import { useState, useEffect } from "react";
 
+// ⭐ Opdateret handleRequest med historik
 const handleRequest = async (postId, userId, approve) => {
   const postRef = doc(db, "posts", postId);
+  const postSnap = await getDoc(postRef);
+  const postData = postSnap.data();
 
+  const existingNotifications = postData.notifications || [];
+
+  // 1. Find den tilhørende notifikation
+  const updatedNotifications = existingNotifications.map((n) => {
+    if (n.requesterUid === userId) {
+      return {
+        ...n,
+        status: approve ? "accepted" : "rejected",
+        handledAt: Date.now(),
+      };
+    }
+    return n;
+  });
+
+  // 2. Opdater Firestore
   if (approve) {
     await updateDoc(postRef, {
       participants: arrayUnion(userId),
       requests: arrayRemove(userId),
+      notifications: updatedNotifications,
     });
   } else {
     await updateDoc(postRef, {
       requests: arrayRemove(userId),
+      notifications: updatedNotifications,
     });
   }
 };
@@ -44,6 +64,7 @@ export default function RequestsList({ post }) {
   return (
     <div className="p-2 border rounded-lg mt-2 bg-(--primary)">
       <h3 className="font-bold text-(--secondary)">Forespørgsler</h3>
+
       {requestUsers.map((user) => (
         <div
           key={user.uid}
