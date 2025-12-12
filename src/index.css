@@ -6,11 +6,26 @@
   --white: #f0f0f0;
   --font: "Quicksand", sans-serif;
   --overskrift: "Winky Sans", sans-serif;
+  
+  --bg-color: #f0f0f0;
+  --text-color: #002546;
+}
+
+.dark {
+  --bg-color: #002546;
+  --text-color: #f0f0f0;
 }
 
 body {
   font-family: var(--font);
   background-color: var(--white);
+  background-color: var(--bg-color);
+  color: var(--text-color);
+}
+
+.settings-page {
+  background: var(--bg-color);
+  color: var(--text-color);
 }
 
 /* Unread badge animations */
