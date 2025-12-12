@@ -6,7 +6,6 @@ import {
   doc,
   getDoc,
   deleteDoc,
-  addDoc,
 } from "firebase/firestore";
 import { NavLink } from "react-router";
 import Settings from "./Settings";
@@ -609,19 +608,19 @@ export default function Profil() {
         </div>
 
         {previewImage && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50"
-          onClick={() => setPreviewImage(null)}
-        >
-          <div className="max-w-3xl max-h-[90vh]">
-            <img
-              src={previewImage}
-              alt="Preview"
-              className="w-full h-full object-contain rounded-xl"
-            />
+          <div
+            className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50"
+            onClick={() => setPreviewImage(null)}
+          >
+            <div className="max-w-3xl max-h-[90vh]">
+              <img
+                src={previewImage}
+                alt="Preview"
+                className="w-full h-full object-contain rounded-xl"
+              />
+            </div>
           </div>
-        </div>
-      )}
+        )}
       </div>
     </motion.div>
   );

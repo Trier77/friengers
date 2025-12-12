@@ -1,4 +1,10 @@
 {
-  "welcome": "Welcome",
-  "description": "This is your app."
+  "settings": "Settings",
+  "account": "Account",
+  "language": "Language",
+  "notifications": "Notifications",
+  "darkmode": "Dark mode",
+  "about": "About us",
+  "help": "Help & support",
+  "logout": "Log out"
 }

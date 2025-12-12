@@ -102,7 +102,7 @@ function IndividualChat() {
         console.log("📜 Initial scroll to bottom");
       }, 100);
     }
-  }, [loading]); // Kører når loading er færdig
+  }, [loading]);
 
   // ✅ Auto scroll når nye beskeder kommer (smooth)
   useEffect(() => {
@@ -172,7 +172,7 @@ function IndividualChat() {
       className="fixed inset-0 flex flex-col bg-white"
     >
       {/* Header */}
-      <div className="bg-white p-4 flex items-center gap-4 shadow-sm z-10 flex-shrink-0">
+      <div className="bg-white p-4 flex items-center gap-4 shadow-sm z-10 shrink-0">
         <button onClick={() => navigate(-1)} className="p-2">
           <svg
             className="w-6 h-6 text-blue-500"
@@ -191,9 +191,13 @@ function IndividualChat() {
         <img
           src={otherUser.profileImage}
           alt={otherUser.fuldenavn}
-          className="w-10 h-10 rounded-full object-cover"
+          className="w-10 h-10 rounded-full object-cover cursor-pointer hover:opacity-80 transition-opacity"
+          onClick={() => navigate(`/AndresProfil/${chatId}`)}
         />
-        <h2 className="font-semibold text-lg text-gray-800">
+        <h2
+          className="font-semibold text-lg text-gray-800 cursor-pointer hover:underline"
+          onClick={() => navigate(`/AndresProfil/${chatId}`)}
+        >
           {otherUser.kaldenavn || otherUser.fuldenavn}
         </h2>
       </div>
@@ -216,13 +220,13 @@ function IndividualChat() {
             }`}
           >
             <div
-              className={`max-w-[70%] p-3 rounded-2xl break-words ${
+              className={`max-w-[70%] p-3 rounded-2xl wrap-break-words ${
                 message.senderId === currentUserId
                   ? "bg-blue-500 text-white rounded-br-sm"
                   : "bg-gray-200 text-gray-800 rounded-bl-sm"
               }`}
             >
-              <p className="break-words whitespace-pre-wrap">{message.text}</p>
+              <p className="wrap-break-words whitespace-pre-wrap">{message.text}</p>
               {message.timestamp && (
                 <span
                   className={`text-xs mt-1 block ${
@@ -240,13 +244,12 @@ function IndividualChat() {
             </div>
           </div>
         ))}
-        {/* ✅ Dette er ankerpunktet som vi scroller til */}
         <div ref={messagesEndRef} />
       </div>
 
       {/* Input Field */}
       <div
-        className={`bg-white p-4 border-t border-gray-200 flex-shrink-0 ${
+        className={`bg-white p-4 border-t border-gray-200 shrink-0 ${
           isInputFocused ? "mb-0" : "mb-20"
         }`}
       >

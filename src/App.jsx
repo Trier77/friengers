@@ -16,6 +16,7 @@ import { useOnlineStatus } from "./hooks/Useonlinestatus";
 import PublicRoute from "./components/PublicRoutes";
 import AppRoute from "./components/AppRoutes";
 import GroupChat from "./pages/GroupChat";
+import ScrollToTopButton from "./components/ScrollToTop";
 
 function App() {
   useOnlineStatus();
@@ -138,6 +139,7 @@ function App() {
           />
         </Routes>
       </div>
+      <ScrollToTopButton />
     </>
   );
 }

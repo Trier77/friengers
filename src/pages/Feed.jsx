@@ -10,6 +10,8 @@ import Create from "../components/Create";
 import GroupsIcon from "../../public/icons/GroupsIcon";
 import NotificationWrapper from "../components/NotificationWrapper";
 import useTags from "../components/Tags";
+import PostCard from "../components/PostCard";
+import FunnelIcon from "../../public/icons/FunnelIcon";
 
 export default function Feed() {
   const { tags: allTags } = useTags();
@@ -114,148 +116,6 @@ export default function Feed() {
     </motion.div>
   );
 
-  // Og det her så hvordan de andres skal se ud
-  const renderPost = (post) => (
-    <motion.div
-      key={post.id}
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.2 }}
-    >
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{
-          opacity:
-            expandedPostId === null ? 1 : expandedPostId === post.id ? 1 : 0.5,
-          scale:
-            expandedPostId === null ? 1 : expandedPostId === post.id ? 1 : 0.95,
-        }}
-        transition={{ duration: 0.3 }}
-        onClick={() => toggleExpand(post.id)}
-        className={`mb-4 p-4 bg-(--primary) rounded-2xl gap-2 flex flex-col relative overflow-hidden
-          
-          `}
-      >
-        <div className="flex items-center justify-between">
-          <h2 className="justify-start text-(--secondary) text-xl overskrift">
-            {post.title}
-          </h2>
-          <div className="bg-(--white) rounded-full px-2 flex gap-4 font-bold text-sm text-(--secondary)">
-            <div className="flex items-center gap-2">
-              <MapPinIcon color="--secondary" size={10} />{" "}
-              <p>{post.location}</p>
-            </div>
-            <div className="flex items-center gap-2">
-              <CalenderIcon color="--secondary" size={10} />
-              <p>
-                {post.time?.toDate().toLocaleDateString(undefined, {
-                  day: "2-digit",
-                  month: "2-digit",
-                })}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div>
-          <ul className="flex gap-1 text-(--white) text-xs">
-            {post.tags.map((tag, index) => (
-              <li
-                key={index}
-                className={`border border-(--secondary) py-1 rounded-2xl px-3 cursor-pointer ${
-                  selectedTags.includes(tag)
-                    ? "bg-(--white) text-(--secondary) font-bold"
-                    : ""
-                }`}
-                onClick={() => handleDropdownChange(tag)}
-              >
-                {tag}
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        <div
-          className={`flex justify-between relative
-      
-        `}
-        >
-          <div className="flex flex-col justify-between gap-2">
-            <p
-              className={`w-70 text-(--white) text-sm cursor-pointer overflow-hidden whitespace-pre-wrap ${
-                expandedPostId === post.id ? "" : "line-clamp-3"
-              }`}
-            >
-              {post.description}
-            </p>
-
-            {expandedPostId === post.id && post.imageUrls && (
-              <div className="flex gap-2 overflow-x-auto mt-2">
-                {post.imageUrls.map((url, i) => (
-                  <img
-                    key={i}
-                    src={url}
-                    alt="Post billede"
-                    className="h-40 w-auto rounded-xl cursor-pointer"
-                    onClick={() => setPreviewImage(url)}
-                  />
-                ))}
-              </div>
-            )}
-
-            <div className="w-60 flex justify-between items-center">
-              <div className="flex items-center gap-2">
-                <img
-                  src={post.author?.profileImage}
-                  alt="Afsender"
-                  className="w-8 h-8 rounded-full object-cover cursor-pointer"
-                  onClick={() => navigate(`/AndresProfil/${post.uid}`)}
-                />
-
-                <p className="text-(--secondary) text-sm">
-                  {post.author?.fuldenavn}
-                </p>
-              </div>
-              <div className="flex gap-2">
-                <GroupsIcon color="--secondary" size={20} />
-                <p className="text-(--secondary) text-sm">
-                  {post.participants?.length || 0}
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <motion.div
-          className="absolute bottom-0 right-0 z-10 rounded-tl-full overflow-hidden"
-          style={{
-            pointerEvents: expandedPostId === post.id ? "auto" : "none",
-            originX: 1, // højre
-            originY: 1, // bund
-          }}
-          animate={{
-            scale:
-              expandedPostId === null
-                ? 0.8
-                : expandedPostId === post.id
-                ? 1
-                : 0.5,
-          }}
-          transition={{ duration: 0.3 }}
-        >
-          <Tilmeld
-            postId={post.id}
-            participants={post.participants}
-            requests={post.requests || []}
-            onUpdate={fetchPosts}
-          />
-        </motion.div>
-
-        {post.uid === userId && <RequestsList post={post} />}
-      </motion.div>
-    </motion.div>
-  );
-
   // Og her er så den samlet return
   return (
     <div className="p-4">
@@ -271,21 +131,40 @@ export default function Feed() {
         transition={{ duration: 0.5 }}
         className="mb-4 flex flex-col justify-end"
       >
-        <div className="flex justify-end">
+        <div className="flex gap-4 items-center px-4">
+          <h3 className="text-(--secondary) font-bold text-lg">Oversigt</h3>{" "}
+          <div className="w-full border border-(--secondary)"></div>
           <button
             onClick={() => setShowFilter((prev) => !prev)}
-            className="px-4 pt-2 text-lg text-(--primary)"
+            className="text-(--primary)"
           >
-            Filter {showFilter ? "▲" : "▼"}
+            <FunnelIcon
+              color="--secondary"
+              size={20}
+              filled={showFilter || selectedTags.length > 0}
+            />
           </button>
         </div>
+        {selectedTags.length > 0 && !showFilter && (
+          <div className="flex flex-wrap gap-2 px-2 mt-2 justify-end">
+            {selectedTags.map((tag) => (
+              <button
+                key={tag}
+                onClick={() => handleDropdownChange(tag)}
+                className="px-3 py-1 rounded-2xl text-xs font-bold bg-(--secondary) text-(--white)"
+              >
+                {tag}
+              </button>
+            ))}
+          </div>
+        )}
 
         {showFilter && (
           <motion.div
             initial={{ opacity: 0, x: 0 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.1 }}
-            className="flex flex-wrap gap-2 justify-end"
+            className="flex flex-wrap gap-2 justify-end px-2 mt-2"
           >
             {allTags.map((tag) => (
               <button
@@ -307,8 +186,20 @@ export default function Feed() {
       {selectedTags.length > 0 ? (
         filteredPosts.length > 0 ? (
           <div>
-            <h2 className="text-lg font-bold mb-2">Filter</h2>
-            {filteredPosts.map((post, index) => renderPost(post, index))}
+            {filteredPosts.map((post) => (
+              <PostCard
+                key={post.id}
+                post={post}
+                userId={userId}
+                expandedPostId={expandedPostId}
+                toggleExpand={toggleExpand}
+                selectedTags={selectedTags}
+                handleDropdownChange={handleDropdownChange}
+                setPreviewImage={setPreviewImage}
+                navigate={navigate}
+                fetchPosts={fetchPosts}
+              />
+            ))}
           </div>
         ) : (
           <p className="text-(--white) mt-4">
@@ -316,22 +207,20 @@ export default function Feed() {
           </p>
         )
       ) : (
-        otherPosts.map((post, index) => renderPost(post, index))
-      )}
-
-      {previewImage && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50"
-          onClick={() => setPreviewImage(null)}
-        >
-          <div className="max-w-3xl max-h-[90vh]">
-            <img
-              src={previewImage}
-              alt="Preview"
-              className="w-full h-full object-contain rounded-xl"
-            />
-          </div>
-        </div>
+        otherPosts.map((post) => (
+          <PostCard
+            key={post.id}
+            post={post}
+            userId={userId}
+            expandedPostId={expandedPostId}
+            toggleExpand={toggleExpand}
+            selectedTags={selectedTags}
+            handleDropdownChange={handleDropdownChange}
+            setPreviewImage={setPreviewImage}
+            navigate={navigate}
+            fetchPosts={fetchPosts}
+          />
+        ))
       )}
     </div>
   );

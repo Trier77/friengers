@@ -524,7 +524,7 @@ function Chats() {
                   delay: 0.3 + index * 0.15,
                   ease: "easeInOut",
                 }}
-                className={`relative flex items-center border-1 border-[var(--secondary)] gap-4 mb-3 rounded-tl-4xl rounded-bl-4xl rounded-tr-2xl rounded-br-2xl cursor-pointer transition-all active:brightness-80 ${
+                className={`relative flex items-center border border-(--secondary) gap-4 mb-3 rounded-tl-4xl rounded-bl-4xl rounded-tr-2xl rounded-br-2xl cursor-pointer transition-all active:brightness-80 ${
                   chat.unread > 0
                     ? "bg-blue-400 text-white"
                     : "bg-white text-gray-800 hover:bg-gray-50"
@@ -534,7 +534,7 @@ function Chats() {
                 {chat.unread > 0 && <UnreadBadge count={chat.unread} />}
 
                 {/* Avatar eller Gruppe Avatars */}
-                <div className="relative flex-shrink-0">
+                <div className="relative shrink-0">
                   {chat.isGroupChat ? (
                     // Overlappende profilbilleder for gruppechat
                     <div
