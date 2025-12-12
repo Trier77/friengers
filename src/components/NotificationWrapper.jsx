@@ -11,6 +11,11 @@ export default function NotificationWrapper() {
 
   const toggleNotifications = () => setIsOpen((prev) => !prev);
 
+  // Tæl kun pending notifications for badge
+  const pendingCount = notifications.filter(
+    (n) => !n.status || n.status === "pending"
+  ).length;
+
   useEffect(() => {
     const handleClickOutside = (event) => {
       if (wrapperRef.current && !wrapperRef.current.contains(event.target)) {
@@ -26,17 +31,17 @@ export default function NotificationWrapper() {
       <button onClick={toggleNotifications} className="relative">
         <NotificationIcon color="--primary" size={20} />
 
-        {notifications.length > 0 && (
+        {pendingCount > 0 && (
           <span className="absolute -top-2 -right-2 bg-(--secondary) text-white rounded-full w-4 h-4 font-bold text-xs flex items-center justify-center">
-            {notifications.length}
+            {pendingCount}
           </span>
         )}
       </button>
 
       {isOpen && (
-        <NotificationsPopup 
-          notifications={notifications} 
-          closePopup={() => setIsOpen(false)} 
+        <NotificationsPopup
+          notifications={notifications}
+          closePopup={() => setIsOpen(false)}
         />
       )}
     </div>
