@@ -3,7 +3,6 @@ import CalenderIcon from "../../public/icons/CalenderIcon";
 import MapPinIcon from "../../public/icons/MapPinIcon";
 import GroupsIcon from "../../public/icons/GroupsIcon";
 import Tilmeld from "../components/Tilmeld";
-import RequestsList from "./RequestsList"; // eller korrekt sti til RequestsList
 
 export default function PostCard({
   post,
@@ -180,8 +179,6 @@ export default function PostCard({
             onUpdate={fetchPosts}
           />
         </motion.div>
-
-        {post.uid === userId && <RequestsList post={post} />}
       </motion.div>
     </motion.div>
   );
