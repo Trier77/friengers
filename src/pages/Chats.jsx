@@ -142,13 +142,27 @@ function Chats() {
             }
 
             // Hent deltager profilbilleder (max 3)
+            // Den sidste afsender skal vises først/øverst
             const participantAvatars = [];
             const maxAvatars = 3;
-            const participantsToShow = chatData.participants.slice(
-              0,
-              maxAvatars
-            );
 
+            // Start med den sidste afsender (hvis det ikke er den nuværende bruger)
+            const participantsToShow = [];
+            if (lastMessageSenderId && lastMessageSenderId !== currentUserId) {
+              participantsToShow.push(lastMessageSenderId);
+            }
+
+            // Tilføj resten af deltagerne
+            for (const participantId of chatData.participants) {
+              if (
+                participantId !== lastMessageSenderId &&
+                participantsToShow.length < maxAvatars
+              ) {
+                participantsToShow.push(participantId);
+              }
+            }
+
+            // Hent deres data
             for (const participantId of participantsToShow) {
               try {
                 const userDoc = await getDoc(doc(db, "users", participantId));
@@ -352,6 +366,16 @@ function Chats() {
 
   const currentChats = getFilteredChats();
 
+  // Beregn totalt antal ulæste beskeder for hver tab
+  const totalPrivateUnread = privateChats.reduce(
+    (sum, chat) => sum + (chat.unread || 0),
+    0
+  );
+  const totalGroupUnread = groupChats.reduce(
+    (sum, chat) => sum + (chat.unread || 0),
+    0
+  );
+
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
@@ -422,23 +446,27 @@ function Chats() {
         <div className="flex gap-3 mt-6">
           <button
             onClick={() => setActiveTab("private")}
-            className={`flex-1 py-2 px-6 rounded-full font-semibold transition-colors ${
+            className={`relative flex-1 py-2 px-6 rounded-full font-semibold transition-colors ${
               activeTab === "private"
                 ? "bg-blue-500 text-white"
                 : "bg-white text-blue-500 border-2 border-blue-500"
             }`}
           >
             Privat chat
+            {totalPrivateUnread > 0 && (
+              <UnreadBadge count={totalPrivateUnread} />
+            )}
           </button>
           <button
             onClick={() => setActiveTab("group")}
-            className={`flex-1 py-2 px-6 rounded-full font-semibold transition-colors ${
+            className={`relative flex-1 py-2 px-6 rounded-full font-semibold transition-colors ${
               activeTab === "group"
                 ? "bg-blue-500 text-white"
                 : "bg-white text-blue-500 border-2 border-blue-500"
             }`}
           >
             Gruppe chat
+            {totalGroupUnread > 0 && <UnreadBadge count={totalGroupUnread} />}
           </button>
         </div>
       </motion.div>
@@ -523,7 +551,7 @@ function Chats() {
                                 key={participant.uid}
                                 src={participant.profileImage}
                                 alt={participant.name}
-                                className="absolute w-14 h-14 rounded-full object-cover"
+                                className="absolute w-14 h-14 rounded-full object-cover border-2 border-white"
                                 style={{
                                   left: `${idx * 16}px`,
                                   zIndex: 3 - idx,

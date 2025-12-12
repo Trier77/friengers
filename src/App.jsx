@@ -21,57 +21,40 @@ function App() {
   useOnlineStatus();
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [loginTimestamp, setLoginTimestamp] = useState(null);
   const navigate = useNavigate();
   const location = useLocation();
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (currentUser) => {
-      const wasLoggedOut = user === null;
-      const isNowLoggedIn = currentUser !== null;
-
       setUser(currentUser);
       setLoading(false);
 
-      // Når bruger logger ind første gang → sæt timestamp og clear history
-      if (wasLoggedOut && isNowLoggedIn) {
-        setLoginTimestamp(Date.now());
-        // Push Feed til history stack så der er noget at "gå tilbage til"
-        window.history.pushState(null, "", "/");
-      }
-
-      // Når bruger logger ud → clear timestamp
-      if (!currentUser) {
-        setLoginTimestamp(null);
+      // Når bruger logger ind → erstat login-siden i historikken med Feed
+      if (currentUser && location.pathname === "/login") {
+        navigate("/", { replace: true });
       }
     });
 
     return unsubscribe;
-  }, [user]);
+  }, [location.pathname, navigate]);
 
-  // Bloker browser tilbage-knap når logget ind
+  // Forhindre navigation tilbage til /login når logget ind
   useEffect(() => {
-    if (!user || !loginTimestamp) return;
+    if (!user) return;
 
-    const blockBackNavigation = (e) => {
-      // Push state igen for at "fange" tilbage-knappen
-      window.history.pushState(null, "", window.location.pathname);
-
-      // Hvis bruger ikke er på Feed, send dem dertil
-      if (location.pathname !== "/") {
-        navigate("/", { replace: false });
+    const handlePopState = () => {
+      // Hvis brugeren prøver at gå tilbage til login → stop dem på Feed
+      if (window.location.pathname === "/login") {
+        navigate("/", { replace: true });
       }
     };
 
-    // Tilføj en initial state så vi kan fange tilbage-knappen
-    window.history.pushState(null, "", window.location.pathname);
-
-    window.addEventListener("popstate", blockBackNavigation);
+    window.addEventListener("popstate", handlePopState);
 
     return () => {
-      window.removeEventListener("popstate", blockBackNavigation);
+      window.removeEventListener("popstate", handlePopState);
     };
-  }, [user, loginTimestamp, location.pathname, navigate]);
+  }, [user, navigate]);
 
   if (loading) return null;
 
@@ -145,7 +128,14 @@ function App() {
               </AppRoute>
             }
           />
-          <Route path="/GroupChat/:chatId" element={<GroupChat />} />
+          <Route
+            path="/GroupChat/:chatId"
+            element={
+              <AppRoute user={user}>
+                <GroupChat />
+              </AppRoute>
+            }
+          />
         </Routes>
       </div>
     </>

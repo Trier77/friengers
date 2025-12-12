@@ -9,7 +9,7 @@ import "./i18n";
 ReactDOM.createRoot(document.getElementById("root")).render(
   <React.StrictMode>
     <BrowserRouter
-      basename={import.meta.env.DEV ? "/" : "/post-app-with-firebase/"}
+      basename={import.meta.env.DEV ? "/" : "/friengers/"}
     >
       <SettingsProvider>
         <App />
