@@ -11,6 +11,7 @@ import GroupsIcon from "../../public/icons/GroupsIcon";
 import NotificationWrapper from "../components/NotificationWrapper";
 import useTags from "../components/Tags";
 import PostCard from "../components/PostCard";
+import FunnelIcon from "../../public/icons/FunnelIcon";
 
 export default function Feed() {
   const { tags: allTags } = useTags();
@@ -130,21 +131,40 @@ export default function Feed() {
         transition={{ duration: 0.5 }}
         className="mb-4 flex flex-col justify-end"
       >
-        <div className="flex justify-end">
+        <div className="flex gap-4 items-center px-4">
+          <h3 className="text-(--secondary) font-bold text-lg">Oversigt</h3>{" "}
+          <div className="w-60 border border-(--secondary)"></div>
           <button
             onClick={() => setShowFilter((prev) => !prev)}
-            className="px-4 pt-2 text-lg text-(--primary)"
+            className="text-(--primary)"
           >
-            Filter {showFilter ? "▲" : "▼"}
+            <FunnelIcon
+              color="--secondary"
+              size={20}
+              filled={showFilter || selectedTags.length > 0}
+            />
           </button>
         </div>
+        {selectedTags.length > 0 && !showFilter && (
+          <div className="flex flex-wrap gap-2 px-2 mt-2 justify-end">
+            {selectedTags.map((tag) => (
+              <button
+                key={tag}
+                onClick={() => handleDropdownChange(tag)}
+                className="px-3 py-1 rounded-2xl text-xs font-bold bg-(--secondary) text-(--white)"
+              >
+                {tag}
+              </button>
+            ))}
+          </div>
+        )}
 
         {showFilter && (
           <motion.div
             initial={{ opacity: 0, x: 0 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.1 }}
-            className="flex flex-wrap gap-2 justify-end"
+            className="flex flex-wrap gap-2 justify-end px-2 mt-2"
           >
             {allTags.map((tag) => (
               <button
@@ -166,7 +186,6 @@ export default function Feed() {
       {selectedTags.length > 0 ? (
         filteredPosts.length > 0 ? (
           <div>
-            <h2 className="text-lg font-bold mb-2">Filter</h2>
             {filteredPosts.map((post) => (
               <PostCard
                 key={post.id}
