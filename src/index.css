@@ -31,3 +31,19 @@ body {
   font-weight: bold;
   letter-spacing: 0.05em;
 }
+
+@keyframes ovalspin {
+  0% {
+    transform: translate(-50%, -50%) rotate(0deg);
+  }
+  50% {
+    transform: translate(-50%, -51%) rotate(180deg);
+  }
+  100% {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+.oval-spin {
+  animation: ovalspin 6s linear infinite;
+}
