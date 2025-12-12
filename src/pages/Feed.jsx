@@ -133,7 +133,7 @@ export default function Feed() {
       >
         <div className="flex gap-4 items-center px-4">
           <h3 className="text-(--secondary) font-bold text-lg">Oversigt</h3>{" "}
-          <div className="w-60 border border-(--secondary)"></div>
+          <div className="w-full border border-(--secondary)"></div>
           <button
             onClick={() => setShowFilter((prev) => !prev)}
             className="text-(--primary)"

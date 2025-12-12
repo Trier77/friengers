@@ -40,6 +40,7 @@ export default function PostCard({
 
     return "lige nu";
   }
+
   return (
     <motion.div
       key={post.id}
@@ -56,10 +57,25 @@ export default function PostCard({
             expandedPostId === null ? 1 : expandedPostId === post.id ? 1 : 0.95,
         }}
         transition={{ duration: 0.3 }}
-        onClick={() => toggleExpand(post.id)}
+        onClick={() => {
+          toggleExpand(post.id);
+        }}
         className={`mb-4 p-4 bg-(--primary) rounded-2xl gap-2 flex flex-col relative overflow-hidden`}
       >
-        <div className="flex items-center justify-between">
+        <motion.div
+          className="absolute top-0 left-0 w-full h-full pointer-events-none"
+          style={{
+            background:
+              "linear-gradient(to left, rgba(59,130,246,0.2), rgba(59,130,246,0))",
+            transformOrigin: "right",
+            zIndex: 0, // lav z-index
+          }}
+          initial={{ scaleX: 0 }}
+          animate={{ scaleX: expandedPostId === post.id ? 1 : 0 }}
+          transition={{ duration: 0.5, ease: "easeInOut" }}
+        />
+
+        <div className="flex items-center justify-between z-10">
           <h2 className="justify-start text-(--secondary) text-xl overskrift">
             {post.title}
           </h2>
@@ -80,7 +96,7 @@ export default function PostCard({
           </div>
         </div>
 
-        <div>
+        <div className="z-10">
           <ul className="flex gap-1 text-(--white) text-xs">
             {post.tags.map((tag, index) => (
               <li
@@ -98,7 +114,7 @@ export default function PostCard({
           </ul>
         </div>
 
-        <div className="flex justify-between relative">
+        <div className="flex justify-between relative z-10">
           <div className="flex flex-col justify-between gap-2">
             <p
               className={`w-70 text-(--white) text-sm cursor-pointer overflow-hidden whitespace-pre-wrap ${
