@@ -9,13 +9,16 @@ import { useNavigate } from "react-router";
 import Create from "../components/Create";
 import GroupsIcon from "../../public/icons/GroupsIcon";
 import NotificationWrapper from "../components/NotificationWrapper";
+import useTags from "../components/Tags";
 
 export default function Feed() {
+  const { tags: allTags } = useTags();
   const [posts, setPosts] = useState([]);
   const navigate = useNavigate();
   const [expandedPostId, setExpandedPostId] = useState(null);
   const [selectedTags, setSelectedTags] = useState([]);
   const [showFilter, setShowFilter] = useState(false);
+  const [previewImage, setPreviewImage] = useState(null);
 
   const userId = auth.currentUser?.uid;
 
@@ -52,10 +55,6 @@ export default function Feed() {
     );
   };
 
-  const allTags = Array.from(new Set(posts.flatMap((post) => post.tags)));
-
-  const myPosts = posts.filter((post) => post.uid === userId);
-
   const filteredPosts =
     selectedTags.length > 0
       ? posts.filter(
@@ -66,7 +65,11 @@ export default function Feed() {
       : [];
 
   const otherPosts = posts.filter(
-    (post) => post.uid !== userId && !filteredPosts.includes(post)
+    (post) => post.uid !== userId && post.active !== false
+  );
+
+  const myPosts = posts.filter(
+    (post) => post.uid === userId && post.active !== false
   );
 
   // Det her er hvordan vores egne post skal se ud
@@ -91,6 +94,7 @@ export default function Feed() {
         <h3 className="justify-start text-(--white) text-xl overskrift">
           {post.title}
         </h3>
+
         <div className="flex justify-between items-center text-sm font-bold bg-(--white) rounded-full px-2 gap-5">
           <div className="gap-2 flex items-center">
             <GroupsIcon color="--secondary" size={20} />
@@ -111,7 +115,7 @@ export default function Feed() {
   );
 
   // Og det her så hvordan de andres skal se ud
-  const renderPost = (post, index) => (
+  const renderPost = (post) => (
     <motion.div
       key={post.id}
       initial={{ opacity: 0, y: 20 }}
@@ -122,9 +126,9 @@ export default function Feed() {
         initial={{ opacity: 0 }}
         animate={{
           opacity:
-            expandedPostId === null ? 1 : expandedPostId === post.id ? 1 : 0.5, // lavere opacity for ikke-aktuelle
+            expandedPostId === null ? 1 : expandedPostId === post.id ? 1 : 0.5,
           scale:
-            expandedPostId === null ? 1 : expandedPostId === post.id ? 1 : 0.95, // lidt mindre
+            expandedPostId === null ? 1 : expandedPostId === post.id ? 1 : 0.95,
         }}
         transition={{ duration: 0.3 }}
         onClick={() => toggleExpand(post.id)}
@@ -178,12 +182,26 @@ export default function Feed() {
         >
           <div className="flex flex-col justify-between gap-2">
             <p
-              className={`w-70 text-(--white) text-sm cursor-pointer overflow-hidden ${
+              className={`w-70 text-(--white) text-sm cursor-pointer overflow-hidden whitespace-pre-wrap ${
                 expandedPostId === post.id ? "" : "line-clamp-3"
               }`}
             >
               {post.description}
             </p>
+
+            {expandedPostId === post.id && post.imageUrls && (
+              <div className="flex gap-2 overflow-x-auto mt-2">
+                {post.imageUrls.map((url, i) => (
+                  <img
+                    key={i}
+                    src={url}
+                    alt="Post billede"
+                    className="h-40 w-auto rounded-xl cursor-pointer"
+                    onClick={() => setPreviewImage(url)}
+                  />
+                ))}
+              </div>
+            )}
 
             <div className="w-60 flex justify-between items-center">
               <div className="flex items-center gap-2">
@@ -207,13 +225,32 @@ export default function Feed() {
             </div>
           </div>
         </div>
-        <Tilmeld
-          postId={post.id}
-          participants={post.participants}
-          requests={post.requests || []} // send requests med
-          onUpdate={fetchPosts}
-          className="absolute bottom-0 right-0 z-10"
-        />
+
+        <motion.div
+          className="absolute bottom-0 right-0 z-10 rounded-tl-full overflow-hidden"
+          style={{
+            pointerEvents: expandedPostId === post.id ? "auto" : "none",
+            originX: 1, // højre
+            originY: 1, // bund
+          }}
+          animate={{
+            scale:
+              expandedPostId === null
+                ? 0.8
+                : expandedPostId === post.id
+                ? 1
+                : 0.5,
+          }}
+          transition={{ duration: 0.3 }}
+        >
+          <Tilmeld
+            postId={post.id}
+            participants={post.participants}
+            requests={post.requests || []}
+            onUpdate={fetchPosts}
+          />
+        </motion.div>
+
         {post.uid === userId && <RequestsList post={post} />}
       </motion.div>
     </motion.div>
@@ -267,14 +304,35 @@ export default function Feed() {
         )}
       </motion.div>
 
-      {filteredPosts.length > 0 && (
-        <div>
-          <h2 className="text-lg font-bold mb-2">Filter</h2>
-          {filteredPosts.map((post, index) => renderPost(post, index))}
-        </div>
+      {selectedTags.length > 0 ? (
+        filteredPosts.length > 0 ? (
+          <div>
+            <h2 className="text-lg font-bold mb-2">Filter</h2>
+            {filteredPosts.map((post, index) => renderPost(post, index))}
+          </div>
+        ) : (
+          <p className="text-(--white) mt-4">
+            Ingen opslag matcher de valgte tags.
+          </p>
+        )
+      ) : (
+        otherPosts.map((post, index) => renderPost(post, index))
       )}
 
-      {otherPosts.map((post, index) => renderPost(post, index))}
+      {previewImage && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50"
+          onClick={() => setPreviewImage(null)}
+        >
+          <div className="max-w-3xl max-h-[90vh]">
+            <img
+              src={previewImage}
+              alt="Preview"
+              className="w-full h-full object-contain rounded-xl"
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

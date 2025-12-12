@@ -17,21 +17,28 @@ export default function useNotifications() {
     if (!userId) return;
 
     const q = query(collection(db, "posts"), where("uid", "==", userId));
+
     const unsubscribe = onSnapshot(q, async (snapshot) => {
       const newNotifications = [];
 
       for (const postDoc of snapshot.docs) {
         const data = postDoc.data();
+
         if (data.requests && data.requests.length > 0) {
           for (const requesterUid of data.requests) {
             const userSnap = await getDoc(doc(db, "users", requesterUid));
             const userData = userSnap.exists()
               ? userSnap.data()
-              : { fuldenavn: requesterUid };
+              : {
+                  fuldenavn: requesterUid,
+                  profileImage: null, // Fallback hvis bruger ikke findes
+                };
+
             newNotifications.push({
               postId: postDoc.id,
               requesterUid,
-              requesterName: userData.fuldenavn,
+              requesterName: userData.kaldenavn || userData.fuldenavn, // ← Bruger kaldenavn først, så fuldenavn
+              requesterImage: userData.profileImage || null, // ← TILFØJET!
               postTitle: data.title,
             });
           }
