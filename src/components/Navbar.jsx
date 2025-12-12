@@ -1,49 +1,97 @@
 import { useEffect, useState } from "react";
 import { auth, db } from "../firebase";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, collection, query, onSnapshot } from "firebase/firestore";
 import { NavLink } from "react-router";
 
 export default function Navbar() {
   const [userData, setUserData] = useState(null);
+  const [hasUnreadMessages, setHasUnreadMessages] = useState(false);
+  const currentUserId = auth.currentUser?.uid;
 
+  // Hent bruger profil
   useEffect(() => {
     const fetchProfile = async () => {
       const user = auth.currentUser;
       if (!user) return;
-
       const docRef = doc(db, "users", user.uid);
       const snap = await getDoc(docRef);
-
       if (snap.exists()) {
         setUserData(snap.data());
       }
     };
-
     fetchProfile();
   }, []);
+
+  // Lyt til ulæste beskeder i real-time
+  useEffect(() => {
+    if (!currentUserId) return;
+
+    const chatsQuery = query(collection(db, "chats"));
+
+    const unsubscribe = onSnapshot(chatsQuery, (snapshot) => {
+      let foundUnread = false;
+
+      snapshot.docs.forEach((chatDoc) => {
+        const chatData = chatDoc.data();
+        const chatId = chatDoc.id;
+
+        // Tjek både private og gruppe chats
+        const isPrivateChat = chatId.includes(currentUserId);
+        const isGroupChat =
+          chatData.isGroupChat &&
+          chatData.participants?.includes(currentUserId);
+
+        if (isPrivateChat || isGroupChat) {
+          const lastReadTime = chatData[`lastReadBy_${currentUserId}`];
+          const lastMessageTime = chatData.lastMessageTime;
+          const lastMessageSenderId = chatData.lastMessageSenderId;
+
+          // Hvis der er en besked, og den ikke er fra dig, og du ikke har læst den
+          if (
+            lastMessageSenderId &&
+            lastMessageSenderId !== currentUserId &&
+            (!lastReadTime ||
+              (lastMessageTime &&
+                lastMessageTime.toMillis() > lastReadTime.toMillis()))
+          ) {
+            foundUnread = true;
+          }
+        }
+      });
+
+      setHasUnreadMessages(foundUnread);
+    });
+
+    return () => unsubscribe();
+  }, [currentUserId]);
 
   if (!userData) return null;
 
   return (
     <div className="z-1000">
-      <div
-        className="pointer-events-none fixed bottom-24 left-0 w-full h-24 z-40 bg-gradient-to-t from-(--white) to-transparent
-        "
-      />
-      <nav className="fixed  bottom-0 left-0 w-full  z-50 flex justify-around p-7 bg-(--white)">
+      <div className="pointer-events-none fixed bottom-24 left-0 w-full h-24 z-40 bg-gradient-to-t from-(--white) to-transparent" />
+
+      <nav className="fixed bottom-0 left-0 w-full z-50 flex justify-around p-7 bg-(--white)">
         {/* Chat Icon */}
-        <NavLink to="/Chats">
+        <NavLink to="/Chats" className="relative">
           {({ isActive }) => (
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 20.23"
-              className={`h-10 ${
-                isActive ? "fill-(--secondary)" : "fill-(--primary)"
-              }`}
-            >
-              <path d="M24,16.09c-.61.37-1.34.57-2.11.57-1.19,0-2.26-.48-3.03-1.27-.89.35-1.87.54-2.89.54h-.13c.74-1.3,1.16-2.8,1.16-4.4,0-4.29-3.03-7.89-7.07-8.76,1.46-1.7,3.62-2.77,6.04-2.77,4.39,0,7.96,3.57,7.96,7.96,0,2.01-.74,3.85-1.97,5.25.22,1.23.99,2.28,2.04,2.88Z" />
-              <path d="M16,11.53c0,4.4-3.57,7.97-7.97,7.97-1.02,0-2-.19-2.9-.54-.77.79-1.84,1.28-3.03,1.28-.77,0-1.49-.21-2.11-.57,1.05-.6,1.82-1.65,2.04-2.89C.81,15.38.07,13.54.07,11.53.07,7.14,3.64,3.57,8.03,3.57s7.97,3.57,7.97,7.97Z" />
-            </svg>
+            <>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 20.23"
+                className={`h-10 ${
+                  isActive ? "fill-(--secondary)" : "fill-(--primary)"
+                }`}
+              >
+                <path d="M24,16.09c-.61.37-1.34.57-2.11.57-1.19,0-2.26-.48-3.03-1.27-.89.35-1.87.54-2.89.54h-.13c.74-1.3,1.16-2.8,1.16-4.4,0-4.29-3.03-7.89-7.07-8.76,1.46-1.7,3.62-2.77,6.04-2.77,4.39,0,7.96,3.57,7.96,7.96,0,2.01-.74,3.85-1.97,5.25.22,1.23.99,2.28,2.04,2.88Z" />
+                <path d="M16,11.53c0,4.4-3.57,7.97-7.97,7.97-1.02,0-2-.19-2.9-.54-.77.79-1.84,1.28-3.03,1.28-.77,0-1.49-.21-2.11-.57,1.05-.6,1.82-1.65,2.04-2.89C.81,15.38.07,13.54.07,11.53.07,7.14,3.64,3.57,8.03,3.57s7.97,3.57,7.97,7.97Z" />
+              </svg>
+
+              {/* Unread indicator - lille blå prik */}
+              {hasUnreadMessages && (
+                <span className="absolute top-0 right-0 w-3 h-3 bg-blue-500 rounded-full border-2 border-white animate-pulse" />
+              )}
+            </>
           )}
         </NavLink>
 
