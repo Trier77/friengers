@@ -1,15 +1,6 @@
-import { doc, updateDoc, arrayUnion } from "firebase/firestore";
+import { doc, updateDoc, arrayUnion, getDoc } from "firebase/firestore";
 import { auth, db } from "../firebase";
 import { useState, useRef } from "react";
-
-const sendJoinRequest = async (postId) => {
-  const userId = auth.currentUser.uid;
-  const postRef = doc(db, "posts", postId);
-
-  await updateDoc(postRef, {
-    requests: arrayUnion(userId),
-  });
-};
 
 export default function Tilmeld({
   postId,
@@ -30,12 +21,50 @@ export default function Tilmeld({
 
   const [showNotification, setShowNotification] = useState(false);
 
+  const sendJoinRequest = async (postId) => {
+    const userId = auth.currentUser.uid;
+    const postRef = doc(db, "posts", postId);
+
+    // Hent brugerdata
+    const userSnap = await getDoc(doc(db, "users", userId));
+    const userData = userSnap.exists() ? userSnap.data() : {};
+
+    // Hent post data for at få post owner's uid
+    const postSnap = await getDoc(postRef);
+    const postData = postSnap.data();
+    const postOwnerUid = postData.uid;
+
+    // Opdater post med request
+    await updateDoc(postRef, {
+      requests: arrayUnion(userId),
+    });
+
+    // Tilføj notification til post ejerens notifications array
+    const ownerRef = doc(db, "users", postOwnerUid);
+    const ownerSnap = await getDoc(ownerRef);
+    
+    if (ownerSnap.exists()) {
+      await updateDoc(ownerRef, {
+        notifications: arrayUnion({
+          notificationType: "request",
+          requesterUid: userId,
+          requesterName: userData.kaldenavn || userData.fuldenavn || "Anonym",
+          requesterImage: userData.profileImage || null,
+          postId: postId,
+          postTitle: postData.title || "Uden titel",
+          status: "pending",
+          createdAt: Date.now(),
+        }),
+      });
+    }
+  };
+
   const handleClick = async () => {
     if (isJoined || isRequested) return;
 
     try {
       await sendJoinRequest(postId);
-      setShowNotification(true); // ✅ vis popup
+      setShowNotification(true);
       onUpdate();
 
       // Skjul popup igen efter 3 sek
