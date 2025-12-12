@@ -1,4 +1,10 @@
 {
-  "welcome": "Velkommen",
-  "description": "Dette er din app."
+  "settings": "Indstillinger",
+  "account": "Konto",
+  "language": "Sprog",
+  "notifications": "Notifikationer",
+  "darkmode": "Dark mode",
+  "about": "Om os",
+  "help": "Hjælp og support",
+  "logout": "Log ud"
 }
