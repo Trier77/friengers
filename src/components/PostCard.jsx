@@ -1,8 +1,8 @@
-import { motion } from "framer-motion";
 import CalenderIcon from "../../public/icons/CalenderIcon";
 import MapPinIcon from "../../public/icons/MapPinIcon";
 import GroupsIcon from "../../public/icons/GroupsIcon";
 import Tilmeld from "../components/Tilmeld";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function PostCard({
   post,
@@ -108,8 +108,8 @@ export default function PostCard({
               {post.description}
             </p>
 
-            {expandedPostId === post.id && post.imageUrls && (
-              <div className="flex gap-2 overflow-x-auto mt-2">
+            {expandedPostId === post.id && post.imageUrls?.length > 0 && (
+              <div className="flex gap-2 overflow-x-auto">
                 {post.imageUrls.map((url, i) => (
                   <img
                     key={i}
