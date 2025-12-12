@@ -172,7 +172,7 @@ function IndividualChat() {
       className="fixed inset-0 flex flex-col bg-white"
     >
       {/* Header */}
-      <div className="bg-white p-4 flex items-center gap-4 shadow-sm z-10 flex-shrink-0">
+      <div className="bg-white p-4 flex items-center gap-4 shadow-sm z-10 shrink-0">
         <button onClick={() => navigate(-1)} className="p-2">
           <svg
             className="w-6 h-6 text-blue-500"
@@ -216,13 +216,13 @@ function IndividualChat() {
             }`}
           >
             <div
-              className={`max-w-[70%] p-3 rounded-2xl break-words ${
+              className={`max-w-[70%] p-3 rounded-2xl wrap-break-words ${
                 message.senderId === currentUserId
                   ? "bg-blue-500 text-white rounded-br-sm"
                   : "bg-gray-200 text-gray-800 rounded-bl-sm"
               }`}
             >
-              <p className="break-words whitespace-pre-wrap">{message.text}</p>
+              <p className="wrap-break-words whitespace-pre-wrap">{message.text}</p>
               {message.timestamp && (
                 <span
                   className={`text-xs mt-1 block ${
@@ -246,7 +246,7 @@ function IndividualChat() {
 
       {/* Input Field */}
       <div
-        className={`bg-white p-4 border-t border-gray-200 flex-shrink-0 ${
+        className={`bg-white p-4 border-t border-gray-200 shrink-0 ${
           isInputFocused ? "mb-0" : "mb-20"
         }`}
       >
