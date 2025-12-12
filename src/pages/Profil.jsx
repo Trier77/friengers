@@ -27,6 +27,7 @@ export default function Profil() {
   const [expandedPostId, setExpandedPostId] = useState(null);
   const [selectedTags, setSelectedTags] = useState([]);
   const navigate = useNavigate();
+  const [previewImage, setPreviewImage] = useState(null);
 
   const [bio, setBio] = useState("");
   const [posts, setPosts] = useState([]);
@@ -296,6 +297,20 @@ export default function Profil() {
               {post.description}
             </p>
 
+            {expandedPostId === post.id && post.imageUrls && (
+              <div className="flex gap-2 overflow-x-auto mt-2">
+                {post.imageUrls.map((url, i) => (
+                  <img
+                    key={i}
+                    src={url}
+                    alt="Post billede"
+                    className="h-40 w-auto rounded-xl cursor-pointer"
+                    onClick={() => setPreviewImage(url)}
+                  />
+                ))}
+              </div>
+            )}
+
             <div className="flex justify-between items-center">
               <div className="text-(--white) font-bold">
                 <p>{post.createdAt ? timeAgo(post.createdAt.toDate()) : ""}</p>
@@ -436,6 +451,20 @@ export default function Profil() {
             >
               {post.description}
             </p>
+
+            {expandedPostId === post.id && post.imageUrls && (
+              <div className="flex gap-2 overflow-x-auto mt-2">
+                {post.imageUrls.map((url, i) => (
+                  <img
+                    key={i}
+                    src={url}
+                    alt="Post billede"
+                    className="h-40 w-auto rounded-xl cursor-pointer"
+                    onClick={() => setPreviewImage(url)}
+                  />
+                ))}
+              </div>
+            )}
 
             <div className="w-60 flex justify-between items-center">
               <div className="flex items-center gap-2">
@@ -578,6 +607,21 @@ export default function Profil() {
             joinedPosts.length > 0 &&
             joinedPosts.map((post, index) => renderOthersPost(post, index))}
         </div>
+
+        {previewImage && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50"
+          onClick={() => setPreviewImage(null)}
+        >
+          <div className="max-w-3xl max-h-[90vh]">
+            <img
+              src={previewImage}
+              alt="Preview"
+              className="w-full h-full object-contain rounded-xl"
+            />
+          </div>
+        </div>
+      )}
       </div>
     </motion.div>
   );
