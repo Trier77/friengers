@@ -15,6 +15,7 @@ import FirebaseTest from "./pages/Firebasetest";
 import { useOnlineStatus } from "./hooks/Useonlinestatus";
 import PublicRoute from "./components/PublicRoutes";
 import AppRoute from "./components/AppRoutes";
+import GroupChat from "./pages/GroupChat";
 
 function App() {
   useOnlineStatus();
@@ -63,13 +64,13 @@ function App() {
       {user && <Navbar />}
       <div className={user ? "pb-36" : ""}>
         <Routes>
-          <Route 
-            path="/login" 
+          <Route
+            path="/login"
             element={
               <PublicRoute user={user}>
                 <Login />
               </PublicRoute>
-            } 
+            }
           />
           <Route
             path="/"
@@ -124,6 +125,14 @@ function App() {
             element={
               <AppRoute user={user}>
                 <FirebaseTest />
+              </AppRoute>
+            }
+          />
+          <Route
+            path="/GroupChat/:chatId"
+            element={
+              <AppRoute user={user}>
+                <GroupChat />
               </AppRoute>
             }
           />
