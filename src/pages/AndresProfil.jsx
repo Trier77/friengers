@@ -14,6 +14,8 @@ import {
   serverTimestamp,
 } from "firebase/firestore";
 import { db, auth } from "../firebase";
+import PostCard from "../components/PostCard";
+import PrivatChatIcon from "../../public/icons/PrivatChat";
 
 function AndresProfil() {
   const { userId } = useParams();
@@ -26,33 +28,54 @@ function AndresProfil() {
   const [invitedPosts, setInvitedPosts] = useState(new Set()); // Track hvilke posts brugeren er inviteret til
   const currentUserId = auth.currentUser?.uid;
 
+  const [expandedPostId, setExpandedPostId] = useState(null);
+  const [previewImage, setPreviewImage] = useState(null);
+
+  const toggleExpand = (id) =>
+    setExpandedPostId((prev) => (prev === id ? null : id));
+
   useEffect(() => {
     const fetchUserData = async () => {
       try {
         // Hent brugerdata
         const userDoc = await getDoc(doc(db, "users", userId));
-
         if (!userDoc.exists()) {
           setLoading(false);
           return;
         }
-
         setUserData(userDoc.data());
 
-        // Hent brugerens posts
+        // 1. Hent brugerens egne opgaver
         const postsQuery = query(
           collection(db, "posts"),
           where("uid", "==", userId)
         );
         const postsSnapshot = await getDocs(postsQuery);
-        const posts = postsSnapshot.docs.map((doc) => ({
+        const ownPosts = postsSnapshot.docs.map((doc) => ({
           id: doc.id,
           ...doc.data(),
         }));
 
-        setUserPosts(posts);
+        // 2. Hent opgaver hvor brugeren er deltager
+        const participantQuery = query(
+          collection(db, "posts"),
+          where("participants", "array-contains", userId)
+        );
+        const participantSnapshot = await getDocs(participantQuery);
+        const participantPosts = participantSnapshot.docs.map((doc) => ({
+          id: doc.id,
+          ...doc.data(),
+        }));
 
-        // Hent MINE posts (for invitation dropdown)
+        // 3. Kombiner uden dubletter
+        const allPostsMap = new Map();
+        ownPosts.forEach((post) => allPostsMap.set(post.id, post));
+        participantPosts.forEach((post) => allPostsMap.set(post.id, post));
+        const allPosts = Array.from(allPostsMap.values());
+
+        setUserPosts(allPosts);
+
+        // 4. Hent MINE posts (for invitation dropdown)
         if (currentUserId) {
           const myPostsQuery = query(
             collection(db, "posts"),
@@ -65,10 +88,6 @@ function AndresProfil() {
               ...doc.data(),
             }))
             .filter((post) => {
-              // Vis posts der:
-              // 1. Er aktive (ikke markeret som done)
-              // 2. Har plads til flere deltagere ELLER brugeren er allerede inviteret
-              // 3. Brugeren ikke allerede er deltager i
               const participants = post.participants || [];
               const requests = post.requests || [];
               const maxParticipants = post.maxParticipants || 1;
@@ -77,7 +96,6 @@ function AndresProfil() {
               const notAlreadyParticipant = !participants.includes(userId);
               const alreadyInvited = requests.includes(userId);
 
-              // Hvis allerede inviteret, vis den altid
               if (alreadyInvited) {
                 setInvitedPosts((prev) => new Set([...prev, post.id]));
                 return isActive && notAlreadyParticipant;
@@ -193,15 +211,19 @@ function AndresProfil() {
     return <div className="p-4 text-center">Bruger ikke fundet</div>;
   }
 
+  const completedCount = userPosts.filter(
+    (post) => post.active !== false
+  ).length;
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.4 }}
-      className="min-h-screen bg-white pb-20"
+      className="relative p-4 overflow-hidden"
     >
       {/* Header Section */}
-      <div className="bg-white pt-8 pb-6 px-6 relative">
+      <div className="pb-4 relative">
         {/* Flag Icon - top right */}
         <button className="absolute top-4 right-4">
           <svg
@@ -218,7 +240,6 @@ function AndresProfil() {
             />
           </svg>
         </button>
-
         {/* Profile Info */}
         <div className="flex items-center gap-4 mb-4">
           {/* Avatar with border */}
@@ -230,8 +251,6 @@ function AndresProfil() {
                 className="w-full h-full rounded-full object-cover"
               />
             </div>
-            {/* Online status dot */}
-            <div className="absolute bottom-1 right-1 w-4 h-4 bg-green-500 rounded-full border-2 border-white"></div>
           </div>
 
           {/* Name and Study */}
@@ -248,49 +267,62 @@ function AndresProfil() {
           </div>
         </div>
 
-        {/* Action Buttons */}
-        <div className="flex gap-3 mb-4">
-          {/* Message Button */}
-          <button
-            onClick={() => navigate(`/Chats/${userId}`)}
-            className="flex-1 flex items-center justify-center gap-2 p-3 bg-blue-500 rounded-full hover:bg-blue-600 transition-colors"
-          >
-            <svg
-              className="w-5 h-5 text-white"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"
-              />
-            </svg>
-            <span className="text-white font-semibold">Besked</span>
-          </button>
+        <div className="flex justify-between">
+          {/* Bio */}
+          <p className="text-(--secondary) text-sm">
+            {userData.bio || "Ingen beskrivelse tilgængelig"}
+          </p>{" "}
+        </div>
 
-          {/* Invite Button */}
-          <button
-            onClick={() => setShowInviteDropdown(!showInviteDropdown)}
-            className="flex-1 flex items-center justify-center gap-2 p-3 border-2 border-blue-500 text-blue-500 rounded-full hover:bg-blue-50 transition-colors"
-          >
-            <svg
-              className="w-5 h-5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-            >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                strokeWidth={2}
-                d="M12 4v16m8-8H4"
-              />
-            </svg>
-            <span className="font-semibold">Inviter</span>
-          </button>
+        {/* Action Buttons */}
+        <div className="flex justify-between pt-4 items-center">
+          <div>
+            <p className="text-xs flex gap-4 items-center text-(--primary) font-semibold">
+              Opgaver løst:
+              <span className="text-(--secondary) font-bold text-xl">
+                {completedCount}
+              </span>
+            </p>
+          </div>{" "}
+          <div className="flex gap-4">
+            {/* Message Button */}
+            <div>
+              <button
+                onClick={() => navigate(`/Chats/${userId}`)}
+                className="flex justify-center items-center w-10 h-10 rounded-full font-semibold transition-colors bg-(--secondary) text-(--white)"
+              >
+                <PrivatChatIcon color="--white" size={15} />
+              </button>
+            </div>
+
+            {/* Invite Button */}
+            <div>
+              <button
+                onClick={() => setShowInviteDropdown(!showInviteDropdown)}
+                className="flex justify-center items-center w-25 h-10 rounded-full font-semibold transition-colors text-(--secondary) border border-(--secondary)"
+              >
+                <div className="flex items-center gap-2">
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 4v16m8-8H4"
+                    />
+                  </svg>
+                  <p className="text-xs text-(--secondary) font-semibold">
+                    Inviter
+                  </p>{" "}
+                </div>
+              </button>
+            </div>
+          </div>
+          {/* Tasks Completed */}
         </div>
 
         {/* Invite Dropdown */}
@@ -374,108 +406,49 @@ function AndresProfil() {
             </motion.div>
           )}
         </AnimatePresence>
-
-        {/* Bio */}
-        <p className="text-gray-700 text-sm mb-4">
-          {userData.bio || "Ingen beskrivelse tilgængelig"}
-        </p>
-
-        {/* Tasks Completed */}
-        <div className="text-center">
-          <p className="text-sm text-gray-600 font-semibold mb-2">
-            Opgaver løst
-          </p>
-          <div className="inline-flex items-center justify-center w-12 h-12 bg-blue-500 rounded-full">
-            <span className="text-white font-bold text-lg">
-              {userPosts.length}
-            </span>
-          </div>
-        </div>
       </div>
 
       {/* Active Posts Section */}
-      <div className="px-6 mt-6">
+      <div className="p">
         <h2 className="text-center font-bold text-gray-900 mb-4">
           Aktive opgaver
         </h2>
-
         {userPosts.length === 0 ? (
           <p className="text-center text-gray-500">Ingen aktive opgaver</p>
         ) : (
           userPosts.map((post) => (
-            <div
+            <PostCard
               key={post.id}
-              className="bg-blue-900 rounded-3xl p-4 mb-4 text-white"
-            >
-              {/* Post Header */}
-              <div className="flex justify-between items-start mb-2">
-                <h3 className="text-lg font-bold flex-1">{post.title}</h3>
-                <div className="flex gap-2 text-xs">
-                  <span className="bg-white text-blue-900 px-3 py-1 rounded-full font-semibold">
-                    {post.time?.toDate().toLocaleDateString("da-DK", {
-                      day: "2-digit",
-                      month: "short",
-                    })}
-                  </span>
-                </div>
-              </div>
-
-              {/* Tags */}
-              <div className="flex gap-2 mb-3">
-                {post.tags?.map((tag, index) => (
-                  <span
-                    key={index}
-                    className="text-xs border border-white px-3 py-1 rounded-full"
-                  >
-                    {tag}
-                  </span>
-                ))}
-              </div>
-
-              {/* Description */}
-              <p className="text-sm mb-4">{post.description}</p>
-
-              {/* Footer */}
-              <div className="flex justify-between items-center">
-                <div className="flex items-center gap-2">
-                  <img
-                    src={userData.profileImage}
-                    alt={userData.fuldenavn}
-                    className="w-6 h-6 rounded-full"
-                  />
-                  <span className="text-sm">
-                    {userData.kaldenavn || userData.fuldenavn}
-                  </span>
-                </div>
-                <div className="flex items-center gap-2">
-                  <svg
-                    className="w-4 h-4"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
-                    <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
-                  </svg>
-                  <span className="text-sm">
-                    {post.participants?.length || 0}/{post.maxParticipants || 1}
-                  </span>
-                </div>
-              </div>
-            </div>
+              post={post}
+              userId={userId} // den profil vi ser
+              expandedPostId={expandedPostId}
+              toggleExpand={toggleExpand}
+              selectedTags={[]} // ingen filter her
+              handleDropdownChange={() => {}}
+              setPreviewImage={setPreviewImage} // kan bruges til at åbne billede
+              navigate={navigate}
+              fetchPosts={() => {}} // tom funktion, Tilmeld kan ignorere
+              showAuthor={false}
+              showTimestamp={true}
+            />
           ))
         )}
       </div>
-
-      {/* Member Since */}
-      <div className="text-center mt-8 mb-4">
-        <p className="text-gray-400 text-sm">Oprettet</p>
-        <p className="text-gray-500 text-sm">
-          {userData.createdAt
-            ? new Date(userData.createdAt.seconds * 1000).toLocaleDateString(
-                "da-DK"
-              )
-            : "Ukendt"}
-        </p>
-      </div>
+      {/* Preview modal */}
+      {previewImage && (
+        <div
+          className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50"
+          onClick={() => setPreviewImage(null)}
+        >
+          <div className="max-w-3xl max-h-[90vh]">
+            <img
+              src={previewImage}
+              alt="Preview"
+              className="w-full h-full object-contain rounded-xl"
+            />
+          </div>
+        </div>
+      )}
     </motion.div>
   );
 }
