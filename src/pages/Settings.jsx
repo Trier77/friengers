@@ -47,7 +47,7 @@ export default function Settings() {
           </div>
 
           {/* Notifications */}
-          <div className="flex justify-between items-center mb-4">
+          <div className="flex justify-between items-center mb-4 gap-4">
             <div className="flex gap-4 items-center">
               <NotificationIcon color="--primary" size={20} />
               <h2 className="text-(--primary) text-3xl">Notifikation</h2>
@@ -65,7 +65,7 @@ export default function Settings() {
 
             <Toggle enabled={darkMode} setEnabled={setDarkMode} />
           </div>
-        </div>
+        
 
         <div className="flex gap-4 items-center mb-4">
           <InfoIcon />
@@ -85,6 +85,7 @@ export default function Settings() {
           >
             Log out
           </button>
+          </div>
         </div>
       </div>
     </div>
