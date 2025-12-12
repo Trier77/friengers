@@ -8,12 +8,14 @@ import {
 import { db } from "../firebase";
 import useNotifications from "./useNotifications";
 import { useState } from "react";
+import { useNavigate } from "react-router";
 import GroupChatPrompt from "./GroupChatPrompt";
 
 export default function NotificationsPopup() {
   const notifications = useNotifications();
   const [showGroupChatPrompt, setShowGroupChatPrompt] = useState(false);
   const [selectedPost, setSelectedPost] = useState(null);
+  const navigate = useNavigate();
 
   const handleResponse = async (postId, requesterUid, approve, postTitle) => {
     console.log("🔵 handleResponse called:", {
@@ -126,43 +128,91 @@ export default function NotificationsPopup() {
   return (
     <>
       {notifications.length > 0 && (
-        <div className="absolute top-10 right-0 w-80 p-4 bg-(--secondary) rounded-lg shadow-lg z-50">
-          {notifications.map((n) => (
-            <div
-              key={`${n.postId}-${n.requesterUid}`}
-              className="flex justify-between items-center gap-3"
-            >
-              <div>
-                <div className="flex gap-1">
-                  <p className="text-(--white) font-bold text-sm">
-                    {n.requesterName}
-                  </p>
-                  <p className="text-(--white) text-sm">vil tilmelde sig:</p>
-                </div>
-                <p className="text-(--white) font-bold text-sm">
-                  {n.postTitle}
-                </p>
-              </div>
-              <div className="flex flex-col gap-2">
-                <button
-                  onClick={() =>
-                    handleResponse(n.postId, n.requesterUid, false, n.postTitle)
-                  }
-                  className="text-sm font-bold h-6 w-10 text-(--white) rounded"
-                >
-                  Nej
-                </button>
-                <button
-                  onClick={() =>
-                    handleResponse(n.postId, n.requesterUid, true, n.postTitle)
-                  }
-                  className="text-sm font-bold h-6 w-10 bg-(--white) text-(--secondary) rounded"
-                >
-                  Ja
-                </button>
-              </div>
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-end sm:items-center sm:justify-center p-4">
+          <div className="w-full max-w-md bg-white rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden">
+            {/* Header */}
+            <div className="bg-(--secondary) p-4 text-center">
+              <h2 className="text-(--white) font-bold text-lg">
+                Nye anmodninger
+              </h2>
             </div>
-          ))}
+
+            {/* Notifikationer */}
+            <div className="max-h-[70vh] overflow-y-auto">
+              {notifications.map((n, index) => (
+                <div
+                  key={`${n.postId}-${n.requesterUid}`}
+                  className={`p-4 ${
+                    index !== notifications.length - 1
+                      ? "border-b border-gray-200"
+                      : ""
+                  }`}
+                >
+                  {/* Post info */}
+                  <div className="mb-3">
+                    <p className="text-gray-600 text-sm mb-1">Anmodning til:</p>
+                    <p className="text-(--secondary) font-bold text-base">
+                      {n.postTitle}
+                    </p>
+                  </div>
+
+                  {/* Bruger info med profilbillede */}
+                  <div className="flex items-center gap-3 mb-4">
+                    <img
+                      src={n.requesterImage || "https://via.placeholder.com/48"}
+                      alt={n.requesterName}
+                      className="w-12 h-12 rounded-full object-cover cursor-pointer border-2 border-(--secondary)"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(`/AndresProfil/${n.requesterUid}`);
+                      }}
+                    />
+                    <div className="flex-1">
+                      <p
+                        className="text-(--secondary) font-semibold text-base cursor-pointer hover:underline"
+                        onClick={() =>
+                          navigate(`/AndresProfil/${n.requesterUid}`)
+                        }
+                      >
+                        {n.requesterName}
+                      </p>
+                      <p className="text-gray-500 text-sm">vil gerne hjælpe</p>
+                    </div>
+                  </div>
+
+                  {/* Action buttons */}
+                  <div className="flex gap-3">
+                    <button
+                      onClick={() =>
+                        handleResponse(
+                          n.postId,
+                          n.requesterUid,
+                          false,
+                          n.postTitle
+                        )
+                      }
+                      className="flex-1 py-3 border-2 border-gray-300 text-gray-700 font-semibold rounded-full hover:bg-gray-50 transition-colors"
+                    >
+                      Afvis
+                    </button>
+                    <button
+                      onClick={() =>
+                        handleResponse(
+                          n.postId,
+                          n.requesterUid,
+                          true,
+                          n.postTitle
+                        )
+                      }
+                      className="flex-1 py-3 bg-(--secondary) text-(--white) font-semibold rounded-full hover:brightness-110 transition-all"
+                    >
+                      Godkend
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
         </div>
       )}
 
