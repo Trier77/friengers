@@ -102,7 +102,7 @@ function IndividualChat() {
         console.log("📜 Initial scroll to bottom");
       }, 100);
     }
-  }, [loading]); // Kører når loading er færdig
+  }, [loading]);
 
   // ✅ Auto scroll når nye beskeder kommer (smooth)
   useEffect(() => {
@@ -191,9 +191,13 @@ function IndividualChat() {
         <img
           src={otherUser.profileImage}
           alt={otherUser.fuldenavn}
-          className="w-10 h-10 rounded-full object-cover"
+          className="w-10 h-10 rounded-full object-cover cursor-pointer hover:opacity-80 transition-opacity"
+          onClick={() => navigate(`/AndresProfil/${chatId}`)}
         />
-        <h2 className="font-semibold text-lg text-gray-800">
+        <h2
+          className="font-semibold text-lg text-gray-800 cursor-pointer hover:underline"
+          onClick={() => navigate(`/AndresProfil/${chatId}`)}
+        >
           {otherUser.kaldenavn || otherUser.fuldenavn}
         </h2>
       </div>
@@ -240,7 +244,6 @@ function IndividualChat() {
             </div>
           </div>
         ))}
-        {/* ✅ Dette er ankerpunktet som vi scroller til */}
         <div ref={messagesEndRef} />
       </div>
 

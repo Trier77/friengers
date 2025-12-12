@@ -214,7 +214,7 @@ function GroupChat() {
             <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
           </svg>
         </div>
-        <div>
+        <div className="flex-1">
           <h2 className="font-semibold text-lg text-gray-800">
             {chatInfo.chatName}
           </h2>
@@ -251,7 +251,10 @@ function GroupChat() {
                   <img
                     src={getSenderAvatar(message.senderId)}
                     alt={getSenderName(message.senderId)}
-                    className="w-8 h-8 rounded-full object-cover flex-shrink-0"
+                    className="w-8 h-8 rounded-full object-cover flex-shrink-0 cursor-pointer hover:opacity-80 transition-opacity"
+                    onClick={() =>
+                      navigate(`/AndresProfil/${message.senderId}`)
+                    }
                   />
                 )}
 
