@@ -16,6 +16,7 @@ import {
 import { db, auth } from "../firebase";
 import PostCard from "../components/PostCard";
 import PrivatChatIcon from "../../public/icons/PrivatChat";
+import ColorCircle from "../components/ColorCircle";
 
 function AndresProfil() {
   const { userId } = useParams();
@@ -222,6 +223,8 @@ function AndresProfil() {
       transition={{ duration: 0.4 }}
       className="relative p-4 overflow-hidden"
     >
+      <ColorCircle />
+
       {/* Header Section */}
       <div className="pb-4 relative">
         {/* Flag Icon - top right */}
@@ -244,7 +247,7 @@ function AndresProfil() {
         <div className="flex items-center gap-4 mb-4">
           {/* Avatar with border */}
           <div className="relative">
-            <div className="w-20 h-20 rounded-full border-4 border-blue-500 p-1">
+            <div className="w-20 h-20 rounded-full">
               <img
                 src={userData.profileImage || "https://via.placeholder.com/80"}
                 alt={userData.fuldenavn}
