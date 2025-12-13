@@ -38,12 +38,12 @@ export default function NotificationWrapper() {
         )}
       </button>
 
-      {isOpen && (
-        <NotificationsPopup
-          notifications={notifications}
-          closePopup={() => setIsOpen(false)}
-        />
-      )}
+      {/* Always render, but control visibility with 'open' prop */}
+      <NotificationsPopup
+        notifications={notifications}
+        open={isOpen}
+        closePopup={() => setIsOpen(false)}
+      />
     </div>
   );
 }
