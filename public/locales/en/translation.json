@@ -55,11 +55,41 @@
     "minute_one": "minute",
     "minute_other": "minutes",
     "second_one": "second",
-    "second_other": "seconds"
+    "second_other": "seconds",
+    "yesterday": "Yesterday"
   },
   "common": {
     "preview": "Preview"
-  }
+  },
 
-  
-}
+  "chats": {
+    "loading": "Loading chats...",
+    "noMessagesYet": "No messages yet",
+    "youPrefix": "You:",
+    "unknownUser": "Unknown",
+
+    "tabs": {
+      "private": "Private chats",
+      "group": "Group chats"
+    },
+
+    "search": {
+      "placeholder": "Search by name...",
+      "clear": "Clear search",
+      "noResults": "No results for \"{{query}}\"",
+      "showingResults_one": "Showing {{count}} result for \"{{query}}\"",
+      "showingResults_other": "Showing {{count}} results for \"{{query}}\""
+    },
+
+    "emptyState": {
+      "noPrivateChats": "No private chats yet",
+      "noGroupChats": "No group chats yet",
+      "startConversation": "Start a conversation by visiting a profile",
+      "groupChatInfo": "Group chats are created automatically when you approve participants"
+    },
+
+    "groupChat": {
+      "defaultName": "Group chat",
+      "prefix": "Group chat: "
+    }
+  }}

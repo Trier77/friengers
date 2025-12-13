@@ -55,10 +55,43 @@
     "minute_one": "minut",
     "minute_other": "minutter",
     "second_one": "sekund",
-    "second_other": "sekunder"
+    "second_other": "sekunder",
+    "yesterday": "I går"
   },
+
   "common": {
     "preview": "Preview"
-  }
-}
+  },
+
+  "chats": {
+    "loading": "Henter chats...",
+    "noMessagesYet": "Ingen beskeder endnu",
+    "youPrefix": "Dig:",
+    "unknownUser": "Ukendt",
+
+      "tabs": {
+      "private": "Privat chat",
+      "group": "Gruppe chat"
+    },
+
+    "search": {
+      "placeholder": "Søg efter navn...",
+      "clear": "Ryd søgning",
+      "noResults": "Ingen resultater for \"{{query}}\"",
+      "showingResults_one": "Viser {{count}} resultat for \"{{query}}\"",
+      "showingResults_other": "Viser {{count}} resultater for \"{{query}}\""
+    },
+
+    "emptyState": {
+      "noPrivateChats": "Ingen private chats endnu",
+      "noGroupChats": "Ingen gruppe chats endnu",
+      "startConversation": "Start en samtale ved at besøge en profil",
+      "groupChatInfo": "Gruppechats oprettes automatisk når du godkender deltagere"
+    },
+
+    "groupChat": {
+      "defaultName": "Gruppechat",
+      "prefix": "Gruppechat: "
+    }
+}}
 
