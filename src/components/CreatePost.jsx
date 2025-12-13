@@ -16,7 +16,7 @@ export default function CreatePost({ open, onClose }) {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [location, setLocation] = useState("");
-  const [participantsCount, setParticipantsCount] = useState(1); // ← OMDØBT fra participants til participantsCount
+  const [participantsCount, setParticipantsCount] = useState("");
   const [time, setTime] = useState("");
   const [selectedTags, setSelectedTags] = useState([]);
   const [imageFile, setImageFile] = useState([]);
@@ -113,11 +113,10 @@ export default function CreatePost({ open, onClose }) {
 
       <div
         className={`
-          fixed inset-x-0 bottom-0 w-screen
+          fixed inset-x-0 bottom-0
           bg-(--secondary) px-4 pt-8 z-50 pb-20
           transition-transform duration-300
-          rounded-t-2xl
-          max-h-[85vh] overflow-y-auto
+          rounded-t-2xl overflow-y-auto overflow-hidden
           ${open ? "translate-y-0" : "translate-y-full"}
         `}
         onClick={(e) => e.stopPropagation()}
@@ -138,7 +137,6 @@ export default function CreatePost({ open, onClose }) {
             onChange={(e) => setDescription(e.target.value)}
           />
         </div>
-
         <div className="flex flex-wrap gap-2 mb-4">
           {!tagsLoading &&
             allTags.map((tag) => (
@@ -155,48 +153,73 @@ export default function CreatePost({ open, onClose }) {
               </button>
             ))}
         </div>
+        <div className="flex justify-between text-[--white] text-sm pb-5 border-t border-[--white] pt-3">
+          <div className="flex flex-col gap-4 min-w-0">
+            <div className="relative flex items-center gap-2 min-w-0 flex-1 text-(--white)">
+              <MapPinIcon color="--white" size={20} />
+              <input
+                className="bg-transparent appearance-none border-none focus:outline-none text-[--white] flex-1 min-w-0 "
+                placeholder="Hvor foregår det..."
+                onFocus={handleFocus}
+                value={location}
+                onChange={(e) => setLocation(e.target.value)}
+              />
+            </div>
 
-        <div className="flex flex-column justify-between text-(--white) text-sm pb-5 gap-10">
-          <div className="relative flex items-center gap-2">
-            <MapPinIcon color="--white" size={20} />
-            <input
-              className="w-full"
-              onFocus={handleFocus}
-              placeholder="Hvor foregår det..."
-              value={location}
-              onChange={(e) => setLocation(e.target.value)}
-            />
-          </div>
+            <div
+              className="relative flex items-center gap-2 min-w-0 flex-1 "
+              style={{ color: "var(--white)" }}
+            >
+              <CalendarIcon color="--white" size={20} />
+              {!time && (
+                <span
+                  className="text-[--white] pointer-events-none absolute left-7 opacity-50"
+                  style={{ color: "var(--white)" }}
+                >
+                  Hvornår?
+                </span>
+              )}
+              <input
+                type="datetime-local"
+                className="bg-transparent appearance-none border-none focus:outline-none text-[--white] flex-1 min-w-0 relative z-10"
+                onFocus={handleFocus}
+                value={time}
+                onChange={(e) => setTime(e.target.value)}
+              />
+            </div>
 
-          <div className="relative flex items-center gap-2">
-            <CalendarIcon color="--white" size={20} />
-            <input
-              className="w-full no-spinner"
-              onFocus={handleFocus}
-              type="datetime-local"
-              value={time}
-              onChange={(e) => setTime(e.target.value)}
-            />
-          </div>
-
-          <div className="relative flex items-center w-20 text-[--white] gap-2">
-            <GroupsIcon color="--white" size={20} />
-            <input
-              className="w-full"
-              onFocus={handleFocus}
-              type="number"
-              min="1"
-              value={participantsCount}
-              onChange={(e) => setParticipantsCount(Number(e.target.value))}
+            <div className="relative flex items-center gap-2 min-w-0 flex-1 text-[--white]">
+              <GroupsIcon color="--white" size={20} />
+              <select
+                className={`bg-transparent appearance-none border-none focus:outline-none flex-1 min-w-0 
+      ${
+        !participantsCount
+          ? "text-[--white] opacity-50"
+          : "text-[--white] opacity-100"
+      }`}
+                style={{ color: "var(--white)" }}
+                value={participantsCount || ""}
+                onChange={(e) => setParticipantsCount(Number(e.target.value))}
+              >
+                <option value="" disabled>
+                  Deltagere
+                </option>
+                {Array.from({ length: 10 }, (_, i) => i + 1).map((num) => (
+                  <option key={num} value={num}>
+                    {num}
+                  </option>
+                ))}
+              </select>
+            </div>
+          </div>{" "}
+          <div className="flex min-w-0">
+            <ImagePicker
+              onImagesSelect={(files) =>
+                setImageFile((prev) => [...prev, ...files])
+              }
             />
           </div>
         </div>
-
-        <ImagePicker
-          onImagesSelect={(files) =>
-            setImageFile((prev) => [...prev, ...files])
-          }
-        />
 
         <Publish handlePublish={handlePublish} isPublishing={isPublishing} />
       </div>
