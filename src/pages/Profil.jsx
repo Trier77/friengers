@@ -347,7 +347,7 @@ export default function Profil() {
           onClick={() => toggleExpand(post.id)}
         >
           <button
-            className="text-sm uppercase text-(--primary) font-bold px-3 py-1 rounded-b-xl"
+            className="w-25 text-sm uppercase text-(--primary) font-bold px-3 py-1 rounded-b-xl"
             onClick={() => {
               if (
                 window.confirm(
@@ -362,7 +362,7 @@ export default function Profil() {
           </button>
 
           <button
-            className="border-2 text-sm uppercase border-t-0 bg-(--primary) text-(--white) font-bold px-5 py-2 rounded-b-xl"
+            className="w-50 border-2 text-md uppercase border-t-0 bg-(--primary) text-(--white) font-bold px-5 py-2 rounded-b-xl"
             onClick={() => {
               if (
                 window.confirm(
@@ -373,10 +373,11 @@ export default function Profil() {
               }
             }}
           >
-            Marker som færdig
+            Færdiggør
           </button>
 
           <button
+            className="w-25 text-sm uppercase text-(--primary) font-bold px-3 py-1 rounded-b-xl"
             onClick={(e) => {
               e.stopPropagation();
               setEditingPost(post);
