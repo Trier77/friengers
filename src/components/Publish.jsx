@@ -8,7 +8,7 @@ export default function SlideToPublish({ handlePublish, isPublishing }) {
 
   const handleDrag = (clientX) => {
     if (isPublishing) return; // Disable drag during publishing
-    
+
     const container = containerRef.current;
     const rect = container.getBoundingClientRect();
     let x = clientX - rect.left - 50;
@@ -31,7 +31,7 @@ export default function SlideToPublish({ handlePublish, isPublishing }) {
       if (sliderRef.current) {
         sliderRef.current.style.transform = `translateX(${threshold}px)`;
       }
-      
+
       // Call async publish function
       await handlePublish();
     }

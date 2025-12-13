@@ -1,6 +1,12 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRef } from "react";
-import { collection, addDoc, Timestamp } from "firebase/firestore";
+import {
+  collection,
+  addDoc,
+  updateDoc,
+  doc,
+  Timestamp,
+} from "firebase/firestore";
 import { auth, db } from "../firebase";
 import CalendarIcon from "../../public/icons/CalenderIcon";
 import GroupsIcon from "../../public/icons/GroupsIcon";
@@ -10,8 +16,9 @@ import ImagePicker from "./ImagePicker";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { storage } from "../firebase";
 import useTags from "./Tags";
+import Edit from "./Edit";
 
-export default function CreatePost({ open, onClose }) {
+export default function CreatePost({ open, onClose, post = null }) {
   const { tags: allTags, loading: tagsLoading } = useTags();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -36,64 +43,68 @@ export default function CreatePost({ open, onClose }) {
 
   const handlePublish = async () => {
     const user = auth.currentUser;
-
-    if (!user) {
-      console.error("User not logged in");
-      return;
-    }
+    if (!user) return;
 
     setIsPublishing(true);
 
     try {
-      let imageUrls = [];
+      let imageUrls = post?.imageUrls || [];
 
       for (const file of imageFile) {
         const imageRef = ref(
           storage,
           `posts/${user.uid}/${Date.now()}-${file.name}`
         );
-
         const snap = await uploadBytes(imageRef, file);
         const url = await getDownloadURL(snap.ref);
         imageUrls.push(url);
       }
 
-      // ✅ VIGTIGT: participants skal være et TOMT ARRAY, ikke et nummer!
-      await addDoc(collection(db, "posts"), {
-        title,
-        description,
-        location,
-        participants: [], // ← RETTET: Tom array i stedet for nummer
-        maxParticipants: participantsCount, // ← NYT FELT: Gem det ønskede antal her
-        tags: selectedTags,
-        time: Timestamp.fromDate(new Date(time)),
-        uid: user.uid,
-        imageUrls,
-        createdAt: Timestamp.now(),
-      });
-
-      console.log(
-        "✅ Post created with participants: [] and maxParticipants:",
-        participantsCount
-      );
-
-      // Reset form
-      setTitle("");
-      setDescription("");
-      setLocation("");
-      setParticipantsCount(1);
-      setTime("");
-      setSelectedTags([]);
-      setImageFile([]);
+      if (post) {
+        // ✏️ EDIT
+        await updateDoc(doc(db, "posts", post.id), {
+          title,
+          description,
+          location,
+          maxParticipants: participantsCount,
+          tags: selectedTags,
+          time: Timestamp.fromDate(new Date(time)),
+          imageUrls,
+        });
+      } else {
+        // ➕ CREATE
+        await addDoc(collection(db, "posts"), {
+          title,
+          description,
+          location,
+          participants: [],
+          maxParticipants: participantsCount,
+          tags: selectedTags,
+          time: Timestamp.fromDate(new Date(time)),
+          uid: user.uid,
+          imageUrls,
+          createdAt: Timestamp.now(),
+        });
+      }
 
       onClose();
-    } catch (error) {
-      console.error("Error creating post:", error);
-      alert("Der opstod en fejl ved oprettelsen af opslaget");
+    } catch (err) {
+      console.error(err);
     } finally {
       setIsPublishing(false);
     }
   };
+
+  useEffect(() => {
+    if (post) {
+      setTitle(post.title || "");
+      setDescription(post.description || "");
+      setLocation(post.location || "");
+      setParticipantsCount(post.maxParticipants || "");
+      setSelectedTags(post.tags || []);
+      setTime(post.time ? post.time.toDate().toISOString().slice(0, 16) : "");
+    }
+  }, [post]);
 
   return (
     <>
@@ -221,7 +232,16 @@ export default function CreatePost({ open, onClose }) {
           </div>
         </div>
 
-        <Publish handlePublish={handlePublish} isPublishing={isPublishing} />
+        <div className="flex justify-end">
+          {post ? (
+            <Edit handlePublish={handlePublish} isPublishing={isPublishing} />
+          ) : (
+            <Publish
+              handlePublish={handlePublish}
+              isPublishing={isPublishing}
+            />
+          )}
+        </div>
       </div>
     </>
   );

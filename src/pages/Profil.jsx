@@ -12,6 +12,7 @@ import Settings from "./Settings";
 import { motion } from "framer-motion";
 import OwnPost from "../components/Post";
 import Tilmeld from "../components/Tilmeld";
+import CreatePost from "../components/CreatePost";
 
 import { updateDoc } from "firebase/firestore";
 import GroupsIcon from "../../public/icons/GroupsIcon";
@@ -32,6 +33,8 @@ export default function Profil() {
   const [posts, setPosts] = useState([]);
 
   const userId = auth.currentUser?.uid;
+
+  const [editingPost, setEditingPost] = useState(null);
 
   const fetchPosts = async () => {
     const postsSnapshot = await getDocs(collection(db, "posts"));
@@ -372,6 +375,15 @@ export default function Profil() {
           >
             Marker som færdig
           </button>
+
+          <button
+            onClick={(e) => {
+              e.stopPropagation();
+              setEditingPost(post);
+            }}
+          >
+            Rediger
+          </button>
         </div>
       </motion.div>
     </motion.div>
@@ -505,6 +517,15 @@ export default function Profil() {
       transition={{ duration: 0.4 }}
       className="relative p-4 overflow-hidden"
     >
+      <CreatePost
+        open={!!editingPost}
+        post={editingPost}
+        onClose={() => {
+          setEditingPost(null);
+          fetchPosts(); // refresh list
+        }}
+      />
+
       <ColorCircle />
 
       {/* Header Section */}
