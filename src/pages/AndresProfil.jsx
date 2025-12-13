@@ -10,8 +10,10 @@ import {
   getDocs,
 } from "firebase/firestore";
 import { db } from "../firebase";
+import { useTranslation } from "react-i18next";
 
 function AndresProfil() {
+  const { t, i18n } = useTranslation();
   const { userId } = useParams();
   const navigate = useNavigate();
   const [userData, setUserData] = useState(null);
@@ -54,11 +56,11 @@ function AndresProfil() {
   }, [userId]);
 
   if (loading) {
-    return <div className="p-4 text-center">Henter profil...</div>;
+    return <div className="p-4 text-center">{t(`viewProfile.loading`)}</div>;
   }
 
   if (!userData) {
-    return <div className="p-4 text-center">Bruger ikke fundet</div>;
+    return <div className="p-4 text-center">{t(`viewProfile.notFound`)}</div>;
   }
 
   return (
@@ -105,10 +107,10 @@ function AndresProfil() {
           {/* Name and Study */}
           <div>
             <h1 className="text-2xl font-bold text-gray-900 whitespace-nowrap">
-              {userData.fuldenavn || userData.kaldenavn || "Ukendt"}
+              {userData.fuldenavn || userData.kaldenavn || t(`viewProfile.unknownName`)}
             </h1>
             <p className="text-blue-500 font-bold text-sm">
-              {userData.study || "Ikke angivet"}
+              {userData.study || t(`viewProfile.noStudy`)}
             </p>
             <p className="text-sm text-blue-500/50">
               {userData.pronouns || ""}
@@ -138,13 +140,13 @@ function AndresProfil() {
 
         {/* Bio - kan tilføjes til Firebase senere */}
         <p className="text-gray-700 text-sm mb-4">
-          {userData.bio || "Ingen beskrivelse tilgængelig"}
+          {userData.bio || t(`viewProfile.noBio`)}
         </p>
 
         {/* Tasks Completed - dummy for nu */}
         <div className="text-center">
           <p className="text-sm text-gray-600 font-semibold mb-2">
-            Opgaver løst
+            {t(`viewProfile.tasksCompleted`)}
           </p>
           <div className="inline-flex items-center justify-center w-12 h-12 bg-blue-500 rounded-full">
             <span className="text-white font-bold text-lg">
@@ -157,11 +159,11 @@ function AndresProfil() {
       {/* Active Posts Section */}
       <div className="px-6 mt-6">
         <h2 className="text-center font-bold text-gray-900 mb-4">
-          Aktive opgaver
+          {t(`viewProfile.activeTasks`)}
         </h2>
 
         {userPosts.length === 0 ? (
-          <p className="text-center text-gray-500">Ingen aktive opgaver</p>
+          <p className="text-center text-gray-500">{t(`viewProfile.noActiveTasks`)}</p>
         ) : (
           userPosts.map((post) => (
             <div
@@ -226,13 +228,13 @@ function AndresProfil() {
 
       {/* Member Since - kan tilføjes til Firebase senere */}
       <div className="text-center mt-8 mb-4">
-        <p className="text-gray-400 text-sm">Oprettet</p>
+        <p className="text-gray-400 text-sm">{t(`viewProfile.createdLabel`)}</p>
         <p className="text-gray-500 text-sm">
           {userData.createdAt
             ? new Date(userData.createdAt.seconds * 1000).toLocaleDateString(
                 "da-DK"
               )
-            : "Ukendt"}
+            : t(`viewProfile.createdUnknown`)}
         </p>
       </div>
     </motion.div>
