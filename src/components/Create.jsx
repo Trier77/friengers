@@ -2,8 +2,17 @@ import NewPostIcon from "../../public/icons/NewPostIcon";
 import CreatePost from "./CreatePost";
 import { useState } from "react";
 
-export default function Create({ allTags }) {
+export default function Create({ allTags, onPostCreated }) {
   const [open, setOpen] = useState(false);
+
+  const handleClose = async (wasCreated) => {
+    console.log("🚪 CreatePost closed, wasCreated:", wasCreated);
+    setOpen(false);
+    if (wasCreated && onPostCreated) {
+      console.log("✅ Calling onPostCreated");
+      await onPostCreated();
+    }
+  };
 
   return (
     <>
@@ -12,12 +21,7 @@ export default function Create({ allTags }) {
           <NewPostIcon />
         </button>
       </div>
-
-      <CreatePost
-        open={open}
-        onClose={() => setOpen(false)}
-        allTags={allTags}
-      />
+      <CreatePost open={open} onClose={handleClose} allTags={allTags} />
     </>
   );
 }

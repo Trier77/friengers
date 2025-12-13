@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { collection, getDocs, doc, getDoc } from "firebase/firestore";
 import { auth, db } from "../firebase";
 import { motion } from "framer-motion";
@@ -21,6 +21,8 @@ export default function Feed() {
   const [selectedTags, setSelectedTags] = useState([]);
   const [showFilter, setShowFilter] = useState(false);
   const [previewImage, setPreviewImage] = useState(null);
+  const [highlightPostId, setHighlightPostId] = useState(null);
+  const myPostsRef = useRef(null);
 
   const userId = auth.currentUser?.uid;
 
@@ -47,6 +49,79 @@ export default function Feed() {
     fetchData();
   }, []);
 
+  const myPosts = posts.filter(
+    (post) => post.uid === userId && post.active !== false
+  );
+
+  // FUNGERENDE VERSION - Bruger friske data direkte
+  const handlePostCreated = async () => {
+    console.log(" handlePostCreated started");
+
+    const oldPostIds = new Set(myPosts.map((p) => p.id));
+    console.log(" Old post IDs:", Array.from(oldPostIds));
+
+    // Hent friske posts direkte (ikke via state)
+    const postsSnapshot = await getDocs(collection(db, "posts"));
+    const freshPosts = await Promise.all(
+      postsSnapshot.docs.map(async (postDoc) => {
+        const postData = postDoc.data();
+        const userSnap = await getDoc(doc(db, "users", postData.uid));
+        return {
+          id: postDoc.id,
+          ...postData,
+          author: userSnap.exists() ? userSnap.data() : null,
+        };
+      })
+    );
+
+    console.log(" Fresh posts fetched:", freshPosts.length);
+
+    // Opdater state (til UI)
+    setPosts(freshPosts);
+
+    // Find det nye opslag med de FRISKE data (ikke state)
+    const newMyPosts = freshPosts.filter(
+      (post) => post.uid === userId && post.active !== false
+    );
+    console.log(" New myPosts count:", newMyPosts.length);
+    console.log(
+      " New myPosts IDs:",
+      newMyPosts.map((p) => p.id)
+    );
+
+    const newPost = newMyPosts.find((p) => !oldPostIds.has(p.id));
+    console.log("✨ New post:", newPost ? newPost.id : "NONE");
+
+    if (newPost) {
+      console.log("🎉 New post found:", newPost.id);
+
+      // 1️ Scroll til toppen FØRST
+      myPostsRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+
+      // 2️ Vent på scroll er færdig, SÅ trigger shockwave
+      setTimeout(() => {
+        console.log(" Triggering shockwave animation");
+        setHighlightPostId(newPost.id);
+
+        // 3️ Fjern highlight efter shockwave er færdig
+        setTimeout(() => {
+          console.log(" Removing highlight");
+          setHighlightPostId(null);
+        }, 1200); // Match shockwave animation duration
+      }, 800); //  Delay så scroll når at blive færdig først
+    } else {
+      console.log("❌ NO NEW POST FOUND!");
+      console.log("Debug - oldPostIds:", Array.from(oldPostIds));
+      console.log(
+        "Debug - newMyPosts IDs:",
+        newMyPosts.map((p) => p.id)
+      );
+    }
+  };
+
   const toggleExpand = (id) => {
     setExpandedPostId((prevId) => (prevId === id ? null : id));
   };
@@ -70,19 +145,28 @@ export default function Feed() {
     (post) => post.uid !== userId && post.active !== false
   );
 
-  const myPosts = posts.filter(
-    (post) => post.uid === userId && post.active !== false
-  );
-
-  // Det her er hvordan vores egne post skal se ud
   const renderMyPost = (post, index) => (
     <motion.div
       key={post.id}
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      className="mb-4"
+      initial={{
+        opacity: 0,
+        y: -20, // Lidt mindre bevægelse
+      }}
+      animate={{
+        opacity: 1,
+        y: 0,
+      }}
+      transition={{
+        duration: 0.5,
+        ease: "easeOut",
+      }}
+      className="mb-4 relative"
     >
+      {/*  Shockwave effekt - enkelt bølge der pulserer ud */}
+      {highlightPostId === post.id && (
+        <div className="absolute inset-0 border-4 border-blue-400 rounded-full animate-shockwave pointer-events-none"></div>
+      )}
+
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -91,7 +175,7 @@ export default function Feed() {
           delay: 0.3 + index * 0.15,
           ease: "easeInOut",
         }}
-        className="flex text-(--secondary) justify-between items-center bg-(--secondary) rounded-full px-4 py-3"
+        className="flex text-(--secondary) justify-between items-center bg-(--secondary) rounded-full px-4 py-3 transition-all duration-300"
       >
         <h3 className="justify-start text-(--white) text-xl overskrift">
           {post.title}
@@ -116,14 +200,16 @@ export default function Feed() {
     </motion.div>
   );
 
-  // Og her er så den samlet return
   return (
     <div className="p-4">
       <NotificationWrapper />
-      {myPosts.length > 0 &&
-        myPosts.map((post, index) => renderMyPost(post, index))}
 
-      <Create allTags={allTags} />
+      <div ref={myPostsRef}>
+        {myPosts.length > 0 &&
+          myPosts.map((post, index) => renderMyPost(post, index))}
+      </div>
+
+      <Create allTags={allTags} onPostCreated={handlePostCreated} />
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}
