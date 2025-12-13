@@ -20,8 +20,11 @@ import CalenderIcon from "../../public/icons/CalenderIcon";
 import MapPinIcon from "../../public/icons/MapPinIcon";
 import { useNavigate } from "react-router";
 import ColorCircle from "../components/ColorCircle";
+import { useTranslation } from "react-i18next";
 
 export default function Profil() {
+  const { t, i18n } = useTranslation();
+
   const [userData, setUserData] = useState(null);
   const [activeTab, setActiveTab] = useState("active");
   const [expandedPostId, setExpandedPostId] = useState(null);
@@ -98,7 +101,7 @@ export default function Profil() {
     fetchProfile();
   }, []);
 
-  if (!userData) return <p>Henter profil...</p>;
+  if (!userData) return <p>{t(`ownProfile.loading`)}</p>;
 
   const myPosts = posts.filter(
     (post) => post.uid === userId && post.active !== false
@@ -116,24 +119,24 @@ export default function Profil() {
     const seconds = Math.floor((Date.now() - date.getTime()) / 1000);
 
     const intervals = [
-      { label: ["år", "år"], secs: 31536000 },
-      { label: ["måned", "måneder"], secs: 2592000 },
-      { label: ["uge", "uger"], secs: 604800 },
-      { label: ["dag", "dage"], secs: 86400 },
-      { label: ["time", "timer"], secs: 3600 },
-      { label: ["minut", "minutter"], secs: 60 },
-      { label: ["sekund", "sekunder"], secs: 1 },
+      { label: [t(`time.year_one`), t(`time.year_other`)], secs: 31536000 },
+      { label: [t(`time.month_one`), t(`time.month_other`)], secs: 2592000 },
+      { label: [t(`time.week_one`), t(`time.week_other`)], secs: 604800 },
+      { label: [t(`time.day_one`), t(`time.day_other`)], secs: 86400 },
+      { label: [t(`time.hour_one`), t(`time.hour_other`)], secs: 3600 },
+      { label: [t(`time.minute_one`), t(`time.minute_other`)], secs: 60 },
+      { label: [t(`time.second_one`), t(`time.second_other`)], secs: 1 },
     ];
 
     for (const i of intervals) {
       const count = Math.floor(seconds / i.secs);
       if (count >= 1) {
         const label = count === 1 ? i.label[0] : i.label[1];
-        return `for ${count} ${label} siden`;
+        return t(`time.ago`, { count: count, unit: label });
       }
     }
 
-    return "lige nu";
+    return t(`time.now`);
   }
 
   const deletePost = async (postId) => {
@@ -333,7 +336,7 @@ export default function Profil() {
                   {post.participantsNames.join(", ")}
                 </p>
               ) : (
-                <p className="text-(--white) text-sm">Ingen deltagere endnu</p>
+                <p className="text-(--white) text-sm">{t(`post.noParticipants`)}</p>
               )}
             </div>
           </div>
@@ -347,31 +350,23 @@ export default function Profil() {
           <button
             className="text-sm uppercase text-(--primary) font-bold px-3 py-1 rounded-b-xl"
             onClick={() => {
-              if (
-                window.confirm(
-                  "Er du sikker på, at du vil slette denne opgave?"
-                )
-              ) {
+              if (window.confirm(t(`post.confirmDelete`))) {
                 deletePost(post.id);
               }
             }}
           >
-            Slet
+            {t(`actions.delete`)}
           </button>
 
           <button
             className="border-2 text-sm uppercase border-t-0 bg-(--primary) text-(--white) font-bold px-5 py-2 rounded-b-xl"
             onClick={() => {
-              if (
-                window.confirm(
-                  "Er du sikker på, at du vil markere denne opgave som løst?"
-                )
-              ) {
+              if (window.confirm(t(`post.confirmDone`))) {
                 markAsDone(post.id, post.title);
               }
             }}
           >
-            Marker som færdig
+            {t(`actions.markDone`)}
           </button>
         </div>
       </motion.div>
@@ -530,7 +525,7 @@ export default function Profil() {
             </h1>
             <p className="text-blue-500 font-bold text-sm">{userData.study}</p>
             <p className="text-sm text-blue-500/50">{userData.pronouns}</p>
-            <div className="absolute right-0 top-2">
+            <div className="absolute right-0 top-2 pr-4 mt-2">
               <NavLink to="/Settings">
                 <svg
                   className="w-6 h-6 text-[#002546]" // w-6/h-6 svarer nogenlunde til 24px
@@ -548,7 +543,7 @@ export default function Profil() {
         {/* Bio */}
         <input
           className="w-full text-(--secondary)"
-          placeholder="Skriv din beskrivelse her..."
+          placeholder={t(`ownProfile.bioPlaceholder`)}
           value={bio}
           onChange={(e) => setBio(e.target.value)}
           onBlur={async () => {
@@ -584,7 +579,7 @@ export default function Profil() {
                 : "text-(--secondary) border-2 border-(--secondary"
             }`}
           >
-            Oprettet
+            {t(`ownProfile.tabs.created`)}
           </button>
           <button
             onClick={() => setActiveTab("group")}
@@ -594,7 +589,7 @@ export default function Profil() {
                 : "text-(--secondary) border-2 border-(--secondary"
             }`}
           >
-            Tilmeldt
+            {t(`ownProfile.tabs.joined`)}
           </button>
         </div>
 
@@ -609,19 +604,19 @@ export default function Profil() {
         </div>
 
         {previewImage && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50"
-          onClick={() => setPreviewImage(null)}
-        >
-          <div className="max-w-3xl max-h-[90vh]">
-            <img
-              src={previewImage}
-              alt="Preview"
-              className="w-full h-full object-contain rounded-xl"
-            />
+          <div
+            className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50"
+            onClick={() => setPreviewImage(null)}
+          >
+            <div className="max-w-3xl max-h-[90vh]">
+              <img
+                src={previewImage}
+                alt={t(`common.preview`)}
+                className="w-full h-full object-contain rounded-xl"
+              />
+            </div>
           </div>
-        </div>
-      )}
+        )}
       </div>
     </motion.div>
   );

@@ -9,12 +9,13 @@ i18n
   .use(initReactI18next)
   .init({
     fallbackLng: "da",
+    keySeparator: ".",
     interpolation: {
-      escapeValue: false
+      escapeValue: false,
     },
     backend: {
-      loadPath: "/locales/{{lng}}/translation.json"
-    }
+      loadPath: "/locales/{{lng}}/translation.json",
+    },
   });
 
 export default i18n;

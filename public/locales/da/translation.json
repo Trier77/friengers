@@ -5,6 +5,60 @@
   "notifications": "Notifikationer",
   "darkmode": "Dark mode",
   "about": "Om os",
-  "help": "Hjælp og support",
-  "logout": "Log ud"
+  "help": "Hjælp & support",
+  "logout": "Log ud",
+
+  "viewProfile": {
+    "loading": "Henter profil...",
+    "notFound": "Bruger ikke fundet",
+    "unknownName": "Ukendt",
+    "noStudy": "Ikke angivet",
+    "noBio": "Ingen beskrivelse tilgængelig",
+    "tasksCompleted": "Opgaver løst",
+    "activeTasks": "Aktive opgaver",
+    "noActiveTasks": "Ingen aktive opgaver",
+    "createdLabel": "Oprettet",
+    "createdUnknown": "Ukendt"
+  },
+
+  
+  "ownProfile": {
+    "loading": "Henter profil...",
+    "bioPlaceholder": "Skriv din beskrivelse her...",
+    "tabs": {
+      "created": "Oprettet",
+      "joined": "Tilmeldt"
+    }
+  },
+  "post": {
+    "noParticipants": "Ingen deltagere endnu",
+    "confirmDelete": "Er du sikker på, at du vil slette denne opgave?",
+    "confirmDone": "Er du sikker på, at du vil markere denne opgave som løst?"
+  },
+  "actions": {
+    "delete": "Slet",
+    "markDone": "Marker som færdig"
+  },
+  "time": {
+    "now": "lige nu",
+    "ago": "for {{count}} {{unit}} siden",
+    "year_one": "år",
+    "year_other": "år",
+    "month_one": "måned",
+    "month_other": "måneder",
+    "week_one": "uge",
+    "week_other": "uger",
+    "day_one": "dag",
+    "day_other": "dage",
+    "hour_one": "time",
+    "hour_other": "timer",
+    "minute_one": "minut",
+    "minute_other": "minutter",
+    "second_one": "sekund",
+    "second_other": "sekunder"
+  },
+  "common": {
+    "preview": "Preview"
+  }
 }
+
