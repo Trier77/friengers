@@ -41,6 +41,17 @@ export default function CreatePost({ open, onClose, post = null }) {
     );
   };
 
+  // ✅ Reset funktion
+  const resetForm = () => {
+    setTitle("");
+    setDescription("");
+    setLocation("");
+    setParticipantsCount("");
+    setTime("");
+    setSelectedTags([]);
+    setImageFile([]);
+  };
+
   const handlePublish = async () => {
     const user = auth.currentUser;
     if (!user) return;
@@ -71,6 +82,9 @@ export default function CreatePost({ open, onClose, post = null }) {
           time: Timestamp.fromDate(new Date(time)),
           imageUrls,
         });
+        console.log("✏️ Post edited");
+        resetForm(); // ✅ Reset efter edit
+        onClose(false);
       } else {
         // ➕ CREATE
         await addDoc(collection(db, "posts"), {
@@ -85,14 +99,22 @@ export default function CreatePost({ open, onClose, post = null }) {
           imageUrls,
           createdAt: Timestamp.now(),
         });
-      }
 
-      onClose();
+        console.log("✅ New post created!");
+        resetForm(); // ✅ Reset efter create
+        onClose(true);
+      }
     } catch (err) {
       console.error(err);
     } finally {
       setIsPublishing(false);
     }
+  };
+
+  // ✅ Reset når modal lukkes uden at gemme
+  const handleClose = () => {
+    resetForm();
+    onClose(false);
   };
 
   useEffect(() => {
@@ -103,8 +125,11 @@ export default function CreatePost({ open, onClose, post = null }) {
       setParticipantsCount(post.maxParticipants || "");
       setSelectedTags(post.tags || []);
       setTime(post.time ? post.time.toDate().toISOString().slice(0, 16) : "");
+    } else {
+      // ✅ Reset når ikke i edit mode
+      resetForm();
     }
-  }, [post]);
+  }, [post, open]); // ✅ Tilføjet open som dependency
 
   return (
     <>
@@ -119,7 +144,7 @@ export default function CreatePost({ open, onClose, post = null }) {
               : "opacity-0 pointer-events-none"
           }
         `}
-        onClick={onClose}
+        onClick={handleClose} // ✅ Bruger handleClose
       />
 
       <div

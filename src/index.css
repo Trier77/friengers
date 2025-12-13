@@ -6,7 +6,7 @@
   --white: #f0f0f0;
   --font: "Quicksand", sans-serif;
   --overskrift: "Winky Sans", sans-serif;
-  
+
   --bg-color: #f0f0f0;
   --text-color: #002546;
 }
@@ -61,4 +61,23 @@ body {
 
 .oval-spin {
   animation: ovalspin 6s linear infinite;
+}
+
+/* ✨ Shockwave animation - enkelt bølge der pulserer ud */
+@keyframes shockwave {
+  0% {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  50% {
+    opacity: 0.8;
+  }
+  100% {
+    transform: scale(1.15);
+    opacity: 0;
+  }
+}
+
+.animate-shockwave {
+  animation: shockwave 1.2s ease-out;
 }
