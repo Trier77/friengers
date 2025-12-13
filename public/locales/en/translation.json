@@ -92,4 +92,12 @@
       "defaultName": "Group chat",
       "prefix": "Group chat: "
     }
-  }}
+  },
+
+  "login": {
+      "failed": "Login failed",
+      "inCollaborationWith": "In collaboration with"
+    }
+
+
+  }

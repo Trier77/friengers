@@ -6,8 +6,10 @@ import logoAnimation from "../assets/logo-animation.json";
 import { useNavigate } from "react-router";
 import { login } from "../auth";
 import { motion, AnimatePresence } from "framer-motion";
+import { useTranslation } from "react-i18next";
 
 export default function Login() {
+  const { t, i18n } = useTranslation();
   const [shouldPlay, setShouldPlay] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -29,7 +31,7 @@ export default function Login() {
       await login(email, password);
       navigate("/");
     } catch (err) {
-      alert("Login failed: " + err.message);
+      alert( t(`login.failed`) + err.message);
       setShouldPlay(false);
     }
   };
@@ -71,7 +73,7 @@ export default function Login() {
             exit={{ opacity: 0, y: 20 }}
             transition={{ duration: 0.5 }}
           >
-            <p className="text-xs text-(--primary)">I samarbejde med</p>
+            <p className="text-xs text-(--primary)">{t(`login.inCollaborationWith`)}</p>
             <AUIcon color="--primary" size={150} />
           </motion.div>
         )}

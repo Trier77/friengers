@@ -93,5 +93,12 @@
       "defaultName": "Gruppechat",
       "prefix": "Gruppechat: "
     }
-}}
+},
+
+  "login": {
+      "failed": "Login failed",
+      "inCollaborationWith": "In collaboration with"
+    }
+  }
+
 
