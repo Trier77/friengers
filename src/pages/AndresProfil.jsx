@@ -26,7 +26,7 @@ function AndresProfil() {
   const [loading, setLoading] = useState(true);
   const [showInviteDropdown, setShowInviteDropdown] = useState(false);
   const [myPosts, setMyPosts] = useState([]);
-  const [invitedPosts, setInvitedPosts] = useState(new Set()); // Track hvilke posts brugeren er inviteret til
+  const [invitedPosts, setInvitedPosts] = useState(new Set());
   const currentUserId = auth.currentUser?.uid;
 
   const [expandedPostId, setExpandedPostId] = useState(null);
@@ -35,10 +35,38 @@ function AndresProfil() {
   const toggleExpand = (id) =>
     setExpandedPostId((prev) => (prev === id ? null : id));
 
+  const sendGroupChatNotifications = async (
+    postId,
+    postTitle,
+    participantUids
+  ) => {
+    try {
+      console.log("Sender gruppechat-notifikationer til:", participantUids);
+
+      for (const uid of participantUids) {
+        const userRef = doc(db, "users", uid);
+
+        await updateDoc(userRef, {
+          notifications: arrayUnion({
+            notificationType: "groupchat_created",
+            postId: postId,
+            postTitle: postTitle,
+            status: "pending",
+            timestamp: Date.now(),
+            createdAt: Date.now(),
+          }),
+        });
+      }
+
+      console.log("Gruppechat-notifikationer sendt!");
+    } catch (error) {
+      console.error("Fejl ved sending af gruppechat-notifikationer:", error);
+    }
+  };
+
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        // Hent brugerdata
         const userDoc = await getDoc(doc(db, "users", userId));
         if (!userDoc.exists()) {
           setLoading(false);
@@ -46,7 +74,6 @@ function AndresProfil() {
         }
         setUserData(userDoc.data());
 
-        // 1. Hent brugerens egne opgaver
         const postsQuery = query(
           collection(db, "posts"),
           where("uid", "==", userId)
@@ -57,7 +84,6 @@ function AndresProfil() {
           ...doc.data(),
         }));
 
-        // 2. Hent opgaver hvor brugeren er deltager
         const participantQuery = query(
           collection(db, "posts"),
           where("participants", "array-contains", userId)
@@ -68,7 +94,6 @@ function AndresProfil() {
           ...doc.data(),
         }));
 
-        // 3. Kombiner uden dubletter
         const allPostsMap = new Map();
         ownPosts.forEach((post) => allPostsMap.set(post.id, post));
         participantPosts.forEach((post) => allPostsMap.set(post.id, post));
@@ -76,7 +101,6 @@ function AndresProfil() {
 
         setUserPosts(allPosts);
 
-        // 4. Hent MINE posts (for invitation dropdown)
         if (currentUserId) {
           const myPostsQuery = query(
             collection(db, "posts"),
@@ -124,29 +148,23 @@ function AndresProfil() {
       const postSnap = await getDoc(postRef);
       const postData = postSnap.data();
 
-      // 1. Tilføj brugeren til post's requests
       await updateDoc(postRef, {
         requests: arrayUnion(userId),
       });
 
       const currentParticipants = postData.participants || [];
 
-      // 2. Tjek om gruppechat skal oprettes (hvis første deltager)
       if (currentParticipants.length === 0) {
-        console.log("🎉 FØRSTE DELTAGER - VIS GRUPPECHAT POPUP!");
-        // Vis popup for at oprette gruppechat
-        setShowInviteDropdown(false); // Luk dropdown
-        // Vi skal vise popup her - men vi skal bruge en state i parent eller anden løsning
-        // For nu, lad os bare oprette den automatisk hvis det er en invitation
+        console.log("FØRSTE DELTAGER - Opretter gruppechat");
+        setShowInviteDropdown(false);
 
-        // Auto-opret gruppechat ved invitation
         const groupChatId = `group_${postId}`;
         const groupChatRef = doc(db, "chats", groupChatId);
 
         await setDoc(groupChatRef, {
           postId: postId,
           chatName: postData.title,
-          participants: [currentUserId, userId], // Både dig og den inviterede
+          participants: [currentUserId, userId],
           createdAt: serverTimestamp(),
           createdBy: currentUserId,
           isGroupChat: true,
@@ -155,9 +173,13 @@ function AndresProfil() {
           lastMessageSenderId: currentUserId,
         });
 
-        console.log("✅ Gruppechat auto-oprettet ved invitation");
+        console.log("Gruppechat auto-oprettet ved invitation");
+
+        await sendGroupChatNotifications(postId, postData.title, [
+          currentUserId,
+          userId,
+        ]);
       } else {
-        // 3. Hvis gruppechat allerede eksisterer, tilføj brugeren
         const groupChatId = `group_${postId}`;
         const groupChatRef = doc(db, "chats", groupChatId);
 
@@ -167,21 +189,19 @@ function AndresProfil() {
             await updateDoc(groupChatRef, {
               participants: arrayUnion(userId),
             });
-            console.log("✅ Bruger tilføjet til gruppechat");
+            console.log("Bruger tilføjet til gruppechat");
           }
         } catch (error) {
-          console.log("ℹ️ Ingen gruppechat endnu");
+          console.log("Ingen gruppechat endnu");
         }
       }
 
-      // 4. Opret notification til den inviterede bruger
       const currentUserDoc = await getDoc(doc(db, "users", currentUserId));
       const currentUserData = currentUserDoc.data();
 
-      // Opret notification dokument
       await updateDoc(doc(db, "users", userId), {
         notifications: arrayUnion({
-          type: "invitation",
+          notificationType: "invitation",
           from: currentUserId,
           fromName: currentUserData.kaldenavn || currentUserData.fuldenavn,
           fromImage: currentUserData.profileImage || null,
@@ -191,15 +211,13 @@ function AndresProfil() {
         }),
       });
 
-      console.log("✅ Invitation sendt!");
+      console.log("Invitation sendt!");
 
-      // Opdater UI - marker som inviteret
       setInvitedPosts((prev) => new Set([...prev, postId]));
 
-      // Vis success besked
       alert(`Du har inviteret ${userData.kaldenavn || userData.fuldenavn}!`);
     } catch (error) {
-      console.error("❌ Fejl ved invitation:", error);
+      console.error("Fejl ved invitation:", error);
       alert("Der opstod en fejl. Prøv igen.");
     }
   };
@@ -225,9 +243,7 @@ function AndresProfil() {
     >
       <ColorCircle />
 
-      {/* Header Section */}
       <div className="pb-4 relative">
-        {/* Flag Icon - top right */}
         <button className="absolute top-4 right-4">
           <svg
             className="w-6 h-6 text-blue-500 opacity-40"
@@ -243,9 +259,8 @@ function AndresProfil() {
             />
           </svg>
         </button>
-        {/* Profile Info */}
+
         <div className="flex items-center gap-4 mb-4">
-          {/* Avatar with border */}
           <div className="relative">
             <div className="w-20 h-20 rounded-full">
               <img
@@ -256,7 +271,6 @@ function AndresProfil() {
             </div>
           </div>
 
-          {/* Name and Study */}
           <div>
             <h1 className="text-2xl font-bold text-gray-900 whitespace-nowrap">
               {userData.fuldenavn || userData.kaldenavn || "Ukendt"}
@@ -271,13 +285,11 @@ function AndresProfil() {
         </div>
 
         <div className="flex justify-between">
-          {/* Bio */}
           <p className="text-(--secondary) text-sm">
             {userData.bio || "Ingen beskrivelse tilgængelig"}
-          </p>{" "}
+          </p>
         </div>
 
-        {/* Action Buttons */}
         <div className="flex justify-between pt-4 items-center">
           <div>
             <p className="text-xs flex gap-4 items-center text-(--primary) font-semibold">
@@ -286,9 +298,9 @@ function AndresProfil() {
                 {completedCount}
               </span>
             </p>
-          </div>{" "}
+          </div>
+
           <div className="flex gap-4">
-            {/* Message Button */}
             <div>
               <button
                 onClick={() => navigate(`/Chats/${userId}`)}
@@ -298,7 +310,6 @@ function AndresProfil() {
               </button>
             </div>
 
-            {/* Invite Button */}
             <div>
               <button
                 onClick={() => setShowInviteDropdown(!showInviteDropdown)}
@@ -320,15 +331,13 @@ function AndresProfil() {
                   </svg>
                   <p className="text-xs text-(--secondary) font-semibold">
                     Inviter
-                  </p>{" "}
+                  </p>
                 </div>
               </button>
             </div>
           </div>
-          {/* Tasks Completed */}
         </div>
 
-        {/* Invite Dropdown */}
         <AnimatePresence>
           {showInviteDropdown && (
             <motion.div
@@ -411,7 +420,6 @@ function AndresProfil() {
         </AnimatePresence>
       </div>
 
-      {/* Active Posts Section */}
       <div className="p">
         <h2 className="text-center font-bold text-gray-900 mb-4">
           Aktive opgaver
@@ -423,21 +431,21 @@ function AndresProfil() {
             <PostCard
               key={post.id}
               post={post}
-              userId={userId} // den profil vi ser
+              userId={userId}
               expandedPostId={expandedPostId}
               toggleExpand={toggleExpand}
-              selectedTags={[]} // ingen filter her
+              selectedTags={[]}
               handleDropdownChange={() => {}}
-              setPreviewImage={setPreviewImage} // kan bruges til at åbne billede
+              setPreviewImage={setPreviewImage}
               navigate={navigate}
-              fetchPosts={() => {}} // tom funktion, Tilmeld kan ignorere
+              fetchPosts={() => {}}
               showAuthor={false}
               showTimestamp={true}
             />
           ))
         )}
       </div>
-      {/* Preview modal */}
+
       {previewImage && (
         <div
           className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50"
