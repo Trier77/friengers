@@ -17,6 +17,8 @@ export default function PostCard({
   showAuthor = true, // <--- ny prop
   showTimestamp = false, // <--- ny prop
 }) {
+  const isFocused = expandedPostId === post.id;
+
   function timeAgo(date) {
     const seconds = Math.floor((Date.now() - date.getTime()) / 1000);
 
@@ -176,14 +178,10 @@ export default function PostCard({
           style={{
             originX: 1,
             originY: 1,
+            pointerEvents: isFocused ? "auto" : "none",
           }}
           animate={{
-            scale:
-              expandedPostId === null
-                ? 0.8
-                : expandedPostId === post.id
-                ? 1
-                : 0.5,
+            scale: expandedPostId === null ? 0.8 : isFocused ? 1 : 0.5,
           }}
           transition={{ duration: 0.3 }}
         >
