@@ -10,7 +10,11 @@ import { useState } from "react";
 import { useNavigate } from "react-router";
 import GroupChatPrompt from "./GroupChatPrompt";
 
-export default function NotificationsPopup({ notifications, open, closePopup }) {
+export default function NotificationsPopup({
+  notifications,
+  open,
+  closePopup,
+}) {
   const [showGroupChatPrompt, setShowGroupChatPrompt] = useState(false);
   const [selectedPost, setSelectedPost] = useState(null);
   const navigate = useNavigate();
@@ -21,7 +25,7 @@ export default function NotificationsPopup({ notifications, open, closePopup }) 
     const postId = notification.postId;
     const requesterUid = notification.requesterUid;
     const postTitle = notification.postTitle;
-    
+
     const postRef = doc(db, "posts", postId);
     const userRef = doc(db, "users", currentUserUid);
 
@@ -91,6 +95,35 @@ export default function NotificationsPopup({ notifications, open, closePopup }) 
     }
   };
 
+  const sendGroupChatNotifications = async (
+    postId,
+    postTitle,
+    participantUids
+  ) => {
+    try {
+      console.log("📬 Sender gruppechat-notifikationer til:", participantUids);
+
+      for (const uid of participantUids) {
+        const userRef = doc(db, "users", uid);
+
+        await updateDoc(userRef, {
+          notifications: arrayUnion({
+            notificationType: "groupchat_created",
+            postId: postId,
+            postTitle: postTitle,
+            status: "pending",
+            timestamp: Date.now(),
+            createdAt: Date.now(),
+          }),
+        });
+      }
+
+      console.log("✅ Gruppechat-notifikationer sendt!");
+    } catch (error) {
+      console.error("❌ Fejl ved sending af gruppechat-notifikationer:", error);
+    }
+  };
+
   // Håndter invitation godkendelse/afvisning
   const handleInvitationResponse = async (notification, approve) => {
     try {
@@ -101,7 +134,11 @@ export default function NotificationsPopup({ notifications, open, closePopup }) 
       const userSnap = await getDoc(userRef);
       const userData = userSnap.data();
       const updatedNotifications = (userData.notifications || []).map((n) => {
-        if (n.postId === notification.postId && n.from === notification.from && n.notificationType === "invitation") {
+        if (
+          n.postId === notification.postId &&
+          n.from === notification.from &&
+          n.notificationType === "invitation"
+        ) {
           return {
             ...n,
             status: approve ? "accepted" : "rejected",
@@ -167,15 +204,52 @@ export default function NotificationsPopup({ notifications, open, closePopup }) 
           participants: arrayUnion(...postData.participants),
         });
         console.log("✅ Alle deltagere tilføjet til gruppechat");
+
+        // 🎉 NYT: Send notifikationer til alle deltagere
+        await sendGroupChatNotifications(
+          selectedPost.id,
+          selectedPost.title,
+          [...postData.participants, postData.uid] // Inkluder også opgave-ejeren
+        );
       }
     }
 
     setSelectedPost(null);
   };
 
-  // Separer notifikationer efter type
-  const requests = notifications.filter((n) => n.notificationType === "request");
-  const invitations = notifications.filter((n) => n.notificationType === "invitation");
+  const handleGroupChatNotification = async (notification) => {
+    try {
+      const userRef = doc(db, "users", currentUserUid);
+      const userSnap = await getDoc(userRef);
+      const userData = userSnap.data();
+
+      // Opdater notifikationens status
+      const updatedNotifications = (userData.notifications || []).map((n) => {
+        if (
+          n.postId === notification.postId &&
+          n.notificationType === "groupchat_created"
+        ) {
+          return {
+            ...n,
+            status: "opened",
+            openedAt: Date.now(),
+          };
+        }
+        return n;
+      });
+
+      await updateDoc(userRef, {
+        notifications: updatedNotifications,
+      });
+
+      // Send brugeren til gruppechatten
+      const groupChatId = `group_${notification.postId}`;
+      navigate(`/GroupChat/${groupChatId}`);
+      closePopup();
+    } catch (error) {
+      console.error("❌ Fejl ved åbning af gruppechat:", error);
+    }
+  };
 
   return (
     <>
@@ -224,166 +298,222 @@ export default function NotificationsPopup({ notifications, open, closePopup }) 
             </div>
           ) : (
             <>
-              {/* REQUESTS */}
-              {requests.map((n, index) => {
+              {notifications.map((n, index) => {
                 const isPending = !n.status || n.status === "pending";
                 const isAccepted = n.status === "accepted";
                 const isRejected = n.status === "rejected";
 
-                return (
-                  <div
-                    key={`request-${n.postId}-${n.requesterUid}-${n.createdAt}`}
-                    className={`p-4 ${
-                      !isPending ? "opacity-50 bg-gray-50" : ""
-                    } ${
-                      index !== requests.length - 1 || invitations.length > 0
-                        ? "border-b border-gray-200"
-                        : ""
-                    }`}
-                  >
-                    <div className="mb-3">
-                      <p className="text-gray-600 text-sm mb-1">
-                        Anmodning til:
-                      </p>
-                      <p className="text-(--secondary) font-bold text-base">
-                        {n.postTitle}
-                      </p>
-                    </div>
-
-                    <div className="flex items-center gap-3 mb-4">
-                      <img
-                        src={
-                          n.requesterImage || "https://via.placeholder.com/48"
+                // GRUPPECHAT NOTIFIKATION
+                if (n.notificationType === "groupchat_created") {
+                  return (
+                    <div
+                      key={`groupchat-${n.postId}-${n.timestamp}`}
+                      className={`p-4 cursor-pointer hover:bg-gray-50 transition-colors ${
+                        !isPending ? "opacity-50 bg-gray-50" : ""
+                      } ${
+                        index !== notifications.length - 1
+                          ? "border-b border-gray-200"
+                          : ""
+                      }`}
+                      onClick={() => {
+                        if (isPending) {
+                          handleGroupChatNotification(n);
                         }
-                        alt={n.requesterName}
-                        className="w-12 h-12 rounded-full border-2 border-(--secondary) cursor-pointer object-cover"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          navigate(`/AndresProfil/${n.requesterUid}`);
-                        }}
-                      />
-                      <div className="flex-1">
-                        <p
-                          className="text-(--secondary) font-semibold cursor-pointer hover:underline"
-                          onClick={() =>
-                            navigate(`/AndresProfil/${n.requesterUid}`)
+                      }}
+                    >
+                      <div className="mb-3">
+                        <p className="text-gray-600 text-sm mb-1">
+                          Gruppechat oprettet:
+                        </p>
+                        <p className="text-(--secondary) font-bold text-base">
+                          {n.postTitle}
+                        </p>
+                      </div>
+
+                      <div className="flex items-center gap-3 mb-2">
+                        <div className="w-12 h-12 rounded-full bg-blue-500 flex items-center justify-center">
+                          <svg
+                            className="w-6 h-6 text-white"
+                            fill="currentColor"
+                            viewBox="0 0 20 20"
+                          >
+                            <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
+                          </svg>
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-gray-700 font-semibold">
+                            Gruppechat er klar!
+                          </p>
+                          <p className="text-gray-500 text-sm">
+                            Klik for at åbne chatten
+                          </p>
+                        </div>
+                      </div>
+
+                      {!isPending && (
+                        <p className="text-center py-2 text-gray-500 text-sm italic">
+                          Åbnet
+                        </p>
+                      )}
+                    </div>
+                  );
+                }
+
+                // REQUEST NOTIFIKATION
+                if (n.notificationType === "request") {
+                  return (
+                    <div
+                      key={`request-${n.postId}-${n.requesterUid}-${n.createdAt}`}
+                      className={`p-4 ${
+                        !isPending ? "opacity-50 bg-gray-50" : ""
+                      } ${
+                        index !== notifications.length - 1
+                          ? "border-b border-gray-200"
+                          : ""
+                      }`}
+                    >
+                      <div className="mb-3">
+                        <p className="text-gray-600 text-sm mb-1">
+                          Anmodning til:
+                        </p>
+                        <p className="text-(--secondary) font-bold text-base">
+                          {n.postTitle}
+                        </p>
+                      </div>
+
+                      <div className="flex items-center gap-3 mb-4">
+                        <img
+                          src={
+                            n.requesterImage || "https://via.placeholder.com/48"
                           }
-                        >
-                          {n.requesterName}
-                        </p>
-                        <p className="text-gray-500 text-sm">
-                          vil gerne hjælpe
-                        </p>
+                          alt={n.requesterName}
+                          className="w-12 h-12 rounded-full border-2 border-(--secondary) cursor-pointer object-cover"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(`/AndresProfil/${n.requesterUid}`);
+                          }}
+                        />
+                        <div className="flex-1">
+                          <p
+                            className="text-(--secondary) font-semibold cursor-pointer hover:underline"
+                            onClick={() =>
+                              navigate(`/AndresProfil/${n.requesterUid}`)
+                            }
+                          >
+                            {n.requesterName}
+                          </p>
+                          <p className="text-gray-500 text-sm">
+                            vil gerne hjælpe
+                          </p>
+                        </div>
                       </div>
-                    </div>
 
-                    {isPending ? (
-                      <div className="flex gap-3">
-                        <button
-                          onClick={() => handleResponse(n, false)}
-                          className="flex-1 py-3 border-2 border-gray-300 rounded-full hover:bg-gray-50"
-                        >
-                          Afvis
-                        </button>
-                        <button
-                          onClick={() => handleResponse(n, true)}
-                          className="flex-1 py-3 bg-(--secondary) text-white rounded-full hover:brightness-110"
-                        >
-                          Godkend
-                        </button>
-                      </div>
-                    ) : (
-                      <p
-                        className={`text-center py-3 font-semibold ${
-                          isAccepted ? "text-green-600" : "text-red-600"
-                        }`}
-                      >
-                        {isAccepted
-                          ? "Du accepterede denne anmodning"
-                          : "Du afviste denne anmodning"}
-                      </p>
-                    )}
-                  </div>
-                );
-              })}
-
-              {/* INVITATIONS */}
-              {invitations.map((n, index) => {
-                const isPending = !n.status || n.status === "pending";
-                const isAccepted = n.status === "accepted";
-                const isRejected = n.status === "rejected";
-
-                return (
-                  <div
-                    key={`invitation-${n.postId}-${n.from}-${n.timestamp}`}
-                    className={`p-4 ${
-                      !isPending ? "opacity-50 bg-gray-50" : ""
-                    } ${
-                      index !== invitations.length - 1
-                        ? "border-b border-gray-200"
-                        : ""
-                    }`}
-                  >
-                    <div className="mb-3">
-                      <p className="text-gray-600 text-sm mb-1">
-                        Invitation til:
-                      </p>
-                      <p className="text-(--secondary) font-bold text-base">
-                        {n.postTitle}
-                      </p>
-                    </div>
-
-                    <div className="flex items-center gap-3 mb-4">
-                      <img
-                        src={n.fromImage || "https://via.placeholder.com/48"}
-                        alt={n.fromName}
-                        className="w-12 h-12 rounded-full object-cover cursor-pointer border-2 border-(--secondary)"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          navigate(`/AndresProfil/${n.from}`);
-                        }}
-                      />
-                      <div className="flex-1">
+                      {isPending ? (
+                        <div className="flex gap-3">
+                          <button
+                            onClick={() => handleResponse(n, false)}
+                            className="flex-1 py-3 border-2 border-gray-300 rounded-full hover:bg-gray-50"
+                          >
+                            Afvis
+                          </button>
+                          <button
+                            onClick={() => handleResponse(n, true)}
+                            className="flex-1 py-3 bg-(--secondary) text-white rounded-full hover:brightness-110"
+                          >
+                            Godkend
+                          </button>
+                        </div>
+                      ) : (
                         <p
-                          className="text-(--secondary) font-semibold text-base cursor-pointer hover:underline"
-                          onClick={() => navigate(`/AndresProfil/${n.from}`)}
+                          className={`text-center py-3 font-semibold ${
+                            isAccepted ? "text-green-600" : "text-red-600"
+                          }`}
                         >
-                          {n.fromName}
+                          {isAccepted
+                            ? "Du accepterede denne anmodning"
+                            : "Du afviste denne anmodning"}
                         </p>
-                        <p className="text-gray-500 text-sm">
-                          har inviteret dig
-                        </p>
-                      </div>
+                      )}
                     </div>
+                  );
+                }
 
-                    {isPending ? (
-                      <div className="flex gap-3">
-                        <button
-                          onClick={() => handleInvitationResponse(n, false)}
-                          className="flex-1 py-3 border-2 border-gray-300 text-gray-700 font-semibold rounded-full hover:bg-gray-50 transition-colors"
-                        >
-                          Afvis
-                        </button>
-                        <button
-                          onClick={() => handleInvitationResponse(n, true)}
-                          className="flex-1 py-3 bg-(--secondary) text-(--white) font-semibold rounded-full hover:brightness-110 transition-all"
-                        >
-                          Acceptér
-                        </button>
+                // INVITATION NOTIFIKATION
+                if (n.notificationType === "invitation") {
+                  return (
+                    <div
+                      key={`invitation-${n.postId}-${n.from}-${n.timestamp}`}
+                      className={`p-4 ${
+                        !isPending ? "opacity-50 bg-gray-50" : ""
+                      } ${
+                        index !== notifications.length - 1
+                          ? "border-b border-gray-200"
+                          : ""
+                      }`}
+                    >
+                      <div className="mb-3">
+                        <p className="text-gray-600 text-sm mb-1">
+                          Invitation til:
+                        </p>
+                        <p className="text-(--secondary) font-bold text-base">
+                          {n.postTitle}
+                        </p>
                       </div>
-                    ) : (
-                      <p
-                        className={`text-center py-3 font-semibold ${
-                          isAccepted ? "text-green-600" : "text-red-600"
-                        }`}
-                      >
-                        {isAccepted
-                          ? "Du accepterede denne invitation"
-                          : "Du afviste denne invitation"}
-                      </p>
-                    )}
-                  </div>
-                );
+
+                      <div className="flex items-center gap-3 mb-4">
+                        <img
+                          src={n.fromImage || "https://via.placeholder.com/48"}
+                          alt={n.fromName}
+                          className="w-12 h-12 rounded-full object-cover cursor-pointer border-2 border-(--secondary)"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(`/AndresProfil/${n.from}`);
+                          }}
+                        />
+                        <div className="flex-1">
+                          <p
+                            className="text-(--secondary) font-semibold text-base cursor-pointer hover:underline"
+                            onClick={() => navigate(`/AndresProfil/${n.from}`)}
+                          >
+                            {n.fromName}
+                          </p>
+                          <p className="text-gray-500 text-sm">
+                            har inviteret dig
+                          </p>
+                        </div>
+                      </div>
+
+                      {isPending ? (
+                        <div className="flex gap-3">
+                          <button
+                            onClick={() => handleInvitationResponse(n, false)}
+                            className="flex-1 py-3 border-2 border-gray-300 text-gray-700 font-semibold rounded-full hover:bg-gray-50 transition-colors"
+                          >
+                            Afvis
+                          </button>
+                          <button
+                            onClick={() => handleInvitationResponse(n, true)}
+                            className="flex-1 py-3 bg-(--secondary) text-(--white) font-semibold rounded-full hover:brightness-110 transition-all"
+                          >
+                            Acceptér
+                          </button>
+                        </div>
+                      ) : (
+                        <p
+                          className={`text-center py-3 font-semibold ${
+                            isAccepted ? "text-green-600" : "text-red-600"
+                          }`}
+                        >
+                          {isAccepted
+                            ? "Du accepterede denne invitation"
+                            : "Du afviste denne invitation"}
+                        </p>
+                      )}
+                    </div>
+                  );
+                }
+
+                return null;
               })}
             </>
           )}
