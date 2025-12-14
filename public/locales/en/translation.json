@@ -122,6 +122,14 @@
     "noMessagesSubtitle": "Send the first message! 💬",
     "unknownSender": "Unknown",
     "messagePlaceholder": "Type a message..."
+  }, 
+
+  "individualChat": {
+    "loading": "Loading chat...",
+    "userNotFound": "User not found",
+    "noMessagesTitle": "No messages yet",
+    "noMessagesSubtitle": "Send the first message! 💬",
+    "messagePlaceholder": "Type a message..."
   }
 
   }

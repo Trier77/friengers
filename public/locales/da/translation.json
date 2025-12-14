@@ -124,6 +124,14 @@
     "noMessagesSubtitle": "Send den første besked! 💬",
     "unknownSender": "Ukendt",
     "messagePlaceholder": "Skriv en besked..."
+  },
+
+  "individualChat": {
+    "loading": "Henter chat...",
+    "userNotFound": "Bruger ikke fundet",
+    "noMessagesTitle": "Ingen beskeder endnu",
+    "noMessagesSubtitle": "Send den første besked! 💬",
+    "messagePlaceholder": "Skriv en besked..."
   }
   
   }

@@ -13,8 +13,10 @@ import {
   setDoc,
 } from "firebase/firestore";
 import { db, auth } from "../firebase";
+import { useTranslation } from "react-i18next";
 
 function IndividualChat() {
+  const { t, i18n } = useTranslation();
   const { chatId } = useParams();
   const navigate = useNavigate();
   const messagesEndRef = useRef(null);
@@ -157,11 +159,11 @@ function IndividualChat() {
   };
 
   if (loading) {
-    return <div className="p-4 text-center">Henter chat...</div>;
+    return <div className="p-4 text-center">{t(`individualChat.loading`)}</div>;
   }
 
   if (!otherUser) {
-    return <div className="p-4 text-center">Bruger ikke fundet</div>;
+    return <div className="p-4 text-center">{t(`individualChat.userNotFound`)}</div>;
   }
 
   return (
@@ -206,8 +208,8 @@ function IndividualChat() {
       <div className="flex-1 overflow-y-auto p-4 space-y-3">
         {messages.length === 0 && (
           <div className="text-center text-gray-400 mt-8">
-            <p>Ingen beskeder endnu</p>
-            <p className="text-sm">Send den første besked! 💬</p>
+            <p>{t(`individualChat.noMessagesTitle`)}</p>
+            <p className="text-sm">{t(`individualChat.noMessagesSubtitle`)}</p>
           </div>
         )}
         {messages.map((message) => (
@@ -259,7 +261,7 @@ function IndividualChat() {
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
             onKeyPress={handleKeyPress}
-            placeholder="Skriv en besked..."
+            placeholder={t(`individualChat.messagePlaceholder`)}
             onFocus={() => {
               setIsInputFocused(true);
               const nav = document.querySelector("nav");
