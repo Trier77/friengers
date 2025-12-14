@@ -14,9 +14,10 @@ import {
 } from "firebase/firestore";
 import { db, auth } from "../firebase";
 import { useTranslation } from "react-i18next";
+import { useTranslation } from "react-i18next";
 
 function GroupChat() {
-  const { t, i18n } = useTranslation();
+  const {t} = useTranslation();
   const { chatId } = useParams();
   const navigate = useNavigate();
   const messagesEndRef = useRef(null);
@@ -174,13 +175,21 @@ function GroupChat() {
     const participant = participants.find((p) => p.uid === senderId);
     return participant?.profileImage || "https://via.placeholder.com/32";
   };
-
+//LOADING ANIMATION SKAL DEN VÆRE HER?
   if (loading) {
-  return <div className="p-4 text-center">{t(`groupChat.loading`)}</div>;
+    return (
+      <div className="p-4 text-center pointer-events-none select-none">
+        {t(`groupChat.loading`)}
+      </div>
+    );
   }
 
   if (!chatInfo) {
-    return <div className="p-4 text-center">{t(`groupChat.notFound`)}</div>;
+    return (
+      <div className="p-4 text-center pointer-events-none select-none">
+        {t(`groupChat.notFound`)}
+      </div>
+    );
   }
 
   return (

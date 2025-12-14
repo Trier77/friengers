@@ -1,15 +1,8 @@
-import { doc, updateDoc, arrayUnion } from "firebase/firestore";
+import { doc, updateDoc, arrayUnion, getDoc } from "firebase/firestore";
 import { auth, db } from "../firebase";
 import { useState, useRef } from "react";
-
-const sendJoinRequest = async (postId) => {
-  const userId = auth.currentUser.uid;
-  const postRef = doc(db, "posts", postId);
-
-  await updateDoc(postRef, {
-    requests: arrayUnion(userId),
-  });
-};
+import { createPortal } from "react-dom";
+import { useTranslation } from "react-i18next";
 
 export default function Tilmeld({
   postId,
@@ -18,6 +11,7 @@ export default function Tilmeld({
   onUpdate,
   className = "",
 }) {
+  const {t} =useTranslation();
   const userId = auth.currentUser.uid;
   const [localParticipants, setLocalParticipants] = useState(
     Array.isArray(participants) ? participants : []
@@ -30,15 +24,63 @@ export default function Tilmeld({
 
   const [showNotification, setShowNotification] = useState(false);
 
+  const isActive = isJoined || isRequested;
+
+  const sendJoinRequest = async (postId) => {
+    const userId = auth.currentUser.uid;
+    const postRef = doc(db, "posts", postId);
+    const userSnap = await getDoc(doc(db, "users", userId));
+    const userData = userSnap.exists() ? userSnap.data() : {};
+    const postSnap = await getDoc(postRef);
+    const postData = postSnap.data();
+    const postOwnerUid = postData.uid;
+
+    await updateDoc(postRef, {
+      requests: arrayUnion(userId),
+    });
+
+    const ownerRef = doc(db, "users", postOwnerUid);
+    const ownerSnap = await getDoc(ownerRef);
+
+    if (ownerSnap.exists()) {
+      const ownerData = ownerSnap.data();
+      const existingNotifications = ownerData.notifications || [];
+
+      const filteredNotifications = existingNotifications.filter(
+        (n) =>
+          !(
+            n.notificationType === "request" &&
+            n.postId === postId &&
+            n.requesterUid === userId &&
+            (!n.status || n.status === "pending")
+          )
+      );
+
+      const newNotification = {
+        notificationType: "request",
+        requesterUid: userId,
+        requesterName: userData.kaldenavn || userData.fuldenavn || "Anonym",
+        requesterImage: userData.profileImage || null,
+        postId: postId,
+        postTitle: postData.title || "Uden titel",
+        status: "pending",
+        createdAt: Date.now(),
+      };
+
+      await updateDoc(ownerRef, {
+        notifications: [...filteredNotifications, newNotification],
+      });
+    }
+  };
+
   const handleClick = async () => {
     if (isJoined || isRequested) return;
 
     try {
       await sendJoinRequest(postId);
-      setShowNotification(true); // ✅ vis popup
+      setShowNotification(true);
       onUpdate();
 
-      // Skjul popup igen efter 3 sek
       setTimeout(() => {
         setShowNotification(false);
       }, 3000);
@@ -74,17 +116,17 @@ export default function Tilmeld({
 
   return (
     <div>
-      {showNotification && (
-        <>
-          {/* Background overlay */}
-          <div className="fixed inset-0 bg-(--white) opacity-60 z-40 transition" />
+      {showNotification &&
+        createPortal(
+          <>
+            <div className="fixed inset-0 bg-(--white) opacity-60 z-40" />
 
-          {/* Popup */}
-          <div className="fixed text-lg overskrift w-70 left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-(--secondary) font-bold text-(--white) px-4 py-2 rounded-full z-50 text-center">
-            Din anmodning er sendt!
-          </div>
-        </>
-      )}
+            <div className="fixed w-60 text-center left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-(--secondary) font-bold text-(--white) p-2  rounded-full z-50">
+              {t("request-sent")}
+            </div>
+          </>,
+          document.body
+        )}
 
       <button
         onMouseDown={handleMouseDown}
@@ -96,9 +138,10 @@ export default function Tilmeld({
       >
         <div
           className={`absolute inset-0 transition-colors duration-300 ${
-            isJoined ? "bg-(--secondary)" : "bg-(--white)"
+            isActive ? "bg-(--secondary)" : "bg-(--white)"
           }`}
         />
+
         <div
           className="absolute bottom-0 left-0 w-full bg-(--secondary) transition-all"
           style={{ height: `${progress}%` }}

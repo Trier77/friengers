@@ -2,8 +2,10 @@ import { useState } from "react";
 import { doc, setDoc, serverTimestamp } from "firebase/firestore";
 import { db, auth } from "../firebase";
 import { motion, AnimatePresence } from "framer-motion";
+import { useTranslation } from "react-i18next";
 
 export default function GroupChatPrompt({ postId, postTitle, onClose }) {
+  const {t} = useTranslation();
   const [isCreating, setIsCreating] = useState(false);
 
   console.log("🔵 GroupChatPrompt rendered:", { postId, postTitle });
@@ -55,7 +57,7 @@ export default function GroupChatPrompt({ postId, postTitle, onClose }) {
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
         exit={{ opacity: 0 }}
-        className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4"
+        className="fixed inset-0 bg-black/50 z-501 flex items-center justify-center p-4"
         onClick={() => !isCreating && onClose(false)}
       >
         <motion.div
@@ -66,10 +68,10 @@ export default function GroupChatPrompt({ postId, postTitle, onClose }) {
           onClick={(e) => e.stopPropagation()}
         >
           <h2 className="text-xl font-bold text-gray-900 mb-2">
-            Opret gruppechat?
+            {t("group?")}
           </h2>
           <p className="text-gray-600 mb-6">
-            Vil du oprette en gruppechat for:{" "}
+            {t("group-for?")}{" "}
             <span className="font-semibold text-blue-600">{postTitle}</span>?
           </p>
 
@@ -79,7 +81,7 @@ export default function GroupChatPrompt({ postId, postTitle, onClose }) {
               disabled={isCreating}
               className="flex-1 px-4 py-3 border-2 border-gray-300 text-gray-700 font-semibold rounded-full hover:bg-gray-50 transition-colors disabled:opacity-50"
             >
-              Nej tak
+              {t("no-thx")}
             </button>
             <button
               onClick={handleCreateGroupChat}

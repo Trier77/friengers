@@ -1,55 +1,37 @@
-import {
-  collection,
-  onSnapshot,
-  query,
-  where,
-  getDoc,
-  doc,
-} from "firebase/firestore";
-import { auth, db } from "../firebase";
-import { useEffect, useState } from "react";
+import { useState, useEffect } from "react";
+import { doc, onSnapshot } from "firebase/firestore";
+import { db, auth } from "../firebase";
 
 export default function useNotifications() {
   const [notifications, setNotifications] = useState([]);
-  const userId = auth.currentUser?.uid;
+  const currentUserId = auth.currentUser?.uid;
 
   useEffect(() => {
-    if (!userId) return;
+    if (!currentUserId) return;
 
-    const q = query(collection(db, "posts"), where("uid", "==", userId));
+    // Lyt til brugerens document for ALLE notifications
+    const userDocRef = doc(db, "users", currentUserId);
 
-    const unsubscribe = onSnapshot(q, async (snapshot) => {
-      const newNotifications = [];
-
-      for (const postDoc of snapshot.docs) {
-        const data = postDoc.data();
-
-        if (data.requests && data.requests.length > 0) {
-          for (const requesterUid of data.requests) {
-            const userSnap = await getDoc(doc(db, "users", requesterUid));
-            const userData = userSnap.exists()
-              ? userSnap.data()
-              : {
-                  fuldenavn: requesterUid,
-                  profileImage: null, // Fallback hvis bruger ikke findes
-                };
-
-            newNotifications.push({
-              postId: postDoc.id,
-              requesterUid,
-              requesterName: userData.kaldenavn || userData.fuldenavn, // ← Bruger kaldenavn først, så fuldenavn
-              requesterImage: userData.profileImage || null, // ← TILFØJET!
-              postTitle: data.title,
-            });
-          }
-        }
+    const unsubscribe = onSnapshot(userDocRef, (userDoc) => {
+      if (!userDoc.exists()) {
+        setNotifications([]);
+        return;
       }
 
-      setNotifications(newNotifications);
+      const userData = userDoc.data();
+      const allNotifications = userData.notifications || [];
+
+      // Sorter efter nyeste først
+      const sortedNotifications = allNotifications.sort((a, b) => {
+        return (b.createdAt || 0) - (a.createdAt || 0);
+      });
+
+      // ✅ VIGTIG: Returner ALLE notifications (både pending og håndterede)
+      setNotifications(sortedNotifications);
     });
 
     return () => unsubscribe();
-  }, [userId]);
+  }, [currentUserId]);
 
   return notifications;
 }

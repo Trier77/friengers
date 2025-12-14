@@ -6,13 +6,14 @@ import {
   doc,
   getDoc,
   deleteDoc,
-  addDoc,
 } from "firebase/firestore";
 import { NavLink } from "react-router";
 import Settings from "./Settings";
 import { motion } from "framer-motion";
 import OwnPost from "../components/Post";
 import Tilmeld from "../components/Tilmeld";
+import CreatePost from "../components/CreatePost";
+import { useRef } from "react";
 
 import { updateDoc } from "firebase/firestore";
 import GroupsIcon from "../../public/icons/GroupsIcon";
@@ -21,9 +22,10 @@ import MapPinIcon from "../../public/icons/MapPinIcon";
 import { useNavigate } from "react-router";
 import ColorCircle from "../components/ColorCircle";
 import { useTranslation } from "react-i18next";
+import { useTranslation } from "react-i18next";
 
 export default function Profil() {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
 
   const [userData, setUserData] = useState(null);
   const [activeTab, setActiveTab] = useState("active");
@@ -31,11 +33,33 @@ export default function Profil() {
   const [selectedTags, setSelectedTags] = useState([]);
   const navigate = useNavigate();
   const [previewImage, setPreviewImage] = useState(null);
+  const [userPosts, setUserPosts] = useState([]);
 
   const [bio, setBio] = useState("");
   const [posts, setPosts] = useState([]);
 
+  const bioRef = useRef(null);
+
+  useEffect(() => {
+    if (bioRef.current) {
+      bioRef.current.style.height = "auto"; // nulstil først
+      bioRef.current.style.height = bioRef.current.scrollHeight + "px"; // sæt til scrollHeight
+    }
+  }, [bio]);
+
   const userId = auth.currentUser?.uid;
+
+  const [editingPost, setEditingPost] = useState(null);
+
+  useEffect(() => {
+    if (!userId) return;
+
+    const myCompletedPosts = posts.filter(
+      (post) => post.uid === userId && post.active === false
+    );
+
+    setUserPosts(myCompletedPosts);
+  }, [posts, userId]);
 
   const fetchPosts = async () => {
     const postsSnapshot = await getDocs(collection(db, "posts"));
@@ -141,44 +165,106 @@ export default function Profil() {
 
   const deletePost = async (postId) => {
     try {
-      console.log("🗑️ Sletter post:", postId);
+      console.log("Sletter post:", postId);
 
-      // 1. Slet selve opslaget
-      await deleteDoc(doc(db, "posts", postId));
-      console.log("✅ Post slettet");
+      // Hent post data FØR vi sletter den
+      const postRef = doc(db, "posts", postId);
+      const postSnap = await getDoc(postRef);
+      const postData = postSnap.data();
+      const postTitle = postData.title;
+      const participants = postData.participants || [];
 
-      // 2. Tjek om der er en tilhørende gruppechat
+      // Tjek om der var en gruppechat
       const groupChatId = `group_${postId}`;
       const groupChatRef = doc(db, "chats", groupChatId);
-
       const groupChatSnap = await getDoc(groupChatRef);
+      const hadGroupChat = groupChatSnap.exists();
 
-      if (groupChatSnap.exists()) {
-        console.log("📬 Fandt gruppechat, sletter...");
+      // Hent info om den bruger der sletter (dig selv)
+      const currentUserSnap = await getDoc(doc(db, "users", userId));
+      const currentUserData = currentUserSnap.data();
 
-        // 2a. Slet alle beskeder i gruppechatten først
+      // Send notifikationer til alle deltagere
+      if (participants.length > 0) {
+        console.log("Sender notifikationer til deltagere:", participants);
+
+        for (const participantId of participants) {
+          try {
+            const participantRef = doc(db, "users", participantId);
+            const participantSnap = await getDoc(participantRef);
+
+            if (participantSnap.exists()) {
+              const participantData = participantSnap.data();
+              const existingNotifications = participantData.notifications || [];
+
+              const filteredNotifications = existingNotifications.filter(
+                (n) =>
+                  !(
+                    n.notificationType === "post_deleted" &&
+                    n.postId === postId &&
+                    (!n.status || n.status === "pending")
+                  )
+              );
+
+              const newNotification = {
+                notificationType: "post_deleted",
+                postId: postId,
+                postTitle: postTitle,
+                deletedBy: userId,
+                deletedByName:
+                  currentUserData.kaldenavn || currentUserData.fuldenavn,
+                deletedByImage: currentUserData.profileImage || null,
+                hadGroupChat: hadGroupChat,
+                status: "pending",
+                timestamp: Date.now(),
+                createdAt: Date.now(),
+              };
+
+              await updateDoc(participantRef, {
+                notifications: [...filteredNotifications, newNotification],
+              });
+            }
+          } catch (error) {
+            console.error(
+              "Fejl ved sending af notifikation til:",
+              participantId,
+              error
+            );
+          }
+        }
+
+        console.log("Notifikationer sendt til alle deltagere");
+      }
+
+      // Slet selve opslaget
+      await deleteDoc(postRef);
+      console.log("Post slettet");
+
+      // Slet gruppechat hvis den findes
+      if (hadGroupChat) {
+        console.log("Fandt gruppechat, sletter...");
+
         const messagesRef = collection(db, "chats", groupChatId, "messages");
         const messagesSnap = await getDocs(messagesRef);
 
-        console.log(`🗑️ Sletter ${messagesSnap.docs.length} beskeder...`);
+        console.log("Sletter beskeder:", messagesSnap.docs.length);
 
         for (const messageDoc of messagesSnap.docs) {
           await deleteDoc(messageDoc.ref);
         }
 
-        // 2b. Slet selve gruppechat dokumentet
         await deleteDoc(groupChatRef);
-        console.log("✅ Gruppechat og alle beskeder slettet");
+        console.log("Gruppechat og alle beskeder slettet");
       } else {
-        console.log("ℹ️ Ingen gruppechat fundet");
+        console.log("Ingen gruppechat fundet");
       }
 
-      // 3. Opdater den lokale state
+      // Opdater den lokale state
       setPosts((prevPosts) => prevPosts.filter((post) => post.id !== postId));
 
-      console.log("🎉 Alt slettet succesfuldt!");
+      console.log("Alt slettet succesfuldt!");
     } catch (error) {
-      console.error("❌ Fejl ved sletning:", error);
+      console.error("Fejl ved sletning:", error);
       alert("Der opstod en fejl ved sletning. Prøv igen.");
     }
   };
@@ -348,7 +434,7 @@ export default function Profil() {
           onClick={() => toggleExpand(post.id)}
         >
           <button
-            className="text-sm uppercase text-(--primary) font-bold px-3 py-1 rounded-b-xl"
+            className="w-25 text-sm uppercase text-(--primary) font-bold px-3 py-1 rounded-b-xl"
             onClick={() => {
               if (window.confirm(t(`post.confirmDelete`))) {
                 deletePost(post.id);
@@ -359,7 +445,7 @@ export default function Profil() {
           </button>
 
           <button
-            className="border-2 text-sm uppercase border-t-0 bg-(--primary) text-(--white) font-bold px-5 py-2 rounded-b-xl"
+            className="w-50 border-2 text-md uppercase border-t-0 bg-(--primary) text-(--white) font-bold px-5 py-2 rounded-b-xl"
             onClick={() => {
               if (window.confirm(t(`post.confirmDone`))) {
                 markAsDone(post.id, post.title);
@@ -367,6 +453,16 @@ export default function Profil() {
             }}
           >
             {t(`actions.markDone`)}
+          </button>
+
+          <button
+            className="w-25 text-sm uppercase text-(--primary) font-bold px-3 py-1 rounded-b-xl"
+            onClick={(e) => {
+              e.stopPropagation();
+              setEditingPost(post);
+            }}
+          >
+            Rediger
           </button>
         </div>
       </motion.div>
@@ -494,6 +590,7 @@ export default function Profil() {
     </motion.div>
   );
 
+  const completedCount = userPosts.length;
   return (
     <motion.div
       initial={{ opacity: 0 }}
@@ -501,6 +598,15 @@ export default function Profil() {
       transition={{ duration: 0.4 }}
       className="relative p-4 overflow-hidden"
     >
+      <CreatePost
+        open={!!editingPost}
+        post={editingPost}
+        onClose={() => {
+          setEditingPost(null);
+          fetchPosts(); // refresh list
+        }}
+      />
+
       <ColorCircle />
 
       {/* Header Section */}
@@ -541,11 +647,20 @@ export default function Profil() {
         </div>
 
         {/* Bio */}
-        <input
-          className="w-full text-(--secondary)"
+        <textarea
+          ref={bioRef}
+          className="w-full text-(--secondary) resize-none overflow-hidden"
           placeholder={t(`ownProfile.bioPlaceholder`)}
           value={bio}
-          onChange={(e) => setBio(e.target.value)}
+          rows={3}
+          onChange={(e) => {
+            const lines = e.target.value.split("\n");
+            if (lines.length <= 3) {
+              setBio(e.target.value);
+            } else {
+              setBio(lines.slice(0, 3).join("\n")); // begræns til maks 3 linjer
+            }
+          }}
           onBlur={async () => {
             const user = auth.currentUser;
             if (!user) return;
@@ -553,29 +668,26 @@ export default function Profil() {
             const docRef = doc(db, "users", user.uid);
             await updateDoc(docRef, { bio });
           }}
-          onKeyDown={async (e) => {
-            if (e.key === "Enter") {
-              e.preventDefault(); // Undgå linjeskift
-              e.target.blur(); // Skjul tastaturet
-
-              const user = auth.currentUser;
-              if (!user) return;
-
-              const docRef = doc(db, "users", user.uid);
-              await updateDoc(docRef, { bio });
-            }
-          }}
         />
+
+        <div className="flex justify-center pt-4">
+          <p className="text-xs flex gap-4 items-center text-(--primary) font-semibold">
+            {t("tasks-solved")}
+            <span className="text-(--secondary) font-bold text-xl">
+              {completedCount}
+            </span>
+          </p>
+        </div>
       </div>
 
-      <div className="flex flex-col justify-center pt-10">
+      <div className="flex flex-col justify-center">
         {/* Tab Buttons */}
-        <div className="flex gap-3 px-10 mt-6 justify-center">
+        <div className="flex gap-3 px-10 justify-center">
           <button
             onClick={() => setActiveTab("active")}
             className={`flex-1 py-2 px-6 rounded-full font-semibold transition-colors ${
               activeTab === "active"
-                ? "bg-(--secondary) text-(--white)"
+                ? "bg-(--secondary) text-(--white) border-2 border-(--secondary"
                 : "text-(--secondary) border-2 border-(--secondary"
             }`}
           >
@@ -585,8 +697,8 @@ export default function Profil() {
             onClick={() => setActiveTab("group")}
             className={`flex-1 py-2 px-6 rounded-full font-semibold transition-colors ${
               activeTab === "group"
-                ? "bg-(--secondary) text-(--white)"
-                : "text-(--secondary) border-2 border-(--secondary"
+                ? "bg-(--secondary) text-(--white) border-2 border-(--secondary"
+                : "text-(--secondary) border-2 border-(--secondary "
             }`}
           >
             {t(`ownProfile.tabs.joined`)}

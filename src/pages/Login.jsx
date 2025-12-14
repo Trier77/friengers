@@ -7,9 +7,10 @@ import { useNavigate } from "react-router";
 import { login } from "../auth";
 import { motion, AnimatePresence } from "framer-motion";
 import { useTranslation } from "react-i18next";
+import { useTranslation } from "react-i18next";
 
 export default function Login() {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const [shouldPlay, setShouldPlay] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");

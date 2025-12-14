@@ -7,6 +7,8 @@
   "about": "Om os",
   "help": "Hjælp & support",
   "logout": "Log ud",
+  "overview": "Oversigt",
+  "notif-title": "Notifikationer",
 
   "viewProfile": {
     "loading": "Henter profil...",
@@ -21,7 +23,6 @@
     "createdUnknown": "Ukendt"
   },
 
-  
   "ownProfile": {
     "loading": "Henter profil...",
     "bioPlaceholder": "Skriv din beskrivelse her...",
@@ -69,7 +70,7 @@
     "youPrefix": "Dig:",
     "unknownUser": "Ukendt",
 
-      "tabs": {
+    "tabs": {
       "private": "Privat chat",
       "group": "Gruppe chat"
     },
@@ -93,21 +94,21 @@
       "defaultName": "Gruppechat",
       "prefix": "Gruppechat: "
     }
-},
+  },
 
   "login": {
-      "failed": "Login failed",
-      "inCollaborationWith": "In collaboration with",
-       
-      "form": {
+    "failed": "Login failed",
+    "inCollaborationWith": "In collaboration with",
+
+    "form": {
       "title": "Log ind med dit AU-login",
       "emailPlaceholder": "Email",
       "passwordPlaceholder": "Adgangskode",
       "rememberMe": "Forbliv logget ind",
       "submit": "Login"
-    }},
-  
-  
+    }
+  },
+
   "feed": {
     "filter": "Filter",
     "noMatchingPosts": "Ingen opslag matcher de valgte tags.",
@@ -116,7 +117,7 @@
     "previewAlt": "Preview"
   },
 
-   "groupChat": {
+  "groupChat": {
     "loading": "Henter gruppechat...",
     "notFound": "Chat ikke fundet",
     "participants": "deltagere",
@@ -133,7 +134,4 @@
     "noMessagesSubtitle": "Send den første besked! 💬",
     "messagePlaceholder": "Skriv en besked..."
   }
-  
-  }
-
-
+}

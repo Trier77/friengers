@@ -14,9 +14,10 @@ import {
 } from "firebase/firestore";
 import { db, auth } from "../firebase";
 import { useTranslation } from "react-i18next";
+import { useTranslation } from "react-i18next";
 
 function IndividualChat() {
-  const { t, i18n } = useTranslation();
+  const { t } = useTranslation();
   const { chatId } = useParams();
   const navigate = useNavigate();
   const messagesEndRef = useRef(null);
@@ -157,9 +158,13 @@ function IndividualChat() {
       handleSendMessage();
     }
   };
-
+//LOADING ANIMATION SKAL DEN VÆRE HER????
   if (loading) {
-    return <div className="p-4 text-center">{t(`individualChat.loading`)}</div>;
+    return (
+      <div className="p-4 text-center pointer-events-none select-none">
+        {t(`individualChat.loading`)}
+      </div>
+    );
   }
 
   if (!otherUser) {
@@ -228,7 +233,9 @@ function IndividualChat() {
                   : "bg-gray-200 text-gray-800 rounded-bl-sm"
               }`}
             >
-              <p className="wrap-break-words whitespace-pre-wrap">{message.text}</p>
+              <p className="wrap-break-words whitespace-pre-wrap">
+                {message.text}
+              </p>
               {message.timestamp && (
                 <span
                   className={`text-xs mt-1 block ${

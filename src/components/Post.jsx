@@ -1,12 +1,13 @@
 
-
+import { useTranslation } from "react-i18next";
 export default function OwnPost({ user, className = "" }) {
+  const {t} = useTranslation();
   if (!user) return null;
 
   return (
     <div className={className}>
       {user.activePosts.length === 0 ? (
-        <p className="text-center text-gray-500">Ingen aktive opgaver</p>
+        <p className="text-center text-gray-500">{t("no-active")}</p>
       ) : (
         user.activePosts.map((post) => (
           <div

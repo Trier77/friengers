@@ -1,19 +1,22 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { collection, getDocs, doc, getDoc } from "firebase/firestore";
 import { auth, db } from "../firebase";
 import { motion } from "framer-motion";
 import CalenderIcon from "../../public/icons/CalenderIcon";
 import MapPinIcon from "../../public/icons/MapPinIcon";
 import Tilmeld from "../components/Tilmeld";
-import { useNavigate } from "react-router";
+import { useNavigate, useSearchParams } from "react-router";
 import Create from "../components/Create";
 import GroupsIcon from "../../public/icons/GroupsIcon";
 import NotificationWrapper from "../components/NotificationWrapper";
 import useTags from "../components/Tags";
+import PostCard from "../components/PostCard";
+import FunnelIcon from "../../public/icons/FunnelIcon";
+import { useSwipe } from "../components/SwipeContext";
 import { useTranslation } from "react-i18next";
 
 export default function Feed() {
-  const { t, i18n } = useTranslation();
+  const { t} = useTranslation();
   const { tags: allTags } = useTags();
   const [posts, setPosts] = useState([]);
   const navigate = useNavigate();
@@ -21,8 +24,15 @@ export default function Feed() {
   const [selectedTags, setSelectedTags] = useState([]);
   const [showFilter, setShowFilter] = useState(false);
   const [previewImage, setPreviewImage] = useState(null);
+  const [highlightPostId, setHighlightPostId] = useState(null);
+  const myPostsRef = useRef(null);
+
+  const { setSwipeEnabled } = useSwipe();
 
   const userId = auth.currentUser?.uid;
+  const [searchParams, setSearchParams] = useSearchParams();
+  const invitationPostId = searchParams.get("invitation");
+  const invitationFrom = searchParams.get("from");
 
   const fetchPosts = async () => {
     const postsSnapshot = await getDocs(collection(db, "posts"));
@@ -47,6 +57,91 @@ export default function Feed() {
     fetchData();
   }, []);
 
+  useEffect(() => {
+    if (invitationPostId && posts.length > 0) {
+      setTimeout(() => {
+        const postElement = document.getElementById(`post-${invitationPostId}`);
+        if (postElement) {
+          postElement.scrollIntoView({ behavior: "smooth", block: "center" });
+          setExpandedPostId(invitationPostId);
+        }
+      }, 300);
+    }
+  }, [invitationPostId, posts]);
+
+  const myPosts = posts.filter(
+    (post) => post.uid === userId && post.active !== false
+  );
+
+  // FUNGERENDE VERSION - Bruger friske data direkte
+  const handlePostCreated = async () => {
+    console.log(" handlePostCreated started");
+
+    const oldPostIds = new Set(myPosts.map((p) => p.id));
+    console.log(" Old post IDs:", Array.from(oldPostIds));
+
+    // Hent friske posts direkte (ikke via state)
+    const postsSnapshot = await getDocs(collection(db, "posts"));
+    const freshPosts = await Promise.all(
+      postsSnapshot.docs.map(async (postDoc) => {
+        const postData = postDoc.data();
+        const userSnap = await getDoc(doc(db, "users", postData.uid));
+        return {
+          id: postDoc.id,
+          ...postData,
+          author: userSnap.exists() ? userSnap.data() : null,
+        };
+      })
+    );
+
+    console.log(" Fresh posts fetched:", freshPosts.length);
+
+    // Opdater state (til UI)
+    setPosts(freshPosts);
+
+    // Find det nye opslag med de FRISKE data (ikke state)
+    const newMyPosts = freshPosts.filter(
+      (post) => post.uid === userId && post.active !== false
+    );
+    console.log(" New myPosts count:", newMyPosts.length);
+    console.log(
+      " New myPosts IDs:",
+      newMyPosts.map((p) => p.id)
+    );
+
+    const newPost = newMyPosts.find((p) => !oldPostIds.has(p.id));
+    console.log("✨ New post:", newPost ? newPost.id : "NONE");
+
+    if (newPost) {
+      console.log("🎉 New post found:", newPost.id);
+
+      // 1️ Scroll til toppen FØRST
+      myPostsRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "start",
+      });
+
+      // 2️ Vent på scroll er færdig, SÅ trigger shockwave
+      setTimeout(() => {
+        console.log(" Triggering shockwave animation");
+        setHighlightPostId(newPost.id);
+
+        // 3️ Fjern highlight efter shockwave er færdig
+        setTimeout(() => {
+          console.log(" Removing highlight");
+          setHighlightPostId(null);
+        }, 1200); // Match shockwave animation duration
+      }, 800); //  Delay så scroll når at blive færdig først
+    } else {
+      console.log("❌ NO NEW POST FOUND!");
+      console.log("Debug - oldPostIds:", Array.from(oldPostIds));
+      console.log(
+        "Debug - newMyPosts IDs:",
+        newMyPosts.map((p) => p.id)
+      );
+    }
+  };
+
   const toggleExpand = (id) => {
     setExpandedPostId((prevId) => (prevId === id ? null : id));
   };
@@ -70,19 +165,28 @@ export default function Feed() {
     (post) => post.uid !== userId && post.active !== false
   );
 
-  const myPosts = posts.filter(
-    (post) => post.uid === userId && post.active !== false
-  );
-
-  // Det her er hvordan vores egne post skal se ud
   const renderMyPost = (post, index) => (
     <motion.div
       key={post.id}
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.5 }}
-      className="mb-4"
+      initial={{
+        opacity: 0,
+        y: -20, // Lidt mindre bevægelse
+      }}
+      animate={{
+        opacity: 1,
+        y: 0,
+      }}
+      transition={{
+        duration: 0.5,
+        ease: "easeOut",
+      }}
+      className="mb-4 relative"
     >
+      {/*  Shockwave effekt - enkelt bølge der pulserer ud */}
+      {highlightPostId === post.id && (
+        <div className="absolute inset-0 border-4 border-blue-400 rounded-full animate-shockwave pointer-events-none"></div>
+      )}
+
       <motion.div
         initial={{ opacity: 0 }}
         animate={{ opacity: 1 }}
@@ -91,7 +195,7 @@ export default function Feed() {
           delay: 0.3 + index * 0.15,
           ease: "easeInOut",
         }}
-        className="flex text-(--secondary) justify-between items-center bg-(--secondary) rounded-full px-4 py-3"
+        className="flex text-(--secondary) justify-between items-center bg-(--secondary) rounded-full px-4 py-3 transition-all duration-300"
       >
         <h3 className="justify-start text-(--white) text-xl overskrift">
           {post.title}
@@ -116,154 +220,21 @@ export default function Feed() {
     </motion.div>
   );
 
-  // Og det her så hvordan de andres skal se ud
-  const renderPost = (post) => (
-    <motion.div
-      key={post.id}
-      initial={{ opacity: 0, y: 20 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.2 }}
-    >
-      <motion.div
-        initial={{ opacity: 0 }}
-        animate={{
-          opacity:
-            expandedPostId === null ? 1 : expandedPostId === post.id ? 1 : 0.5,
-          scale:
-            expandedPostId === null ? 1 : expandedPostId === post.id ? 1 : 0.95,
-        }}
-        transition={{ duration: 0.3 }}
-        onClick={() => toggleExpand(post.id)}
-        className={`mb-4 p-4 bg-(--primary) rounded-2xl gap-2 flex flex-col relative overflow-hidden
-          
-          `}
-      >
-        <div className="flex items-center justify-between">
-          <h2 className="justify-start text-(--secondary) text-xl overskrift">
-            {post.title}
-          </h2>
-          <div className="bg-(--white) rounded-full px-2 flex gap-4 font-bold text-sm text-(--secondary)">
-            <div className="flex items-center gap-2">
-              <MapPinIcon color="--secondary" size={10} />{" "}
-              <p>{post.location}</p>
-            </div>
-            <div className="flex items-center gap-2">
-              <CalenderIcon color="--secondary" size={10} />
-              <p>
-                {post.time?.toDate().toLocaleDateString(undefined, {
-                  day: "2-digit",
-                  month: "2-digit",
-                })}
-              </p>
-            </div>
-          </div>
-        </div>
-
-        <div>
-          <ul className="flex gap-1 text-(--white) text-xs">
-            {post.tags.map((tag, index) => (
-              <li
-                key={index}
-                className={`border border-(--secondary) py-1 rounded-2xl px-3 cursor-pointer ${
-                  selectedTags.includes(tag)
-                    ? "bg-(--white) text-(--secondary) font-bold"
-                    : ""
-                }`}
-                onClick={() => handleDropdownChange(tag)}
-              >
-                {tag}
-              </li>
-            ))}
-          </ul>
-        </div>
-
-        <div
-          className={`flex justify-between relative`}
-        >
-          <div className="flex flex-col justify-between gap-2">
-            <p
-              className={`w-70 text-(--white) text-sm cursor-pointer overflow-hidden whitespace-pre-wrap ${
-                expandedPostId === post.id ? "" : "line-clamp-3"
-              }`}
-            >
-              {post.description}
-            </p>
-
-            {expandedPostId === post.id && post.imageUrls && (
-              <div className="flex gap-2 overflow-x-auto mt-2">
-                {post.imageUrls.map((url, i) => (
-                  <img
-                    key={i}
-                    src={url}
-                    alt={t(`feed.postImageAlt`)}
-                    className="h-40 w-auto rounded-xl cursor-pointer"
-                    onClick={() => setPreviewImage(url)}
-                  />
-                ))}
-              </div>
-            )}
-
-            <div className="w-60 flex justify-between items-center">
-              <div className="flex items-center gap-2">
-                <img
-                  src={post.author?.profileImage}
-                  alt={t(`feed.senderAlt`)}
-                  className="w-8 h-8 rounded-full object-cover cursor-pointer"
-                  onClick={() => navigate(`/AndresProfil/${post.uid}`)}
-                />
-
-                <p className="text-(--secondary) text-sm">
-                  {post.author?.fuldenavn}
-                </p>
-              </div>
-              <div className="flex gap-2">
-                <GroupsIcon color="--secondary" size={20} />
-                <p className="text-(--secondary) text-sm">
-                  {post.participants?.length || 0}
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <motion.div
-          className="absolute bottom-0 right-0 z-10 rounded-tl-full overflow-hidden"
-          style={{
-            pointerEvents: expandedPostId === post.id ? "auto" : "none",
-            originX: 1, // højre
-            originY: 1, // bund
-          }}
-          animate={{
-            scale:
-              expandedPostId === null
-                ? 0.8
-                : expandedPostId === post.id
-                ? 1
-                : 0.5,
-          }}
-          transition={{ duration: 0.3 }}
-        >
-          <Tilmeld
-            postId={post.id}
-            participants={post.participants}
-            requests={post.requests || []}
-            onUpdate={fetchPosts}
-          />
-        </motion.div>
-
-        {post.uid === userId && <RequestsList post={post} />}
-      </motion.div>
-    </motion.div>
-  );
-
-  // Og her er så den samlet return
   return (
     <div className="p-4">
       <NotificationWrapper />
-      {myPosts.length > 0 &&
-        myPosts.map((post, index) => renderMyPost(post, index))}
 
-      <Create allTags={allTags} />
+      <div ref={myPostsRef}>
+        {myPosts.length > 0 &&
+          myPosts.map((post, index) => renderMyPost(post, index))}
+      </div>
+
+      <Create
+        allTags={allTags}
+        onPostCreated={handlePostCreated}
+        onOpen={() => setSwipeEnabled(false)}
+        onClose={() => setSwipeEnabled(true)}
+      />
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -271,21 +242,40 @@ export default function Feed() {
         transition={{ duration: 0.5 }}
         className="mb-4 flex flex-col justify-end"
       >
-        <div className="flex justify-end">
+        <div className="flex gap-4 items-center px-4">
+          <h3 className="text-(--secondary) font-bold text-lg">{t("overview")}</h3>{" "}
+          <div className="w-full border border-(--secondary)"></div>
           <button
             onClick={() => setShowFilter((prev) => !prev)}
-            className="px-4 pt-2 text-lg text-(--primary)"
+            className="text-(--primary)"
           >
-            {t(`feed.filter`)} {showFilter ? "▲" : "▼"}
+            <FunnelIcon
+              color="--secondary"
+              size={20}
+              filled={showFilter || selectedTags.length > 0}
+            />
           </button>
         </div>
+        {selectedTags.length > 0 && !showFilter && (
+          <div className="flex flex-wrap gap-2 px-2 mt-2 justify-end">
+            {selectedTags.map((tag) => (
+              <button
+                key={tag}
+                onClick={() => handleDropdownChange(tag)}
+                className="px-3 py-1 rounded-2xl text-xs font-bold bg-(--secondary) text-(--white)"
+              >
+                {tag}
+              </button>
+            ))}
+          </div>
+        )}
 
         {showFilter && (
           <motion.div
             initial={{ opacity: 0, x: 0 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.1 }}
-            className="flex flex-wrap gap-2 justify-end"
+            className="flex flex-wrap gap-2 justify-end px-2 mt-2"
           >
             {allTags.map((tag) => (
               <button
@@ -307,8 +297,20 @@ export default function Feed() {
       {selectedTags.length > 0 ? (
         filteredPosts.length > 0 ? (
           <div>
-            <h2 className="text-lg font-bold mb-2">{t(`feed.filter`)}</h2>
-            {filteredPosts.map((post, index) => renderPost(post, index))}
+            {filteredPosts.map((post) => (
+              <PostCard
+                key={post.id}
+                post={post}
+                userId={userId}
+                expandedPostId={expandedPostId}
+                toggleExpand={toggleExpand}
+                selectedTags={selectedTags}
+                handleDropdownChange={handleDropdownChange}
+                setPreviewImage={setPreviewImage}
+                navigate={navigate}
+                fetchPosts={fetchPosts}
+              />
+            ))}
           </div>
         ) : (
           <p className="text-(--white) mt-4">
@@ -316,22 +318,27 @@ export default function Feed() {
           </p>
         )
       ) : (
-        otherPosts.map((post, index) => renderPost(post, index))
-      )}
-
-      {previewImage && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50"
-          onClick={() => setPreviewImage(null)}
-        >
-          <div className="max-w-3xl max-h-[90vh]">
-            <img
-              src={previewImage}
-              alt={t(`feed.previewAlt`)}
-              className="w-full h-full object-contain rounded-xl"
+        otherPosts.map((post) => (
+          <div key={post.id} id={`post-${post.id}`}>
+            <PostCard
+              post={post}
+              userId={userId}
+              expandedPostId={expandedPostId}
+              toggleExpand={toggleExpand}
+              selectedTags={selectedTags}
+              handleDropdownChange={handleDropdownChange}
+              setPreviewImage={setPreviewImage}
+              navigate={navigate}
+              fetchPosts={fetchPosts}
+              isInvitation={invitationPostId === post.id}
+              invitationFrom={invitationFrom}
+              onInvitationHandled={() => {
+                setSearchParams({});
+                fetchPosts();
+              }}
             />
           </div>
-        </div>
+        ))
       )}
     </div>
   );
