@@ -25,10 +25,8 @@ export default function Tilmeld({
   const sendJoinRequest = async (postId) => {
     const userId = auth.currentUser.uid;
     const postRef = doc(db, "posts", postId);
-
     const userSnap = await getDoc(doc(db, "users", userId));
     const userData = userSnap.exists() ? userSnap.data() : {};
-
     const postSnap = await getDoc(postRef);
     const postData = postSnap.data();
     const postOwnerUid = postData.uid;
@@ -41,17 +39,32 @@ export default function Tilmeld({
     const ownerSnap = await getDoc(ownerRef);
 
     if (ownerSnap.exists()) {
+      const ownerData = ownerSnap.data();
+      const existingNotifications = ownerData.notifications || [];
+
+      const filteredNotifications = existingNotifications.filter(
+        (n) =>
+          !(
+            n.notificationType === "request" &&
+            n.postId === postId &&
+            n.requesterUid === userId &&
+            (!n.status || n.status === "pending")
+          )
+      );
+
+      const newNotification = {
+        notificationType: "request",
+        requesterUid: userId,
+        requesterName: userData.kaldenavn || userData.fuldenavn || "Anonym",
+        requesterImage: userData.profileImage || null,
+        postId: postId,
+        postTitle: postData.title || "Uden titel",
+        status: "pending",
+        createdAt: Date.now(),
+      };
+
       await updateDoc(ownerRef, {
-        notifications: arrayUnion({
-          notificationType: "request",
-          requesterUid: userId,
-          requesterName: userData.kaldenavn || userData.fuldenavn || "Anonym",
-          requesterImage: userData.profileImage || null,
-          postId: postId,
-          postTitle: postData.title || "Uden titel",
-          status: "pending",
-          createdAt: Date.now(),
-        }),
+        notifications: [...filteredNotifications, newNotification],
       });
     }
   };
