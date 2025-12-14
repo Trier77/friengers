@@ -97,7 +97,15 @@
 
   "login": {
       "failed": "Login failed",
-      "inCollaborationWith": "In collaboration with"
+      "inCollaborationWith": "In collaboration with",
+       
+      "form": {
+      "title": "Log ind med dit AU-login",
+      "emailPlaceholder": "Email",
+      "passwordPlaceholder": "Adgangskode",
+      "rememberMe": "Forbliv logget ind",
+      "submit": "Login"
+    }
     }
   }
 

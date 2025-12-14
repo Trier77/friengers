@@ -1,8 +1,10 @@
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 export default function LoginForm({ onLoginClick }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const { t, i18n } = useTranslation();
 
   const handleLogin = () => {
     if (onLoginClick) onLoginClick(email, password);
@@ -12,18 +14,18 @@ export default function LoginForm({ onLoginClick }) {
     <div className="gap-5 flex flex-col items-center">
       <div>
         <h1 className="flex justify-center mb-2 uppercase text-(--secondary)">
-          Log in med dit AU-Login
+          {t(`login.form.title`)}
         </h1>
 
         <input
           className="p-2 rounded-2xl border-(--secondary) border-2 text-(--secondary) w-full mb-3 focus:border-(--secondary) focus:ring-2 focus:ring-blue-300 focus:outline-none"
-          placeholder="Email"
+          placeholder={t(`login.form.emailPlaceholder`)}
           onChange={(e) => setEmail(e.target.value)}
         />
         <input
           className="p-2 rounded-2xl border-(--secondary) border-2 text-(--secondary) w-full mb-3 focus:border-(--secondary) focus:ring-2 focus:ring-blue-300 focus:outline-none"
           type="password"
-          placeholder="Adgangskode"
+          placeholder={t(`login.form.passwordPlaceholder`)}
           onChange={(e) => setPassword(e.target.value)}
         />
 
@@ -39,7 +41,7 @@ export default function LoginForm({ onLoginClick }) {
                          checked:before:items-center checked:before:justify-center
                          checked:before:text-white checked:before:text-sm"
             />
-            <span className="text-sm">Forbliv logget ind</span>
+            <span className="text-sm">{t(`login.form.rememberMe`)}</span>
           </label>
         </div>
 
@@ -49,7 +51,7 @@ export default function LoginForm({ onLoginClick }) {
             onClick={handleLogin}
             className="bg-(--secondary) text-white font-bold px-4 py-1.5 rounded-2xl mt-4 uppercase"
           >
-            Login
+            {t(`login.form.submit`)}
           </button>
         </div>
       </div>

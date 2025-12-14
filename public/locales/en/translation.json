@@ -91,13 +91,19 @@
     "groupChat": {
       "defaultName": "Group chat",
       "prefix": "Group chat: "
-    }
-  },
+  }},
 
   "login": {
       "failed": "Login failed",
-      "inCollaborationWith": "In collaboration with"
-    }
+      "inCollaborationWith": "In collaboration with",
+
+       "form": {
+      "title": "Log in with your AU login",
+      "emailPlaceholder": "Email",
+      "passwordPlaceholder": "Password",
+      "rememberMe": "Stay logged in",
+      "submit": "Log in"
+    }}
 
 
   }
