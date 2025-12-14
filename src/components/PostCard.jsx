@@ -185,14 +185,16 @@ export default function PostCard({
         />
 
         <div className="flex items-center justify-between z-10">
-          <h2 className="justify-start text-(--secondary) text-xl overskrift">
+          <h2 className="justify-start text-(--secondary) text-xl overskrift flex-none w-40 truncate">
             {post.title}
           </h2>
+
           <div className="bg-(--white) rounded-full px-2 flex gap-4 font-bold text-sm text-(--secondary)">
-            <div className="flex items-center gap-2">
-              <MapPinIcon color="--secondary" size={10} />
-              <p>{post.location}</p>
+            <div className="flex items-center gap-2 flex-none w-16">
+              <MapPinIcon color="--secondary" size={12} />
+              <p className="truncate">{post.location}</p>
             </div>
+
             <div className="flex items-center gap-2">
               <CalenderIcon color="--secondary" size={10} />
               <p>
