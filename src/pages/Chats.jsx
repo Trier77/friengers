@@ -62,7 +62,7 @@ function Chats() {
 
             const messagesSnapshot = await getDocs(messagesQuery);
 
-            let lastMessage = "Ingen beskeder endnu";
+            let lastMessage = t(`chats.noMessagesYet`);
             let lastMessageTime = null;
             let lastMessageSenderId = null;
 
@@ -75,7 +75,7 @@ function Chats() {
 
             // Hvis beskeden er fra den nuværende bruger, tilføj "Dig: " præfix
             if (lastMessageSenderId === currentUserId) {
-              lastMessage = `Dig: ${lastMessage}`;
+              lastMessage = t(`chats.youPrefix`) + lastMessage;
             }
 
             // Tæl ulæste beskeder
@@ -132,7 +132,7 @@ function Chats() {
                   minute: "2-digit",
                 });
               } else if (diffInDays === 1) {
-                timeDisplay = "I går";
+                timeDisplay = t(`time.yesterday`);
               } else if (diffInDays < 7) {
                 timeDisplay = messageDate.toLocaleDateString("da-DK", {
                   weekday: "short",
@@ -179,7 +179,7 @@ function Chats() {
                     name:
                       userDoc.data().kaldenavn ||
                       userDoc.data().fuldenavn ||
-                      "Ukendt",
+                      t(`chats.unknownUser`),
                   });
                 }
               } catch (error) {
@@ -189,8 +189,8 @@ function Chats() {
 
             groupChatList.push({
               id: chatId,
-              name: (chatData.chatName || "Gruppechat").replace(
-                "Gruppechat: ",
+              name: (chatData.chatName || t(`chats.groupChat.defaultName`)).replace(
+                t(`chats.groupChat.prefix`),
                 ""
               ), // ← Fjern præfix
               message: lastMessage,
@@ -222,7 +222,7 @@ function Chats() {
 
             const messagesSnapshot = await getDocs(messagesQuery);
 
-            let lastMessage = "Ingen beskeder endnu";
+            let lastMessage = t(`chats.noMessagesYet`);
             let lastMessageTime = null;
             let lastMessageSenderId = null;
 
@@ -234,7 +234,7 @@ function Chats() {
             }
 
             if (lastMessageSenderId === currentUserId) {
-              lastMessage = `Dig: ${lastMessage}`;
+              lastMessage = t(`chats.youPrefix`) + lastMessage;
             }
 
             let unreadCount = 0;
@@ -289,7 +289,7 @@ function Chats() {
                   minute: "2-digit",
                 });
               } else if (diffInDays === 1) {
-                timeDisplay = "I går";
+                timeDisplay = t(`time.yesterday`);
               } else if (diffInDays < 7) {
                 timeDisplay = messageDate.toLocaleDateString("da-DK", {
                   weekday: "short",
@@ -425,7 +425,7 @@ function Chats() {
         <div className="relative">
           <input
             type="text"
-            placeholder={t("name-search")}
+            placeholder={t(`chats.search.placeholder`)}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full px-6 py-2 rounded-full border-2 border-(--secondary)/40 focus:border-(--secondary) focus:outline-none text-(--primary)"
@@ -476,7 +476,7 @@ function Chats() {
                 : " text-(--secondary) border-2 border-(--secondary)"
             }`}
           >
-            {t("private")}
+            {t(`chats.tabs.private`)}
             {totalPrivateUnread > 0 && (
               <UnreadBadge count={totalPrivateUnread} />
             )}
@@ -489,7 +489,7 @@ function Chats() {
                 : " text-(--secondary) border-2 border-(--secondary)"
             }`}
           >
-            {t("group")}
+            {t(`chats.tabs.group`)}
             {totalGroupUnread > 0 && <UnreadBadge count={totalGroupUnread} />}
           </button>
         </div>
@@ -501,24 +501,26 @@ function Chats() {
           <div className="text-center text-gray-500 mt-8">
             {searchQuery ? (
               <>
-                <p>{t("no-results")} "{searchQuery}"</p>
+                <p> {t(`chats.search.noResults`, { quwry: searchQuery })} "</p>
                 <button
                   onClick={() => setSearchQuery("")}
                   className="text-blue-500 text-sm mt-2 underline"
                 >
-                  {t("clear")}
+                  {t(`chats.search.clear`)}
                 </button>
               </>
             ) : (
               <>
                 <p>
-                  {t("none")} {activeTab === "private" ? "private" : "gruppe"} {t("chats-yet")}
-                  
+                  {}{" "}
+                  {activeTab === "private"
+                    ? t(`chats.emptyState.noPrivateChats`)
+                    : t(`chats.emptyState.noGroupChats`)}
                 </p>
                 <p className="text-sm mt-2">
                   {activeTab === "private"
-                    ? "Start en samtale ved at besøge en profil"
-                    : "Gruppechats oprettes automatisk når du godkender deltagere"}
+                    ? t(`chats.emptyState.startConversation`)
+                    : t(`chats.emptyState.groupChatInfo`)}
                 </p>
               </>
             )}
@@ -527,8 +529,10 @@ function Chats() {
           <>
             {searchQuery && (
               <p className="text-sm text-gray-500 mb-3">
-                Viser {currentChats.length} {t("result")}
-                {currentChats.length !== 1 ? "er" : ""} {t("for")} "{searchQuery}"
+                {currentChats.length !== 1
+                  ? "t(`chats.search.showingResults_other`, {count: currentChats.length, query: searchQuery })"
+                  : "t(`chats.search.showingResults_one`, {count: currentChats.length, query: searchQuery })"}{" "}
+                for "{searchQuery}"
               </p>
             )}
             {currentChats.map((chat, index) => (

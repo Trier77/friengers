@@ -314,7 +314,7 @@ export default function Feed() {
           </div>
         ) : (
           <p className="text-(--white) mt-4">
-            Ingen opslag matcher de valgte tags.
+           {t(`feed.filnoMatchingPostster`)}
           </p>
         )
       ) : (

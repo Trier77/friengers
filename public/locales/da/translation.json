@@ -5,10 +5,134 @@
   "notifications": "Notifikationer",
   "darkmode": "Dark mode",
   "about": "Om os",
-  "help": "Hjælp og support",
+  "help": "Hjælp & support",
   "logout": "Log ud",
-
   "overview": "Oversigt",
+  "notif-title": "Notifikationer",
 
-  "notif-title": "Notifikationer"
+  "viewProfile": {
+    "loading": "Henter profil...",
+    "notFound": "Bruger ikke fundet",
+    "unknownName": "Ukendt",
+    "noStudy": "Ikke angivet",
+    "noBio": "Ingen beskrivelse tilgængelig",
+    "tasksCompleted": "Opgaver løst",
+    "activeTasks": "Aktive opgaver",
+    "noActiveTasks": "Ingen aktive opgaver",
+    "createdLabel": "Oprettet",
+    "createdUnknown": "Ukendt",
+    "invite": "Inviter"
+  },
+
+  "ownProfile": {
+    "loading": "Henter profil...",
+    "bioPlaceholder": "Skriv din beskrivelse her...",
+    "tabs": {
+      "created": "Oprettet",
+      "joined": "Tilmeldt"
+    }
+  },
+  "post": {
+    "noParticipants": "Ingen deltagere endnu",
+    "confirmDelete": "Er du sikker på, at du vil slette denne opgave?",
+    "confirmDone": "Er du sikker på, at du vil markere denne opgave som løst?"
+  },
+  "actions": {
+    "delete": "Slet",
+    "markDone": "Marker som færdig"
+  },
+  "time": {
+    "now": "lige nu",
+    "ago": "for {{count}} {{unit}} siden",
+    "year_one": "år",
+    "year_other": "år",
+    "month_one": "måned",
+    "month_other": "måneder",
+    "week_one": "uge",
+    "week_other": "uger",
+    "day_one": "dag",
+    "day_other": "dage",
+    "hour_one": "time",
+    "hour_other": "timer",
+    "minute_one": "minut",
+    "minute_other": "minutter",
+    "second_one": "sekund",
+    "second_other": "sekunder",
+    "yesterday": "I går"
+  },
+
+  "common": {
+    "preview": "Preview"
+  },
+
+  "chats": {
+    "loading": "Henter chats...",
+    "noMessagesYet": "Ingen beskeder endnu",
+    "youPrefix": "Dig:",
+    "unknownUser": "Ukendt",
+
+    "tabs": {
+      "private": "Privat chat",
+      "group": "Gruppe chat"
+    },
+
+    "search": {
+      "placeholder": "Søg efter navn...",
+      "clear": "Ryd søgning",
+      "noResults": "Ingen resultater for \"{{query}}\"",
+      "showingResults_one": "Viser {{count}} resultat for \"{{query}}\"",
+      "showingResults_other": "Viser {{count}} resultater for \"{{query}}\""
+    },
+
+    "emptyState": {
+      "noPrivateChats": "Ingen private chats endnu",
+      "noGroupChats": "Ingen gruppe chats endnu",
+      "startConversation": "Start en samtale ved at besøge en profil",
+      "groupChatInfo": "Gruppechats oprettes automatisk når du godkender deltagere"
+    },
+
+    "groupChat": {
+      "defaultName": "Gruppechat",
+      "prefix": "Gruppechat: "
+    }
+  },
+
+  "login": {
+    "failed": "Login failed",
+    "inCollaborationWith": "In collaboration with",
+
+    "form": {
+      "title": "Log ind med dit AU-login",
+      "emailPlaceholder": "Email",
+      "passwordPlaceholder": "Adgangskode",
+      "rememberMe": "Forbliv logget ind",
+      "submit": "Login"
+    }
+  },
+
+  "feed": {
+    "filter": "Filter",
+    "noMatchingPosts": "Ingen opslag matcher de valgte tags.",
+    "postImageAlt": "Post billede",
+    "senderAlt": "Afsender",
+    "previewAlt": "Preview"
+  },
+
+  "groupChat": {
+    "loading": "Henter gruppechat...",
+    "notFound": "Chat ikke fundet",
+    "participants": "deltagere",
+    "noMessagesTitle": "Ingen beskeder endnu",
+    "noMessagesSubtitle": "Send den første besked! 💬",
+    "unknownSender": "Ukendt",
+    "messagePlaceholder": "Skriv en besked..."
+  },
+
+  "individualChat": {
+    "loading": "Henter chat...",
+    "userNotFound": "Bruger ikke fundet",
+    "noMessagesTitle": "Ingen beskeder endnu",
+    "noMessagesSubtitle": "Send den første besked! 💬",
+    "messagePlaceholder": "Skriv en besked..."
+  }
 }

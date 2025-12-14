@@ -228,13 +228,13 @@ function AndresProfil() {
   if (loading) {
     return (
       <div className="p-4 text-center pointer-events-none select-none">
-        Henter profil...
+        {t(`viewProfile.notFound`)}
       </div>
     );
   }
 
   if (!userData) {
-    return <div className="p-4 text-center">{t("no-user")}</div>;
+    return <div className="p-4 text-center">{t(`viewProfile.notFound`)}</div>;
   }
 
   const completedCount = userPosts.filter(
@@ -283,10 +283,10 @@ function AndresProfil() {
 
           <div>
             <h1 className="text-2xl font-bold text-gray-900 whitespace-nowrap">
-              {userData.fuldenavn || userData.kaldenavn || "Ukendt"}
+              {userData.fuldenavn || userData.kaldenavn || t(`viewProfile.unknownName`)}
             </h1>
             <p className="text-blue-500 font-bold text-sm">
-              {userData.study || "Ikke angivet"}
+              {userData.study || t(`viewProfile.noStudy`)}
             </p>
             <p className="text-sm text-blue-500/50">
               {userData.pronouns || ""}
@@ -296,14 +296,14 @@ function AndresProfil() {
 
         <div className="flex justify-between">
           <p className="text-(--secondary) text-sm">
-            {userData.bio || "Ingen beskrivelse tilgængelig"}
+            {userData.bio || t(`viewProfile.noBio`)}
           </p>
         </div>
 
         <div className="flex justify-between pt-4 items-center">
           <div>
             <p className="text-xs flex gap-4 items-center text-(--primary) font-semibold">
-              {t("solved")}
+              {t(`viewProfile.tasksCompleted`)}
               <span className="text-(--secondary) font-bold text-xl">
                 {completedCount}
               </span>
@@ -340,7 +340,7 @@ function AndresProfil() {
                     />
                   </svg>
                   <p className="text-xs text-(--secondary) font-semibold">
-                    {t("invite")}
+                    {t("viewProfile.invite")}
                   </p>
                 </div>
               </button>
@@ -432,10 +432,10 @@ function AndresProfil() {
 
       <div className="p">
         <h2 className="text-center font-bold text-gray-900 mb-4">
-          {t("active")}
+          {t(`viewProfile.activeTasks`)}
         </h2>
         {userPosts.length === 0 ? (
-          <p className="text-center text-gray-500">{t("no-active")}</p>
+          <p className="text-center text-gray-500">{t(`viewProfile.noActiveTasks`)}</p>
         ) : (
           userPosts.map((post) => (
             <PostCard
