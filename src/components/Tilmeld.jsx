@@ -25,24 +25,20 @@ export default function Tilmeld({
     const userId = auth.currentUser.uid;
     const postRef = doc(db, "posts", postId);
 
-    // Hent brugerdata
     const userSnap = await getDoc(doc(db, "users", userId));
     const userData = userSnap.exists() ? userSnap.data() : {};
 
-    // Hent post data for at få post owner's uid
     const postSnap = await getDoc(postRef);
     const postData = postSnap.data();
     const postOwnerUid = postData.uid;
 
-    // Opdater post med request
     await updateDoc(postRef, {
       requests: arrayUnion(userId),
     });
 
-    // Tilføj notification til post ejerens notifications array
     const ownerRef = doc(db, "users", postOwnerUid);
     const ownerSnap = await getDoc(ownerRef);
-    
+
     if (ownerSnap.exists()) {
       await updateDoc(ownerRef, {
         notifications: arrayUnion({
@@ -67,7 +63,6 @@ export default function Tilmeld({
       setShowNotification(true);
       onUpdate();
 
-      // Skjul popup igen efter 3 sek
       setTimeout(() => {
         setShowNotification(false);
       }, 3000);
