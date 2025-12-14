@@ -13,8 +13,10 @@ import {
   setDoc,
 } from "firebase/firestore";
 import { db, auth } from "../firebase";
+import { useTranslation } from "react-i18next";
 
 function GroupChat() {
+  const {t} = useTranslation();
   const { chatId } = useParams();
   const navigate = useNavigate();
   const messagesEndRef = useRef(null);
@@ -172,7 +174,7 @@ function GroupChat() {
     const participant = participants.find((p) => p.uid === senderId);
     return participant?.profileImage || "https://via.placeholder.com/32";
   };
-
+//LOADING ANIMATION SKAL DEN VÆRE HER?
   if (loading) {
     return (
       <div className="p-4 text-center pointer-events-none select-none">
@@ -184,7 +186,7 @@ function GroupChat() {
   if (!chatInfo) {
     return (
       <div className="p-4 text-center pointer-events-none select-none">
-        Chat ikke fundet
+        {t("no-chat")}
       </div>
     );
   }
@@ -227,7 +229,7 @@ function GroupChat() {
             {chatInfo.chatName}
           </h2>
           <p className="text-xs text-gray-500">
-            {participants.length} deltagere
+            {participants.length} {t("participants")}
           </p>
         </div>
       </div>
@@ -236,8 +238,8 @@ function GroupChat() {
       <div className="flex-1 overflow-y-auto p-4 space-y-3">
         {messages.length === 0 && (
           <div className="text-center text-gray-400 mt-8">
-            <p>Ingen beskeder endnu</p>
-            <p className="text-sm">Send den første besked! 💬</p>
+            <p>{t("no-message")}</p>
+            <p className="text-sm">{t("first-message")} 💬</p>
           </div>
         )}
         {messages.map((message) => {
@@ -320,7 +322,7 @@ function GroupChat() {
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
             onKeyPress={handleKeyPress}
-            placeholder="Skriv en besked..."
+            placeholder={t("write-a")}
             onFocus={() => {
               setIsInputFocused(true);
               const nav = document.querySelector("nav");

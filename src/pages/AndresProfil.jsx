@@ -20,6 +20,7 @@ import ColorCircle from "../components/ColorCircle";
 import AnmeldelsesModal from "../components/Anmeldelsesmodal";
 
 function AndresProfil() {
+  const {t} = useTranslation();
   const { userId } = useParams();
   const navigate = useNavigate();
   const [userData, setUserData] = useState(null);
@@ -223,7 +224,7 @@ function AndresProfil() {
       alert("Der opstod en fejl. Prøv igen.");
     }
   };
-
+//LOADING ANIMATION SKAL DEN VÆRE HER????
   if (loading) {
     return (
       <div className="p-4 text-center pointer-events-none select-none">
@@ -233,7 +234,7 @@ function AndresProfil() {
   }
 
   if (!userData) {
-    return <div className="p-4 text-center">Bruger ikke fundet</div>;
+    return <div className="p-4 text-center">{t("no-user")}</div>;
   }
 
   const completedCount = userPosts.filter(
@@ -302,7 +303,7 @@ function AndresProfil() {
         <div className="flex justify-between pt-4 items-center">
           <div>
             <p className="text-xs flex gap-4 items-center text-(--primary) font-semibold">
-              Opgaver løst:
+              {t("solved")}
               <span className="text-(--secondary) font-bold text-xl">
                 {completedCount}
               </span>
@@ -339,7 +340,7 @@ function AndresProfil() {
                     />
                   </svg>
                   <p className="text-xs text-(--secondary) font-semibold">
-                    Inviter
+                    {t("invite")}
                   </p>
                 </div>
               </button>
@@ -358,16 +359,16 @@ function AndresProfil() {
             >
               <div className="bg-gray-50 rounded-2xl p-4 mb-4">
                 <h3 className="text-sm font-semibold text-gray-700 mb-3">
-                  Inviter til en opgave:
+                  {t("task-invite")}
                 </h3>
 
                 {myPosts.length === 0 ? (
                   <div className="text-center py-6">
                     <p className="text-gray-500 text-sm mb-2">
-                      Du har ingen opgaver at invitere til
+                      {t("no-tasks")}
                     </p>
                     <p className="text-gray-400 text-xs">
-                      Opret en opgave først for at kunne invitere andre
+                      {t("create-task")}
                     </p>
                   </div>
                 ) : (
@@ -405,7 +406,7 @@ function AndresProfil() {
                                       clipRule="evenodd"
                                     />
                                   </svg>
-                                  Inviteret
+                                  {t("invited")}
                                 </span>
                               ) : (
                                 <span className="text-xs text-gray-500 whitespace-nowrap">
@@ -431,10 +432,10 @@ function AndresProfil() {
 
       <div className="p">
         <h2 className="text-center font-bold text-gray-900 mb-4">
-          Aktive opgaver
+          {t("active")}
         </h2>
         {userPosts.length === 0 ? (
-          <p className="text-center text-gray-500">Ingen aktive opgaver</p>
+          <p className="text-center text-gray-500">{t("no-active")}</p>
         ) : (
           userPosts.map((post) => (
             <PostCard

@@ -21,8 +21,10 @@ import CalenderIcon from "../../public/icons/CalenderIcon";
 import MapPinIcon from "../../public/icons/MapPinIcon";
 import { useNavigate } from "react-router";
 import ColorCircle from "../components/ColorCircle";
+import { useTranslation } from "react-i18next";
 
 export default function Profil() {
+  const {t} =useTranslation();
   const [userData, setUserData] = useState(null);
   const [activeTab, setActiveTab] = useState("active");
   const [expandedPostId, setExpandedPostId] = useState(null);
@@ -654,7 +656,7 @@ export default function Profil() {
         <textarea
           ref={bioRef}
           className="w-full text-(--secondary) resize-none overflow-hidden"
-          placeholder="Skriv din beskrivelse her..."
+          placeholder={t("about-you")}
           value={bio}
           rows={3}
           onChange={(e) => {
@@ -676,7 +678,7 @@ export default function Profil() {
 
         <div className="flex justify-center pt-4">
           <p className="text-xs flex gap-4 items-center text-(--primary) font-semibold">
-            Opgaver løst:
+            {t("tasks-solved")}
             <span className="text-(--secondary) font-bold text-xl">
               {completedCount}
             </span>
@@ -695,7 +697,7 @@ export default function Profil() {
                 : "text-(--secondary) border-2 border-(--secondary"
             }`}
           >
-            Oprettet
+            {t("created")}
           </button>
           <button
             onClick={() => setActiveTab("group")}
@@ -705,7 +707,7 @@ export default function Profil() {
                 : "text-(--secondary) border-2 border-(--secondary "
             }`}
           >
-            Tilmeldt
+            {t("applied")}
           </button>
         </div>
 

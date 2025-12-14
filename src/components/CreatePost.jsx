@@ -17,8 +17,10 @@ import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { storage } from "../firebase";
 import useTags from "./Tags";
 import Edit from "./Edit";
+import { useTranslation } from "react-i18next";
 
 export default function CreatePost({ open, onClose, post = null }) {
+  const {t} = useTranslation();
   const { tags: allTags, loading: tagsLoading } = useTags();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -160,14 +162,14 @@ export default function CreatePost({ open, onClose, post = null }) {
         <div className="bg-(--white) rounded-2xl p-3 mb-3">
           <input
             className="w-full text-(--secondary) font-bold mb-2"
-            placeholder="Title"
+            placeholder={t("title")}
             onFocus={handleFocus}
             value={title}
             onChange={(e) => setTitle(e.target.value)}
           />
           <textarea
             className="w-full text-(--secondary) text-lg"
-            placeholder="Description"
+            placeholder={t("decription")}
             onFocus={handleFocus}
             value={description}
             onChange={(e) => setDescription(e.target.value)}
@@ -195,7 +197,7 @@ export default function CreatePost({ open, onClose, post = null }) {
               <MapPinIcon color="--white" size={20} />
               <input
                 className="bg-transparent appearance-none border-none focus:outline-none text-[--white] flex-1 min-w-0 "
-                placeholder="Hvor foregår det..."
+                placeholder={t("where")}
                 onFocus={handleFocus}
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
@@ -212,7 +214,7 @@ export default function CreatePost({ open, onClose, post = null }) {
                   className="text-[--white] pointer-events-none absolute left-7 opacity-50"
                   style={{ color: "var(--white)" }}
                 >
-                  Hvornår?
+                 {t("when")}
                 </span>
               )}
               <input
@@ -238,7 +240,7 @@ export default function CreatePost({ open, onClose, post = null }) {
                 onChange={(e) => setParticipantsCount(Number(e.target.value))}
               >
                 <option value="" disabled>
-                  Deltagere
+                  {t("participants")}
                 </option>
                 {Array.from({ length: 10 }, (_, i) => i + 1).map((num) => (
                   <option key={num} value={num}>

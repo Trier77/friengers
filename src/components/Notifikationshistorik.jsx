@@ -8,8 +8,10 @@ import Publish from "./Publish";
 import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { storage } from "../firebase";
 import useTags from "./Tags";
+import { useTranslation } from "react-i18next";
 
 export default function Notifikationshistorik({ open, onClose }) {
+  const {t} =useTranslation();
   const { tags: allTags, loading: tagsLoading } = useTags();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -123,14 +125,14 @@ export default function Notifikationshistorik({ open, onClose }) {
         <div className="bg-(--white) rounded-2xl p-3 mb-3">
           <input
             className="w-full text-(--secondary) font-bold mb-2"
-            placeholder="Title"
+            placeholder={t("title")}
             onFocus={handleFocus}
             value={title}
             onChange={(e) => setTitle(e.target.value)}
           />
           <textarea
             className="w-full text-(--secondary) text-lg"
-            placeholder="Description"
+            placeholder={t("description")}
             onFocus={handleFocus}
             value={description}
             onChange={(e) => setDescription(e.target.value)}
@@ -160,7 +162,7 @@ export default function Notifikationshistorik({ open, onClose }) {
             <input
               className="w-full"
               onFocus={handleFocus}
-              placeholder="Hvor foregår det..."
+              placeholder={t("where")}
               value={location}
               onChange={(e) => setLocation(e.target.value)}
             />

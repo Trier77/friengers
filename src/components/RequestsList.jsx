@@ -7,6 +7,7 @@ import {
 } from "firebase/firestore";
 import { db } from "../firebase";
 import { useState, useEffect } from "react";
+import { useTranslation } from "react-i18next";
 
 // ⭐ Opdateret handleRequest med historik
 const handleRequest = async (postId, userId, approve) => {
@@ -44,6 +45,7 @@ const handleRequest = async (postId, userId, approve) => {
 };
 
 export default function RequestsList({ post }) {
+  const {t} = useTranslation();
   const [requestUsers, setRequestUsers] = useState([]);
 
   useEffect(() => {
@@ -76,13 +78,13 @@ export default function RequestsList({ post }) {
               onClick={() => handleRequest(post.id, user.uid, true)}
               className="px-2 py-1 bg-green-500 text-white rounded"
             >
-              Accepter
+              {t("accept")}
             </button>
             <button
               onClick={() => handleRequest(post.id, user.uid, false)}
               className="px-2 py-1 bg-red-500 text-white rounded"
             >
-              Afvis
+              {t("deny")}
             </button>
           </div>
         </div>
