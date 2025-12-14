@@ -1,6 +1,7 @@
 import { doc, updateDoc, arrayUnion, getDoc } from "firebase/firestore";
 import { auth, db } from "../firebase";
 import { useState, useRef } from "react";
+import { createPortal } from "react-dom";
 
 export default function Tilmeld({
   postId,
@@ -98,17 +99,17 @@ export default function Tilmeld({
 
   return (
     <div>
-      {showNotification && (
-        <>
-          {/* Background overlay */}
-          <div className="fixed inset-0 bg-(--white) opacity-60 z-40 transition" />
+      {showNotification &&
+        createPortal(
+          <>
+            <div className="fixed inset-0 bg-(--white) opacity-60 z-40" />
 
-          {/* Popup */}
-          <div className="fixed text-lg overskrift w-70 left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-(--secondary) font-bold text-(--white) px-4 py-2 rounded-full z-50 text-center">
-            Din anmodning er sendt!
-          </div>
-        </>
-      )}
+            <div className="fixed w-60 text-center left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-(--secondary) font-bold text-(--white) p-2  rounded-full z-50">
+              Din anmodning er sendt!
+            </div>
+          </>,
+          document.body
+        )}
 
       <button
         onMouseDown={handleMouseDown}
