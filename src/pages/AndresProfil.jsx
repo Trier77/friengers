@@ -17,7 +17,7 @@ import { db, auth } from "../firebase";
 import PostCard from "../components/PostCard";
 import PrivatChatIcon from "../../public/icons/PrivatChat";
 import ColorCircle from "../components/ColorCircle";
-import { useTranslation } from "react-i18next";
+import AnmeldelsesModal from "../components/Anmeldelsesmodal";
 
 function AndresProfil() {
   const {t} = useTranslation();
@@ -33,6 +33,7 @@ function AndresProfil() {
 
   const [expandedPostId, setExpandedPostId] = useState(null);
   const [previewImage, setPreviewImage] = useState(null);
+  const [showAnmeldelsesModal, setShowAnmeldelsesModal] = useState(false);
 
   const toggleExpand = (id) =>
     setExpandedPostId((prev) => (prev === id ? null : id));
@@ -250,9 +251,12 @@ function AndresProfil() {
       <ColorCircle />
 
       <div className="pb-4 relative">
-        <button className="absolute top-4 right-4">
+        <button
+          className="absolute top-4 right-4"
+          onClick={() => setShowAnmeldelsesModal(true)}
+        >
           <svg
-            className="w-6 h-6 text-blue-500 opacity-40"
+            className="w-6 h-6 text-blue-500/60"
             fill="none"
             stroke="currentColor"
             strokeWidth={2}
@@ -466,6 +470,11 @@ function AndresProfil() {
           </div>
         </div>
       )}
+      <AnmeldelsesModal
+        isOpen={showAnmeldelsesModal}
+        onClose={() => setShowAnmeldelsesModal(false)}
+        reportedUserName={userData.fuldenavn || "brugeren"}
+      />
     </motion.div>
   );
 }
