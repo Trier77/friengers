@@ -10,8 +10,10 @@ import Create from "../components/Create";
 import GroupsIcon from "../../public/icons/GroupsIcon";
 import NotificationWrapper from "../components/NotificationWrapper";
 import useTags from "../components/Tags";
+import { useTranslation } from "react-i18next";
 
 export default function Feed() {
+  const { t, i18n } = useTranslation();
   const { tags: allTags } = useTags();
   const [posts, setPosts] = useState([]);
   const navigate = useNavigate();
@@ -176,9 +178,7 @@ export default function Feed() {
         </div>
 
         <div
-          className={`flex justify-between relative
-      
-        `}
+          className={`flex justify-between relative`}
         >
           <div className="flex flex-col justify-between gap-2">
             <p
@@ -195,7 +195,7 @@ export default function Feed() {
                   <img
                     key={i}
                     src={url}
-                    alt="Post billede"
+                    alt={t(`feed.postImageAlt`)}
                     className="h-40 w-auto rounded-xl cursor-pointer"
                     onClick={() => setPreviewImage(url)}
                   />
@@ -207,7 +207,7 @@ export default function Feed() {
               <div className="flex items-center gap-2">
                 <img
                   src={post.author?.profileImage}
-                  alt="Afsender"
+                  alt={t(`feed.senderAlt`)}
                   className="w-8 h-8 rounded-full object-cover cursor-pointer"
                   onClick={() => navigate(`/AndresProfil/${post.uid}`)}
                 />
@@ -276,7 +276,7 @@ export default function Feed() {
             onClick={() => setShowFilter((prev) => !prev)}
             className="px-4 pt-2 text-lg text-(--primary)"
           >
-            Filter {showFilter ? "▲" : "▼"}
+            {t(`feed.filter`)} {showFilter ? "▲" : "▼"}
           </button>
         </div>
 
@@ -307,12 +307,12 @@ export default function Feed() {
       {selectedTags.length > 0 ? (
         filteredPosts.length > 0 ? (
           <div>
-            <h2 className="text-lg font-bold mb-2">Filter</h2>
+            <h2 className="text-lg font-bold mb-2">{t(`feed.filter`)}</h2>
             {filteredPosts.map((post, index) => renderPost(post, index))}
           </div>
         ) : (
           <p className="text-(--white) mt-4">
-            Ingen opslag matcher de valgte tags.
+           {t(`feed.filnoMatchingPostster`)}
           </p>
         )
       ) : (
@@ -327,7 +327,7 @@ export default function Feed() {
           <div className="max-w-3xl max-h-[90vh]">
             <img
               src={previewImage}
-              alt="Preview"
+              alt={t(`feed.previewAlt`)}
               className="w-full h-full object-contain rounded-xl"
             />
           </div>

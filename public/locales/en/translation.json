@@ -103,7 +103,15 @@
       "passwordPlaceholder": "Password",
       "rememberMe": "Stay logged in",
       "submit": "Log in"
-    }}
+    }},
 
+  
+  "feed": {
+    "filter": "Filter",
+    "noMatchingPosts": "No posts match the selected tags.",
+    "postImageAlt": "Post image",
+    "senderAlt": "Author",
+    "previewAlt": "Preview"
+  }
 
   }

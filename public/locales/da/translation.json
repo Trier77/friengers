@@ -105,8 +105,17 @@
       "passwordPlaceholder": "Adgangskode",
       "rememberMe": "Forbliv logget ind",
       "submit": "Login"
-    }
-    }
+    }},
+  
+  
+  "feed": {
+    "filter": "Filter",
+    "noMatchingPosts": "Ingen opslag matcher de valgte tags.",
+    "postImageAlt": "Post billede",
+    "senderAlt": "Afsender",
+    "previewAlt": "Preview"
+  }
+  
   }
 
 
