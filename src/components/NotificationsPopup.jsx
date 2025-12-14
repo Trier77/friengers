@@ -530,7 +530,14 @@ export default function NotificationsPopup({
                         <p className="text-red-600 text-sm mb-1 font-semibold">
                           Opgave slettet
                         </p>
-                        <p className="text-(--secondary) font-bold text-base">
+                        <p
+                          className="text-(--secondary) font-bold text-base cursor-pointer hover:underline"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            closePopup();
+                            navigate(`/?invitation=${n.postId}&from=${n.from}`);
+                          }}
+                        >
                           {n.postTitle}
                         </p>
                       </div>
