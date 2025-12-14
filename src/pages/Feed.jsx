@@ -12,6 +12,7 @@ import NotificationWrapper from "../components/NotificationWrapper";
 import useTags from "../components/Tags";
 import PostCard from "../components/PostCard";
 import FunnelIcon from "../../public/icons/FunnelIcon";
+import { useSwipe } from "../components/SwipeContext";
 
 export default function Feed() {
   const { tags: allTags } = useTags();
@@ -23,6 +24,8 @@ export default function Feed() {
   const [previewImage, setPreviewImage] = useState(null);
   const [highlightPostId, setHighlightPostId] = useState(null);
   const myPostsRef = useRef(null);
+
+  const { setSwipeEnabled } = useSwipe();
 
   const userId = auth.currentUser?.uid;
 
@@ -209,7 +212,12 @@ export default function Feed() {
           myPosts.map((post, index) => renderMyPost(post, index))}
       </div>
 
-      <Create allTags={allTags} onPostCreated={handlePostCreated} />
+      <Create
+        allTags={allTags}
+        onPostCreated={handlePostCreated}
+        onOpen={() => setSwipeEnabled(false)}
+        onClose={() => setSwipeEnabled(true)}
+      />
 
       <motion.div
         initial={{ opacity: 0, y: 20 }}

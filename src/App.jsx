@@ -17,6 +17,8 @@ import PublicRoute from "./components/PublicRoutes";
 import AppRoute from "./components/AppRoutes";
 import GroupChat from "./pages/GroupChat";
 import ScrollToTopButton from "./components/ScrollToTop";
+import SwipeLayout from "./components/SwipeLayout";
+import { SwipeProvider } from "./components/SwipeContext";
 
 function App() {
   useOnlineStatus();
@@ -60,87 +62,92 @@ function App() {
   if (loading) return null;
 
   return (
-    <>
-      {user && <Logo />}
-      {user && <Navbar />}
-      <div className={user ? "pb-36" : ""}>
-        <Routes>
-          <Route
-            path="/login"
-            element={
-              <PublicRoute user={user}>
-                <Login />
-              </PublicRoute>
-            }
-          />
-          <Route
-            path="/"
-            element={
-              <AppRoute user={user}>
-                <Feed />
-              </AppRoute>
-            }
-          />
-          <Route
-            path="/Chats"
-            element={
-              <AppRoute user={user}>
-                <Chats />
-              </AppRoute>
-            }
-          />
-          <Route
-            path="/Chats/:chatId"
-            element={
-              <AppRoute user={user}>
-                <IndividualChat />
-              </AppRoute>
-            }
-          />
-          <Route
-            path="/Profil"
-            element={
-              <AppRoute user={user}>
-                <Profil />
-              </AppRoute>
-            }
-          />
-          <Route
-            path="/AndresProfil/:userId"
-            element={
-              <AppRoute user={user}>
-                <AndresProfil />
-              </AppRoute>
-            }
-          />
-          <Route
-            path="/Settings"
-            element={
-              <AppRoute user={user}>
-                <Settings />
-              </AppRoute>
-            }
-          />
-          <Route
-            path="/test"
-            element={
-              <AppRoute user={user}>
-                <FirebaseTest />
-              </AppRoute>
-            }
-          />
-          <Route
-            path="/GroupChat/:chatId"
-            element={
-              <AppRoute user={user}>
-                <GroupChat />
-              </AppRoute>
-            }
-          />
-        </Routes>
-      </div>
-      <ScrollToTopButton />
-    </>
+    <SwipeProvider>
+      <>
+        {user && <Logo />}
+        {user && <Navbar />}
+        <div className={user ? "pb-36" : ""}>
+          <Routes>
+            <Route
+              path="/login"
+              element={
+                <PublicRoute user={user}>
+                  <Login />
+                </PublicRoute>
+              }
+            />
+            <Route element={<SwipeLayout />}>
+              <Route
+                path="/"
+                element={
+                  <AppRoute user={user}>
+                    <Feed />
+                  </AppRoute>
+                }
+              />
+              <Route
+                path="/Chats"
+                element={
+                  <AppRoute user={user}>
+                    <Chats />
+                  </AppRoute>
+                }
+              />
+              <Route
+                path="/Profil"
+                element={
+                  <AppRoute user={user}>
+                    <Profil />
+                  </AppRoute>
+                }
+              />
+            </Route>
+            <Route
+              path="/Chats/:chatId"
+              element={
+                <AppRoute user={user}>
+                  <IndividualChat />
+                </AppRoute>
+              }
+            />
+
+            <Route
+              path="/AndresProfil/:userId"
+              element={
+                <AppRoute user={user}>
+                  <AndresProfil />
+                </AppRoute>
+              }
+            />
+            <Route
+              path="/Settings"
+              element={
+                <AppRoute user={user}>
+                  <Settings />
+                </AppRoute>
+              }
+            />
+            <Route
+              path="/test"
+              element={
+                <AppRoute user={user}>
+                  <FirebaseTest />
+                </AppRoute>
+              }
+            />
+            <Route
+              path="/GroupChat/:chatId"
+              element={
+                <AppRoute user={user}>
+                  <GroupChat />
+                </AppRoute>
+              }
+            />
+          </Routes>
+        </div>
+        <ScrollToTopButton />
+      </>
+    </SwipeProvider>
   );
 }
 
