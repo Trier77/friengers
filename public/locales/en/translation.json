@@ -112,6 +112,16 @@
     "postImageAlt": "Post image",
     "senderAlt": "Author",
     "previewAlt": "Preview"
+  }, 
+
+   "groupChat": {
+    "loading": "Loading group chat...",
+    "notFound": "Chat not found",
+    "participants": "participants",
+    "noMessagesTitle": "No messages yet",
+    "noMessagesSubtitle": "Send the first message! 💬",
+    "unknownSender": "Unknown",
+    "messagePlaceholder": "Type a message..."
   }
 
   }

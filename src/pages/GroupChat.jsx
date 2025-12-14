@@ -13,8 +13,10 @@ import {
   setDoc,
 } from "firebase/firestore";
 import { db, auth } from "../firebase";
+import { useTranslation } from "react-i18next";
 
 function GroupChat() {
+  const { t, i18n } = useTranslation();
   const { chatId } = useParams();
   const navigate = useNavigate();
   const messagesEndRef = useRef(null);
@@ -165,7 +167,7 @@ function GroupChat() {
     const participant = participants.find((p) => p.uid === senderId);
     return participant
       ? participant.kaldenavn || participant.fuldenavn
-      : "Ukendt";
+      : t(`groupChat.unknownSender`);
   };
 
   const getSenderAvatar = (senderId) => {
@@ -174,11 +176,11 @@ function GroupChat() {
   };
 
   if (loading) {
-    return <div className="p-4 text-center">Henter gruppechat...</div>;
+  return <div className="p-4 text-center">{t(`groupChat.loading`)}</div>;
   }
 
   if (!chatInfo) {
-    return <div className="p-4 text-center">Chat ikke fundet</div>;
+    return <div className="p-4 text-center">{t(`groupChat.notFound`)}</div>;
   }
 
   return (
@@ -189,7 +191,7 @@ function GroupChat() {
       className="fixed inset-0 flex flex-col bg-white"
     >
       {/* Header */}
-      <div className="bg-white p-4 flex items-center gap-4 shadow-sm z-10 flex-shrink-0">
+      <div className="bg-white p-4 flex items-center gap-4 shadow-sm z-10 shrink-0">
         <button onClick={() => navigate(-1)} className="p-2">
           <svg
             className="w-6 h-6 text-blue-500"
@@ -219,7 +221,7 @@ function GroupChat() {
             {chatInfo.chatName}
           </h2>
           <p className="text-xs text-gray-500">
-            {participants.length} deltagere
+            {participants.length} {t(`groupChat.participants`)}
           </p>
         </div>
       </div>
@@ -228,8 +230,8 @@ function GroupChat() {
       <div className="flex-1 overflow-y-auto p-4 space-y-3">
         {messages.length === 0 && (
           <div className="text-center text-gray-400 mt-8">
-            <p>Ingen beskeder endnu</p>
-            <p className="text-sm">Send den første besked! 💬</p>
+            <p>{t(`groupChat.noMessagesTitle`)}</p>
+            <p className="text-sm"> {t(`groupChat.noMessagesSubtitle`)}</p>
           </div>
         )}
         {messages.map((message) => {
@@ -251,7 +253,7 @@ function GroupChat() {
                   <img
                     src={getSenderAvatar(message.senderId)}
                     alt={getSenderName(message.senderId)}
-                    className="w-8 h-8 rounded-full object-cover flex-shrink-0 cursor-pointer hover:opacity-80 transition-opacity"
+                    className="w-8 h-8 rounded-full object-cover shrink-0 cursor-pointer hover:opacity-80 transition-opacity"
                     onClick={() =>
                       navigate(`/AndresProfil/${message.senderId}`)
                     }
@@ -268,13 +270,13 @@ function GroupChat() {
 
                   {/* Besked */}
                   <div
-                    className={`p-3 rounded-2xl break-words ${
+                    className={`p-3 rounded-2xl warp-break-words ${
                       isOwnMessage
                         ? "bg-blue-500 text-white rounded-br-sm"
                         : "bg-gray-200 text-gray-800 rounded-bl-sm"
                     }`}
                   >
-                    <p className="break-words whitespace-pre-wrap">
+                    <p className="wrap-break-words whitespace-pre-wrap">
                       {message.text}
                     </p>
                     {message.timestamp && (
@@ -302,7 +304,7 @@ function GroupChat() {
 
       {/* Input Field */}
       <div
-        className={`bg-white p-4 border-t border-gray-200 flex-shrink-0 ${
+        className={`bg-white p-4 border-t border-gray-200 shrink-0 ${
           isInputFocused ? "mb-0" : "mb-20"
         }`}
       >
@@ -312,7 +314,7 @@ function GroupChat() {
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
             onKeyPress={handleKeyPress}
-            placeholder="Skriv en besked..."
+            placeholder={t(`groupChat.messagePlaceholder`)}
             onFocus={() => {
               setIsInputFocused(true);
               const nav = document.querySelector("nav");
