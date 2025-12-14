@@ -4,6 +4,16 @@ import GroupsIcon from "../../public/icons/GroupsIcon";
 import Tilmeld from "../components/Tilmeld";
 import { motion, AnimatePresence } from "framer-motion";
 import FingerPrintIcon from "../../public/icons/FingerPrintIcon";
+import { auth, db } from "../firebase";
+import {
+  doc,
+  getDoc,
+  updateDoc,
+  arrayUnion,
+  arrayRemove,
+  setDoc,
+  serverTimestamp,
+} from "firebase/firestore";
 
 export default function PostCard({
   post,
@@ -14,8 +24,11 @@ export default function PostCard({
   setPreviewImage,
   navigate,
   fetchPosts,
-  showAuthor = true, // <--- ny prop
-  showTimestamp = false, // <--- ny prop
+  showAuthor = true,
+  showTimestamp = false,
+  isInvitation = false,
+  invitationFrom = null,
+  onInvitationHandled = () => {},
 }) {
   const isFocused = expandedPostId === post.id;
 
@@ -42,6 +55,98 @@ export default function PostCard({
 
     return "lige nu";
   }
+
+  const handleInvitationResponse = async (approve) => {
+    try {
+      const currentUserId = auth.currentUser?.uid;
+      const postRef = doc(db, "posts", post.id);
+      const userRef = doc(db, "users", currentUserId);
+
+      const userSnap = await getDoc(userRef);
+      const userData = userSnap.data();
+      const updatedNotifications = (userData.notifications || []).map((n) => {
+        if (
+          n.postId === post.id &&
+          n.from === invitationFrom &&
+          n.notificationType === "invitation"
+        ) {
+          return {
+            ...n,
+            status: approve ? "accepted" : "rejected",
+            handledAt: Date.now(),
+          };
+        }
+        return n;
+      });
+
+      await updateDoc(userRef, {
+        notifications: updatedNotifications,
+      });
+
+      if (approve) {
+        const postSnap = await getDoc(postRef);
+        const postData = postSnap.data();
+        const currentParticipants = postData.participants || [];
+
+        await updateDoc(postRef, {
+          participants: arrayUnion(currentUserId),
+          requests: arrayRemove(currentUserId),
+        });
+
+        const groupChatId = `group_${post.id}`;
+        const groupChatRef = doc(db, "chats", groupChatId);
+        const groupChatSnap = await getDoc(groupChatRef);
+
+        if (groupChatSnap.exists()) {
+          await updateDoc(groupChatRef, {
+            participants: arrayUnion(currentUserId),
+          });
+        } else {
+          const allParticipants = [
+            ...currentParticipants,
+            currentUserId,
+            postData.uid,
+          ];
+          const uniqueParticipants = [...new Set(allParticipants)];
+
+          await setDoc(groupChatRef, {
+            postId: post.id,
+            chatName: postData.title,
+            participants: uniqueParticipants,
+            createdAt: serverTimestamp(),
+            createdBy: postData.uid,
+            isGroupChat: true,
+            lastMessage: "Gruppechat oprettet",
+            lastMessageTime: serverTimestamp(),
+            lastMessageSenderId: currentUserId,
+          });
+
+          for (const uid of uniqueParticipants) {
+            const participantRef = doc(db, "users", uid);
+
+            await updateDoc(participantRef, {
+              notifications: arrayUnion({
+                notificationType: "groupchat_created",
+                postId: post.id,
+                postTitle: postData.title,
+                status: "pending",
+                timestamp: Date.now(),
+                createdAt: Date.now(),
+              }),
+            });
+          }
+        }
+      } else {
+        await updateDoc(postRef, {
+          requests: arrayRemove(currentUserId),
+        });
+      }
+
+      onInvitationHandled();
+    } catch (error) {
+      console.error("Fejl ved håndtering af invitation:", error);
+    }
+  };
 
   return (
     <motion.div
@@ -198,12 +303,40 @@ export default function PostCard({
             </motion.div>
           )}
 
-          <Tilmeld
-            postId={post.id}
-            participants={post.participants}
-            requests={post.requests || []}
-            onUpdate={fetchPosts}
-          />
+          {isInvitation ? (
+            <motion.div
+              className="absolute bottom-0 right-0 z-10 flex gap-2 p-2 bg-white rounded-tl-2xl shadow-lg"
+              initial={{ scale: 0.8, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              transition={{ duration: 0.3 }}
+            >
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleInvitationResponse(false);
+                }}
+                className="px-4 py-2 border-2 border-gray-300 text-gray-700 font-semibold rounded-full hover:bg-gray-50"
+              >
+                Afvis
+              </button>
+              <button
+                onClick={(e) => {
+                  e.stopPropagation();
+                  handleInvitationResponse(true);
+                }}
+                className="px-4 py-2 bg-(--secondary) text-white font-semibold rounded-full hover:brightness-110"
+              >
+                Acceptér
+              </button>
+            </motion.div>
+          ) : (
+            <Tilmeld
+              postId={post.id}
+              participants={post.participants}
+              requests={post.requests || []}
+              onUpdate={fetchPosts}
+            />
+          )}
         </motion.div>
       </motion.div>
     </motion.div>

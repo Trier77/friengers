@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import CalenderIcon from "../../public/icons/CalenderIcon";
 import MapPinIcon from "../../public/icons/MapPinIcon";
 import Tilmeld from "../components/Tilmeld";
-import { useNavigate } from "react-router";
+import { useNavigate, useSearchParams } from "react-router";
 import Create from "../components/Create";
 import GroupsIcon from "../../public/icons/GroupsIcon";
 import NotificationWrapper from "../components/NotificationWrapper";
@@ -28,6 +28,9 @@ export default function Feed() {
   const { setSwipeEnabled } = useSwipe();
 
   const userId = auth.currentUser?.uid;
+  const [searchParams, setSearchParams] = useSearchParams();
+  const invitationPostId = searchParams.get("invitation");
+  const invitationFrom = searchParams.get("from");
 
   const fetchPosts = async () => {
     const postsSnapshot = await getDocs(collection(db, "posts"));
@@ -51,6 +54,18 @@ export default function Feed() {
     };
     fetchData();
   }, []);
+
+  useEffect(() => {
+    if (invitationPostId && posts.length > 0) {
+      setTimeout(() => {
+        const postElement = document.getElementById(`post-${invitationPostId}`);
+        if (postElement) {
+          postElement.scrollIntoView({ behavior: "smooth", block: "center" });
+          setExpandedPostId(invitationPostId);
+        }
+      }, 300);
+    }
+  }, [invitationPostId, posts]);
 
   const myPosts = posts.filter(
     (post) => post.uid === userId && post.active !== false
@@ -302,18 +317,25 @@ export default function Feed() {
         )
       ) : (
         otherPosts.map((post) => (
-          <PostCard
-            key={post.id}
-            post={post}
-            userId={userId}
-            expandedPostId={expandedPostId}
-            toggleExpand={toggleExpand}
-            selectedTags={selectedTags}
-            handleDropdownChange={handleDropdownChange}
-            setPreviewImage={setPreviewImage}
-            navigate={navigate}
-            fetchPosts={fetchPosts}
-          />
+          <div key={post.id} id={`post-${post.id}`}>
+            <PostCard
+              post={post}
+              userId={userId}
+              expandedPostId={expandedPostId}
+              toggleExpand={toggleExpand}
+              selectedTags={selectedTags}
+              handleDropdownChange={handleDropdownChange}
+              setPreviewImage={setPreviewImage}
+              navigate={navigate}
+              fetchPosts={fetchPosts}
+              isInvitation={invitationPostId === post.id}
+              invitationFrom={invitationFrom}
+              onInvitationHandled={() => {
+                setSearchParams({});
+                fetchPosts();
+              }}
+            />
+          </div>
         ))
       )}
     </div>
