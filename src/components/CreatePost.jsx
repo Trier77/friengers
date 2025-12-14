@@ -162,14 +162,14 @@ export default function CreatePost({ open, onClose, post = null }) {
         <div className="bg-(--white) rounded-2xl p-3 mb-3">
           <input
             className="w-full text-(--secondary) font-bold mb-2"
-            placeholder="Title"
+            placeholder={t("title")}
             onFocus={handleFocus}
             value={title}
             onChange={(e) => setTitle(e.target.value)}
           />
           <textarea
             className="w-full text-(--secondary) text-lg"
-            placeholder="Description"
+            placeholder={t("decription")}
             onFocus={handleFocus}
             value={description}
             onChange={(e) => setDescription(e.target.value)}
@@ -197,7 +197,7 @@ export default function CreatePost({ open, onClose, post = null }) {
               <MapPinIcon color="--white" size={20} />
               <input
                 className="bg-transparent appearance-none border-none focus:outline-none text-[--white] flex-1 min-w-0 "
-                placeholder="Hvor foregår det..."
+                placeholder={t("where")}
                 onFocus={handleFocus}
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}

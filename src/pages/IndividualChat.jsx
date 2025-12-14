@@ -267,7 +267,7 @@ function IndividualChat() {
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
             onKeyPress={handleKeyPress}
-            placeholder="Skriv en besked..."
+            placeholder={t("write-a")}
             onFocus={() => {
               setIsInputFocused(true);
               const nav = document.querySelector("nav");

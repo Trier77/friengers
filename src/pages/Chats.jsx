@@ -16,6 +16,7 @@ import { db, auth } from "../firebase";
 import { isUserOnline } from "../hooks/Useonlinestatus";
 import ColorCircle from "../components/ColorCircle";
 import { useTranslation } from "react-i18next";
+import loadingVideo from "../assets/loadingScreen.mp4"
 
 function Chats() {
   const {t} = useTranslation();
@@ -379,15 +380,31 @@ function Chats() {
     0
   );
 
+  // if (loading) {
+  //   return (
+  //     <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+  //       <p className="text-gray-500 pointer-events-none select-none">
+  //         Henter chats...
+  //       </p>
+  //     </div>
+  //   );
+  // }
+
   if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-        <p className="text-gray-500 pointer-events-none select-none">
-          Henter chats...
-        </p>
-      </div>
-    );
-  }
+  return (
+    <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+      <video
+        src={loadingVideo}
+        autoPlay
+        loop
+        muted
+        playsInline
+        className="w-50% h-50% pointer-events-none select-none"
+      />
+    </div>
+  );
+}
+
 
   return (
     <motion.div
@@ -408,7 +425,7 @@ function Chats() {
         <div className="relative">
           <input
             type="text"
-            placeholder="Søg efter navn..."
+            placeholder={t("name-search")}
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             className="w-full px-6 py-2 rounded-full border-2 border-(--secondary)/40 focus:border-(--secondary) focus:outline-none text-(--primary)"

@@ -25,7 +25,7 @@ export default function LoginForm({ onLoginClick }) {
         <input
           className="p-2 rounded-2xl border-(--secondary) border-2 text-(--secondary) w-full mb-3 focus:border-(--secondary) focus:ring-2 focus:ring-blue-300 focus:outline-none"
           type="password"
-          placeholder="Adgangskode"
+          placeholder={t("password")}
           onChange={(e) => setPassword(e.target.value)}
         />
 
