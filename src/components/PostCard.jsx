@@ -3,10 +3,10 @@ import MapPinIcon from "../../public/icons/MapPinIcon";
 import GroupsIcon from "../../public/icons/GroupsIcon";
 import Tilmeld from "../components/Tilmeld";
 import { motion, AnimatePresence } from "framer-motion";
+import FingerPrintIcon from "../../public/icons/FingerPrintIcon";
 
 export default function PostCard({
   post,
-  userId,
   expandedPostId,
   toggleExpand,
   selectedTags,
@@ -174,7 +174,6 @@ export default function PostCard({
         <motion.div
           className="absolute bottom-0 right-0 z-10 rounded-tl-full overflow-hidden"
           style={{
-            pointerEvents: expandedPostId === post.id ? "auto" : "none",
             originX: 1,
             originY: 1,
           }}
@@ -188,6 +187,19 @@ export default function PostCard({
           }}
           transition={{ duration: 0.3 }}
         >
+          {expandedPostId === post.id && (
+            <motion.div
+              className="absolute bottom-3 right-3 z-20 pointer-events-none animate-pulse"
+              animate={{
+                opacity: expandedPostId === post.id ? 1 : 0,
+                scale: expandedPostId === post.id ? 1 : 0.6,
+              }}
+              transition={{ duration: 0.2 }}
+            >
+              <FingerPrintIcon color="--secondary" size={30} />
+            </motion.div>
+          )}
+
           <Tilmeld
             postId={post.id}
             participants={post.participants}
