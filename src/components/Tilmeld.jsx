@@ -22,6 +22,8 @@ export default function Tilmeld({
 
   const [showNotification, setShowNotification] = useState(false);
 
+  const isActive = isJoined || isRequested;
+
   const sendJoinRequest = async (postId) => {
     const userId = auth.currentUser.uid;
     const postRef = doc(db, "posts", postId);
@@ -134,9 +136,10 @@ export default function Tilmeld({
       >
         <div
           className={`absolute inset-0 transition-colors duration-300 ${
-            isJoined ? "bg-(--secondary)" : "bg-(--white)"
+            isActive ? "bg-(--secondary)" : "bg-(--white)"
           }`}
         />
+
         <div
           className="absolute bottom-0 left-0 w-full bg-(--secondary) transition-all"
           style={{ height: `${progress}%` }}
