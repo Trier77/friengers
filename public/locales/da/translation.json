@@ -20,7 +20,8 @@
     "activeTasks": "Aktive opgaver",
     "noActiveTasks": "Ingen aktive opgaver",
     "createdLabel": "Oprettet",
-    "createdUnknown": "Ukendt"
+    "createdUnknown": "Ukendt",
+    "invite": "Inviter"
   },
 
   "ownProfile": {

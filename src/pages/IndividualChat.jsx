@@ -14,7 +14,6 @@ import {
 } from "firebase/firestore";
 import { db, auth } from "../firebase";
 import { useTranslation } from "react-i18next";
-import { useTranslation } from "react-i18next";
 
 function IndividualChat() {
   const { t } = useTranslation();
@@ -158,7 +157,7 @@ function IndividualChat() {
       handleSendMessage();
     }
   };
-//LOADING ANIMATION SKAL DEN VÆRE HER????
+  //LOADING ANIMATION SKAL DEN VÆRE HER????
   if (loading) {
     return (
       <div className="p-4 text-center pointer-events-none select-none">
@@ -168,7 +167,9 @@ function IndividualChat() {
   }
 
   if (!otherUser) {
-    return <div className="p-4 text-center">{t(`individualChat.userNotFound`)}</div>;
+    return (
+      <div className="p-4 text-center">{t(`individualChat.userNotFound`)}</div>
+    );
   }
 
   return (

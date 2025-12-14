@@ -22,7 +22,6 @@ import MapPinIcon from "../../public/icons/MapPinIcon";
 import { useNavigate } from "react-router";
 import ColorCircle from "../components/ColorCircle";
 import { useTranslation } from "react-i18next";
-import { useTranslation } from "react-i18next";
 
 export default function Profil() {
   const { t } = useTranslation();
@@ -422,7 +421,9 @@ export default function Profil() {
                   {post.participantsNames.join(", ")}
                 </p>
               ) : (
-                <p className="text-(--white) text-sm">{t(`post.noParticipants`)}</p>
+                <p className="text-(--white) text-sm">
+                  {t(`post.noParticipants`)}
+                </p>
               )}
             </div>
           </div>

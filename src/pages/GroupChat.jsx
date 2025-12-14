@@ -14,7 +14,6 @@ import {
 } from "firebase/firestore";
 import { db, auth } from "../firebase";
 import { useTranslation } from "react-i18next";
-import { useTranslation } from "react-i18next";
 
 function GroupChat() {
   const {t} = useTranslation();
