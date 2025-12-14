@@ -14,6 +14,7 @@ import {
   setDoc,
   serverTimestamp,
 } from "firebase/firestore";
+import { useTranslation } from "react-i18next";
 
 export default function PostCard({
   post,
@@ -30,6 +31,7 @@ export default function PostCard({
   invitationFrom = null,
   onInvitationHandled = () => {},
 }) {
+  const {t} =useTranslation();
   const isFocused = expandedPostId === post.id;
 
   function timeAgo(date) {
@@ -317,7 +319,7 @@ export default function PostCard({
                 }}
                 className="px-4 py-2 border-2 border-gray-300 text-gray-700 font-semibold rounded-full hover:bg-gray-50"
               >
-                Afvis
+                {t("deny")}
               </button>
               <button
                 onClick={(e) => {
@@ -326,7 +328,7 @@ export default function PostCard({
                 }}
                 className="px-4 py-2 bg-(--secondary) text-white font-semibold rounded-full hover:brightness-110"
               >
-                Acceptér
+                {t("accept")}
               </button>
             </motion.div>
           ) : (

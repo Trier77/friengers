@@ -13,8 +13,10 @@ import {
   setDoc,
 } from "firebase/firestore";
 import { db, auth } from "../firebase";
+import { useTranslation } from "react-i18next";
 
 function IndividualChat() {
+  const {t} =useTranslation();
   const { chatId } = useParams();
   const navigate = useNavigate();
   const messagesEndRef = useRef(null);
@@ -155,7 +157,7 @@ function IndividualChat() {
       handleSendMessage();
     }
   };
-
+//LOADING ANIMATION SKAL DEN VÆRE HER????
   if (loading) {
     return (
       <div className="p-4 text-center pointer-events-none select-none">
@@ -165,7 +167,7 @@ function IndividualChat() {
   }
 
   if (!otherUser) {
-    return <div className="p-4 text-center">Bruger ikke fundet</div>;
+    return <div className="p-4 text-center">{t("no-user")}</div>;
   }
 
   return (
@@ -210,8 +212,8 @@ function IndividualChat() {
       <div className="flex-1 overflow-y-auto p-4 space-y-3">
         {messages.length === 0 && (
           <div className="text-center text-gray-400 mt-8">
-            <p>Ingen beskeder endnu</p>
-            <p className="text-sm">Send den første besked! 💬</p>
+            <p>{t("no-messages")}</p>
+            <p className="text-sm">{t("first-message")} 💬</p>
           </div>
         )}
         {messages.map((message) => (

@@ -2,6 +2,7 @@ import { doc, updateDoc, arrayUnion, getDoc } from "firebase/firestore";
 import { auth, db } from "../firebase";
 import { useState, useRef } from "react";
 import { createPortal } from "react-dom";
+import { useTranslation } from "react-i18next";
 
 export default function Tilmeld({
   postId,
@@ -10,6 +11,7 @@ export default function Tilmeld({
   onUpdate,
   className = "",
 }) {
+  const {t} =useTranslation();
   const userId = auth.currentUser.uid;
   const [localParticipants, setLocalParticipants] = useState(
     Array.isArray(participants) ? participants : []
@@ -120,7 +122,7 @@ export default function Tilmeld({
             <div className="fixed inset-0 bg-(--white) opacity-60 z-40" />
 
             <div className="fixed w-60 text-center left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 bg-(--secondary) font-bold text-(--white) p-2  rounded-full z-50">
-              Din anmodning er sendt!
+              {t("request-sent")}
             </div>
           </>,
           document.body

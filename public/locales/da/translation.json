@@ -6,5 +6,9 @@
   "darkmode": "Dark mode",
   "about": "Om os",
   "help": "Hjælp og support",
-  "logout": "Log ud"
+  "logout": "Log ud",
+
+  "overview": "Oversigt",
+
+  "notif-title": "Notifikationer"
 }

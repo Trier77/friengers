@@ -6,5 +6,70 @@
   "darkmode": "Dark mode",
   "about": "About us",
   "help": "Help & support",
-  "logout": "Log out"
+  "logout": "Log out",
+
+  
+  "overview": "Overview",
+
+  "notif-title": "Notifications",
+  "no-notifs": "No notifications yet",
+  "group-creation": "Group chat created:",
+  "group-ready": "Group chat is ready!",
+  "click-open-chat": "Click to open chat",
+  "opened": "Opened",
+  "request": "Request from:",
+  "wants-to-help": "Wants to help",
+  "denied": "Deny",
+  "accept": "Accept",
+  "invitation": "Invitation to",
+  "invitor": "has invited you",
+  "deleted": "Task deleted",
+  "deletor": "has deleted the task",
+  "group-ceased": "Group chat has ceased",
+  "read": "read",
+
+  "tasks-solved": "Tasks solved",
+  "created": "Created",
+  "applied": "Applied",
+
+  "collab": "In collaboration with",
+
+  "no-user": "User not found",
+  "no-messages": "No messages yet",
+  "first-message": "Be the first to send a message",
+
+  "no-chat": "Chat not found",
+  "participants": "Participants",
+
+  "private": "Private chat",
+  "group": "Group chat",
+  "no-results": "No results for",
+  "clear": "Clear search",
+  "none": "No",
+  "chats-yet": "chats yet",
+  "result": "result",
+  "for": "for",
+
+  "solved": "Tasks solved:",
+  "invite": "Invite",
+  "task-invite": "Invite to task",
+  "no-task": "You have no tasks to invtite to",
+  "create-task": "Create a task first to invite others",
+  "invited": "Invited",
+  "active": "Active tasks",
+  "no-active": "No active tasks",
+
+  "request-sent": "Your request has been sent",
+
+  "au-login": "Log in with your AU-Login",
+  "stay-logged": "Remain logged in",
+  "login": "Login",
+
+  "group?": "Create group chat?",
+  "group-for?": "Do you want to make a group chat for:",
+  "no-thx": "No thank you",
+
+  "when": "When"
+
+
 }

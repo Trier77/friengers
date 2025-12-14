@@ -17,8 +17,10 @@ import { ref, uploadBytes, getDownloadURL } from "firebase/storage";
 import { storage } from "../firebase";
 import useTags from "./Tags";
 import Edit from "./Edit";
+import { useTranslation } from "react-i18next";
 
 export default function CreatePost({ open, onClose, post = null }) {
+  const {t} = useTranslation();
   const { tags: allTags, loading: tagsLoading } = useTags();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -212,7 +214,7 @@ export default function CreatePost({ open, onClose, post = null }) {
                   className="text-[--white] pointer-events-none absolute left-7 opacity-50"
                   style={{ color: "var(--white)" }}
                 >
-                  Hvornår?
+                 {t("when")}
                 </span>
               )}
               <input
@@ -238,7 +240,7 @@ export default function CreatePost({ open, onClose, post = null }) {
                 onChange={(e) => setParticipantsCount(Number(e.target.value))}
               >
                 <option value="" disabled>
-                  Deltagere
+                  {t("participants")}
                 </option>
                 {Array.from({ length: 10 }, (_, i) => i + 1).map((num) => (
                   <option key={num} value={num}>

@@ -13,8 +13,10 @@ import useTags from "../components/Tags";
 import PostCard from "../components/PostCard";
 import FunnelIcon from "../../public/icons/FunnelIcon";
 import { useSwipe } from "../components/SwipeContext";
+import { useTranslation } from "react-i18next";
 
 export default function Feed() {
+  const { t} = useTranslation();
   const { tags: allTags } = useTags();
   const [posts, setPosts] = useState([]);
   const navigate = useNavigate();
@@ -241,7 +243,7 @@ export default function Feed() {
         className="mb-4 flex flex-col justify-end"
       >
         <div className="flex gap-4 items-center px-4">
-          <h3 className="text-(--secondary) font-bold text-lg">Oversigt</h3>{" "}
+          <h3 className="text-(--secondary) font-bold text-lg">{t("overview")}</h3>{" "}
           <div className="w-full border border-(--secondary)"></div>
           <button
             onClick={() => setShowFilter((prev) => !prev)}

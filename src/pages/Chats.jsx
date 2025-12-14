@@ -15,8 +15,10 @@ import {
 import { db, auth } from "../firebase";
 import { isUserOnline } from "../hooks/Useonlinestatus";
 import ColorCircle from "../components/ColorCircle";
+import { useTranslation } from "react-i18next";
 
 function Chats() {
+  const {t} = useTranslation();
   const [activeTab, setActiveTab] = useState("private");
   const [privateChats, setPrivateChats] = useState([]);
   const [groupChats, setGroupChats] = useState([]);
@@ -457,7 +459,7 @@ function Chats() {
                 : " text-(--secondary) border-2 border-(--secondary)"
             }`}
           >
-            Privat chat
+            {t("private")}
             {totalPrivateUnread > 0 && (
               <UnreadBadge count={totalPrivateUnread} />
             )}
@@ -470,7 +472,7 @@ function Chats() {
                 : " text-(--secondary) border-2 border-(--secondary)"
             }`}
           >
-            Gruppe chat
+            {t("group")}
             {totalGroupUnread > 0 && <UnreadBadge count={totalGroupUnread} />}
           </button>
         </div>
@@ -482,19 +484,19 @@ function Chats() {
           <div className="text-center text-gray-500 mt-8">
             {searchQuery ? (
               <>
-                <p>Ingen resultater for "{searchQuery}"</p>
+                <p>{t("no-results")} "{searchQuery}"</p>
                 <button
                   onClick={() => setSearchQuery("")}
                   className="text-blue-500 text-sm mt-2 underline"
                 >
-                  Ryd søgning
+                  {t("clear")}
                 </button>
               </>
             ) : (
               <>
                 <p>
-                  Ingen {activeTab === "private" ? "private" : "gruppe"} chats
-                  endnu
+                  {t("none")} {activeTab === "private" ? "private" : "gruppe"} {t("chats-yet")}
+                  
                 </p>
                 <p className="text-sm mt-2">
                   {activeTab === "private"
@@ -508,8 +510,8 @@ function Chats() {
           <>
             {searchQuery && (
               <p className="text-sm text-gray-500 mb-3">
-                Viser {currentChats.length} resultat
-                {currentChats.length !== 1 ? "er" : ""} for "{searchQuery}"
+                Viser {currentChats.length} {t("result")}
+                {currentChats.length !== 1 ? "er" : ""} {t("for")} "{searchQuery}"
               </p>
             )}
             {currentChats.map((chat, index) => (

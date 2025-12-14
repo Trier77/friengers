@@ -9,12 +9,14 @@ import { db, auth } from "../firebase";
 import { useState } from "react";
 import { useNavigate } from "react-router";
 import GroupChatPrompt from "./GroupChatPrompt";
+import { useTranslation } from "react-i18next";
 
 export default function NotificationsPopup({
   notifications,
   open,
   closePopup,
 }) {
+  const { t } = useTranslation();
   const [showGroupChatPrompt, setShowGroupChatPrompt] = useState(false);
   const [selectedPost, setSelectedPost] = useState(null);
   const navigate = useNavigate();
@@ -281,7 +283,7 @@ export default function NotificationsPopup({
       >
         {/* Header */}
         <div className="bg-(--secondary) p-4 flex justify-between items-center">
-          <h2 className="text-(--white) font-bold text-lg">Notifikationer</h2>
+          <h2 className="text-(--white) font-bold text-lg">{t("notif-title")}</h2>
           <button
             onClick={closePopup}
             className="text-(--white) text-2xl font-bold hover:opacity-80"
@@ -294,7 +296,7 @@ export default function NotificationsPopup({
         <div className="max-h-[70vh] overflow-y-auto">
           {notifications.length === 0 ? (
             <div className="p-8 text-center text-gray-500">
-              Ingen notifikationer endnu
+              {t("no-notifs")}
             </div>
           ) : (
             <>
@@ -323,7 +325,7 @@ export default function NotificationsPopup({
                     >
                       <div className="mb-3">
                         <p className="text-gray-600 text-sm mb-1">
-                          Gruppechat oprettet:
+                          {t("group-creation")}
                         </p>
                         <p className="text-(--secondary) font-bold text-base">
                           {n.postTitle}
@@ -342,17 +344,17 @@ export default function NotificationsPopup({
                         </div>
                         <div className="flex-1">
                           <p className="text-gray-700 font-semibold">
-                            Gruppechat er klar!
+                            {t("group-ready")}
                           </p>
                           <p className="text-gray-500 text-sm">
-                            Klik for at åbne chatten
+                            {t("click-open-chat")}
                           </p>
                         </div>
                       </div>
 
                       {!isPending && (
                         <p className="text-center py-2 text-gray-500 text-sm italic">
-                          Åbnet
+                          {t("opened")}
                         </p>
                       )}
                     </div>
@@ -374,7 +376,7 @@ export default function NotificationsPopup({
                     >
                       <div className="mb-3">
                         <p className="text-gray-600 text-sm mb-1">
-                          Anmodning til:
+                          {t("request")}
                         </p>
                         <p className="text-(--secondary) font-bold text-base">
                           {n.postTitle}
@@ -403,7 +405,7 @@ export default function NotificationsPopup({
                             {n.requesterName}
                           </p>
                           <p className="text-gray-500 text-sm">
-                            vil gerne hjælpe
+                            {t("wants-to-help")}
                           </p>
                         </div>
                       </div>
@@ -414,13 +416,13 @@ export default function NotificationsPopup({
                             onClick={() => handleResponse(n, false)}
                             className="flex-1 py-3 border-2 border-gray-300 rounded-full hover:bg-gray-50"
                           >
-                            Afvis
+                            {t("deny")}
                           </button>
                           <button
                             onClick={() => handleResponse(n, true)}
                             className="flex-1 py-3 bg-(--secondary) text-white rounded-full hover:brightness-110"
                           >
-                            Godkend
+                            {t("accept")}
                           </button>
                         </div>
                       ) : (
@@ -453,7 +455,7 @@ export default function NotificationsPopup({
                     >
                       <div className="mb-3">
                         <p className="text-gray-600 text-sm mb-1">
-                          Invitation til:
+                          {t("invitation")}
                         </p>
                         <p className="text-(--secondary) font-bold text-base">
                           {n.postTitle}
@@ -478,7 +480,7 @@ export default function NotificationsPopup({
                             {n.fromName}
                           </p>
                           <p className="text-gray-500 text-sm">
-                            har inviteret dig
+                            {t("invitor")}
                           </p>
                         </div>
                       </div>
@@ -489,13 +491,13 @@ export default function NotificationsPopup({
                             onClick={() => handleInvitationResponse(n, false)}
                             className="flex-1 py-3 border-2 border-gray-300 text-gray-700 font-semibold rounded-full hover:bg-gray-50 transition-colors"
                           >
-                            Afvis
+                            {t("deny")}
                           </button>
                           <button
                             onClick={() => handleInvitationResponse(n, true)}
                             className="flex-1 py-3 bg-(--secondary) text-(--white) font-semibold rounded-full hover:brightness-110 transition-all"
                           >
-                            Acceptér
+                            {t("accept")}
                           </button>
                         </div>
                       ) : (
@@ -528,7 +530,7 @@ export default function NotificationsPopup({
                     >
                       <div className="mb-3">
                         <p className="text-red-600 text-sm mb-1 font-semibold">
-                          Opgave slettet
+                          {t("deleted")}
                         </p>
                         <p
                           className="text-(--secondary) font-bold text-base cursor-pointer hover:underline"
@@ -555,7 +557,7 @@ export default function NotificationsPopup({
                             {n.deletedByName}
                           </p>
                           <p className="text-gray-500 text-sm">
-                            har slettet opgaven
+                            {t("deletor")}
                           </p>
                         </div>
                       </div>
@@ -563,7 +565,7 @@ export default function NotificationsPopup({
                       {n.hadGroupChat && (
                         <div className="bg-red-50 border border-red-200 rounded-lg p-2 mb-3">
                           <p className="text-red-700 text-sm">
-                            Gruppechatten er ophørt
+                            {t("group-ceased")}
                           </p>
                         </div>
                       )}
@@ -611,7 +613,7 @@ export default function NotificationsPopup({
 
                       {!isPending && (
                         <p className="text-center py-2 text-gray-500 text-sm italic">
-                          Set
+                          {t("read")}
                         </p>
                       )}
                     </div>
