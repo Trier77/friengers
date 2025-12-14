@@ -81,3 +81,11 @@ body {
 .animate-shockwave {
   animation: shockwave 1.2s ease-out;
 }
+
+.bio-textarea {
+  display: -webkit-box;
+  -webkit-line-clamp: 3; /* Begræns til 3 linjer */
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  resize: none; /* forhindrer manuel ændring */
+}
