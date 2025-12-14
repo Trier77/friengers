@@ -656,7 +656,7 @@ export default function Profil() {
         <textarea
           ref={bioRef}
           className="w-full text-(--secondary) resize-none overflow-hidden"
-          placeholder="Skriv din beskrivelse her..."
+          placeholder={t("about-you")}
           value={bio}
           rows={3}
           onChange={(e) => {
