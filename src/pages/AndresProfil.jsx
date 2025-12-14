@@ -223,7 +223,11 @@ function AndresProfil() {
   };
 
   if (loading) {
-    return <div className="p-4 text-center">Henter profil...</div>;
+    return (
+      <div className="p-4 text-center pointer-events-none select-none">
+        Henter profil...
+      </div>
+    );
   }
 
   if (!userData) {
@@ -231,7 +235,7 @@ function AndresProfil() {
   }
 
   const completedCount = userPosts.filter(
-    (post) => post.active !== false
+    (post) => post.active === false
   ).length;
 
   return (

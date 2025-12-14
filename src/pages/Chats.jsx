@@ -14,6 +14,7 @@ import {
 } from "firebase/firestore";
 import { db, auth } from "../firebase";
 import { isUserOnline } from "../hooks/Useonlinestatus";
+import ColorCircle from "../components/ColorCircle";
 
 function Chats() {
   const [activeTab, setActiveTab] = useState("private");
@@ -379,7 +380,9 @@ function Chats() {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-        <p className="text-gray-500">Henter chats...</p>
+        <p className="text-gray-500 pointer-events-none select-none">
+          Henter chats...
+        </p>
       </div>
     );
   }
@@ -389,14 +392,16 @@ function Chats() {
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
-      className="min-h-screen bg-gray-100 pb-20"
+      className="relative p-4 overflow-hidden"
     >
       <motion.div
         initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.1 }}
-        className="bg-white pt-6 pb-4 px-6"
+        className=" "
       >
+        <ColorCircle />
+
         {/* Search Bar */}
         <div className="relative">
           <input
@@ -404,7 +409,7 @@ function Chats() {
             placeholder="Søg efter navn..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            className="w-full px-6 py-3 rounded-full border-2 border-blue-200 focus:outline-none focus:border-blue-400 text-gray-600"
+            className="w-full px-6 py-2 rounded-full border-2 border-(--secondary)/40 focus:border-(--secondary) focus:outline-none text-(--primary)"
           />
           {searchQuery ? (
             <button
@@ -412,7 +417,7 @@ function Chats() {
               className="absolute right-6 top-1/2 -translate-y-1/2"
             >
               <svg
-                className="w-6 h-6 text-gray-400 hover:text-gray-600"
+                className="w-6 h-6 text-gray-400"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -443,13 +448,13 @@ function Chats() {
         </div>
 
         {/* Tab Buttons */}
-        <div className="flex gap-3 mt-6">
+        <div className="flex gap-3 mt-10 px-10 ">
           <button
             onClick={() => setActiveTab("private")}
-            className={`relative flex-1 py-2 px-6 rounded-full font-semibold transition-colors ${
+            className={`relative flex-1 p-2 rounded-full font-semibold transition-colors ${
               activeTab === "private"
-                ? "bg-blue-500 text-white"
-                : "bg-white text-blue-500 border-2 border-blue-500"
+                ? "bg-(--secondary) text-white border-2 border-(--secondary)"
+                : " text-(--secondary) border-2 border-(--secondary)"
             }`}
           >
             Privat chat
@@ -459,10 +464,10 @@ function Chats() {
           </button>
           <button
             onClick={() => setActiveTab("group")}
-            className={`relative flex-1 py-2 px-6 rounded-full font-semibold transition-colors ${
+            className={`relative flex-1 p-2 rounded-full font-semibold transition-colors ${
               activeTab === "group"
-                ? "bg-blue-500 text-white"
-                : "bg-white text-blue-500 border-2 border-blue-500"
+                ? "bg-(--secondary) text-white border-2 border-(--secondary)"
+                : " text-(--secondary) border-2 border-(--secondary)"
             }`}
           >
             Gruppe chat
@@ -472,7 +477,7 @@ function Chats() {
       </motion.div>
 
       {/* Chat Liste */}
-      <div className="px-4 mt-4">
+      <div className="mt-4">
         {currentChats.length === 0 ? (
           <div className="text-center text-gray-500 mt-8">
             {searchQuery ? (
@@ -524,10 +529,10 @@ function Chats() {
                   delay: 0.3 + index * 0.15,
                   ease: "easeInOut",
                 }}
-                className={`relative flex items-center border border-(--secondary) gap-4 mb-3 rounded-tl-4xl rounded-bl-4xl rounded-tr-2xl rounded-br-2xl cursor-pointer transition-all active:brightness-80 ${
+                className={`relative flex items-center border-2 border-(--secondary) gap-4 mb-3 rounded-full cursor-pointer transition-all active:brightness-80 ${
                   chat.unread > 0
-                    ? "bg-blue-400 text-white"
-                    : "bg-white text-gray-800 hover:bg-gray-50"
+                    ? "bg-blue-400 text-(--white)"
+                    : "bg-(--white) text-gray-800 hover:bg-gray-50"
                 }`}
               >
                 {/* UnreadBadge */}
@@ -551,7 +556,7 @@ function Chats() {
                                 key={participant.uid}
                                 src={participant.profileImage}
                                 alt={participant.name}
-                                className="absolute w-14 h-14 rounded-full object-cover border-2 border-white"
+                                className="absolute w-14 h-14 rounded-full object-cover border-2 border-(--white)"
                                 style={{
                                   left: `${idx * 16}px`,
                                   zIndex: 3 - idx,
@@ -561,7 +566,7 @@ function Chats() {
                           {/* Hvis flere end 3 deltagere, vis +X */}
                           {chat.participantCount > 3 && (
                             <div
-                              className="absolute w-14 h-14 rounded-full bg-blue-500 border-2 border-white flex items-center justify-center"
+                              className="absolute w-14 h-14 rounded-full bg-blue-500 border-2 border-(--white) flex items-center justify-center"
                               style={{
                                 left: "48px",
                                 zIndex: 0,
@@ -591,10 +596,10 @@ function Chats() {
                       <img
                         src={chat.avatar || "https://via.placeholder.com/56"}
                         alt={chat.name}
-                        className="w-14 h-14 rounded-full object-cover"
+                        className="w-14 h-14 rounded-full object-cover border-2 border-(--white)"
                       />
                       <div
-                        className={`absolute bottom-0 right-0 w-4 h-4 rounded-full border-2 border-white ${
+                        className={`absolute bottom-0 right-0 w-4 h-4 rounded-full border-2 border-(--white) ${
                           chat.online
                             ? chat.unread > 0
                               ? "bg-blue-300"
@@ -608,12 +613,12 @@ function Chats() {
 
                 {/* Chat Info */}
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold text-lg truncate">
+                  <h3 className="font-semibold text-lg truncate text-(--secondary)">
                     {chat.name}
                   </h3>
                   <p
                     className={`text-sm truncate ${
-                      chat.unread > 0 ? "text-white/90" : "text-gray-500"
+                      chat.unread > 0 ? "text-white/90" : "text-(--primary)"
                     }`}
                   >
                     {chat.message}
@@ -624,7 +629,9 @@ function Chats() {
                 <div className="flex flex-col items-end gap-1 mr-4">
                   <span
                     className={`text-sm ${
-                      chat.unread > 0 ? "text-white" : "text-gray-500"
+                      chat.unread > 0
+                        ? "text-(--white)"
+                        : "text-(--secondary)/80"
                     }`}
                   >
                     {chat.time}

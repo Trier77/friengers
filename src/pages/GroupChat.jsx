@@ -174,11 +174,19 @@ function GroupChat() {
   };
 
   if (loading) {
-    return <div className="p-4 text-center">Henter gruppechat...</div>;
+    return (
+      <div className="p-4 text-center pointer-events-none select-none">
+        Henter gruppechat...
+      </div>
+    );
   }
 
   if (!chatInfo) {
-    return <div className="p-4 text-center">Chat ikke fundet</div>;
+    return (
+      <div className="p-4 text-center pointer-events-none select-none">
+        Chat ikke fundet
+      </div>
+    );
   }
 
   return (
