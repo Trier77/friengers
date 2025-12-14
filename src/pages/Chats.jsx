@@ -556,7 +556,7 @@ function Chats() {
                                 key={participant.uid}
                                 src={participant.profileImage}
                                 alt={participant.name}
-                                className="absolute w-14 h-14 rounded-full object-cover border-2 border-(--white)"
+                                className="absolute w-14 h-14 rounded-full object-cover"
                                 style={{
                                   left: `${idx * 16}px`,
                                   zIndex: 3 - idx,
@@ -596,7 +596,7 @@ function Chats() {
                       <img
                         src={chat.avatar || "https://via.placeholder.com/56"}
                         alt={chat.name}
-                        className="w-14 h-14 rounded-full object-cover border-2 border-(--white)"
+                        className="w-14 h-14 rounded-full object-cover"
                       />
                       <div
                         className={`absolute bottom-0 right-0 w-4 h-4 rounded-full border-2 border-(--white) ${
