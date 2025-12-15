@@ -57,7 +57,7 @@ export default function Settings() {
         {/* Page title */}
         <div className="flex flex-col items-center gap-5 m-4">
           <h1 className="text-(--primary) text-5xl whitespace-nowrap">
-            {t("settings")}
+            {t(`settings.title`)}
           </h1>
 
           {/* Content */}
@@ -67,7 +67,7 @@ export default function Settings() {
               <div>
                 <ProfileIcon />
               </div>
-              <h2 className="text-(--primary) text-3xl">{t("account")}</h2>
+              <h2 className="text-(--primary) text-3xl">{t(`settings.account`)}</h2>
             </div>
 
             {/* ------ LANGUAGE ------ */}
@@ -77,7 +77,7 @@ export default function Settings() {
                   <LangIcon />
                 </div>
                 <h2 className="text-(--primary) text-3xl whitespace-nowrap">
-                  {t("language")}
+                  {t(`settings.language`)}
                 </h2>
               </div>
 
@@ -123,7 +123,7 @@ export default function Settings() {
                   <NotificationIcon color="--primary" size={20} />
                 </div>
                 <h2 className="text-(--primary) text-3xl whitespace-nowrap">
-                  {t("notifications")}
+                  {t(`settings.notifications`)}
                 </h2>
               </div>
 
@@ -137,7 +137,7 @@ export default function Settings() {
                   <DarkModeIcon />
                 </div>
                 <h2 className="text-(--primary) text-3xl whitespace-nowrap">
-                  {t("darkmode")}
+                  {t(`settings.darkmode`)}
                 </h2>
               </div>
 
@@ -150,7 +150,7 @@ export default function Settings() {
                 <InfoIcon />
               </div>
               <h2 className="text-(--primary) text-2xl whitespace-nowrap">
-                {t("about")}
+                {t(`settings.about`)}
               </h2>
             </div>
 
@@ -163,7 +163,7 @@ export default function Settings() {
                 <HelpIcon />
               </div>
               <h2 className="text-(--primary) text-2xl whitespace-nowrap">
-                {t("help")}
+                {t(`settings.help`)}
               </h2>
             </button>
 
@@ -176,7 +176,7 @@ export default function Settings() {
                 className="text-(--primary) text-2xl whitespace-nowrap"
                 onClick={handleLogout}
               >
-                {t("logout")}
+                {t(`settings.logout`)}
               </button>
             </div>
           </div>
