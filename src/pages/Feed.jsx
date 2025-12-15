@@ -239,23 +239,28 @@ export default function Feed() {
       {myPosts.length > 0 && (
         <div ref={myPostsRef} className="mb-4">
           <motion.button
-            initial={{ opacity: 0, y: 0 }}
-            animate={{ opacity: 1, y: 0 }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
             transition={{ duration: 0 }}
-            onClick={() => setMyPostsDropdownOpen(!myPostsDropdownOpen)}
-            className="w-full flex items-center justify-between bg-(--secondary) text-(--white) rounded-2xl p-4 font-bold text-lg hover:brightness-110 transition-all"
+            onClick={() => setMyPostsDropdownOpen((prev) => !prev)}
+            style={{
+              background: myPostsDropdownOpen
+                ? "linear-gradient(to right, rgba(59,130,246,1), rgba(59,130,246,1)"
+                : "var(--secondary)",
+              transformOrigin: "right",
+              zIndex: 0, // lav z-index
+            }}
+            className="w-full flex items-center justify-between text-(--white) rounded-2xl p-4 font-bold text-lg transition-all"
           >
             <div className="flex items-center gap-1">
-              <span className="overskrift">
-                {t("My Tasks") || "Mine opgaver"}
-              </span>
+              <span className="overskrift">{t("feed.mytasks")}</span>
             </div>
 
             {/* Chevron icon */}
             <motion.svg
               animate={{ rotate: myPostsDropdownOpen ? 180 : 0 }}
               transition={{ duration: 0.3 }}
-              className="w-6 h-6"
+              className="w-8 h-8"
               fill="none"
               stroke="white"
               viewBox="0 0 24 24"
@@ -263,7 +268,7 @@ export default function Feed() {
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                strokeWidth={2}
+                strokeWidth={3}
                 d="M19 9l-7 7-7-7"
               />
             </motion.svg>
@@ -276,7 +281,7 @@ export default function Feed() {
                 initial={{ height: 0, opacity: 0 }}
                 animate={{ height: "auto", opacity: 1 }}
                 exit={{ height: 0, opacity: 0 }}
-                transition={{ duration: 0.3, ease: "easeInOut" }}
+                transition={{ duration: 0.2, ease: "easeInOut" }}
                 className="overflow-hidden"
               >
                 <div className="mt-2 space-y-2">
@@ -308,7 +313,7 @@ export default function Feed() {
           className="flex gap-4 items-center px-4"
         >
           <h3 className="text-(--secondary) font-bold text-lg">
-            {t("overview")}
+            {t("settings.overview")}
           </h3>{" "}
           <div className="w-full border border-(--secondary)"></div>
           <button

@@ -120,7 +120,8 @@
     "noMatchingPosts": "Ups! Ingen opslag matcher de valgte tags.",
     "postImageAlt": "Post billede",
     "senderAlt": "Afsender",
-    "previewAlt": "Preview"
+    "previewAlt": "Preview",
+    "mytasks": "Mine opgaver"
   },
 
   "groupChat": {

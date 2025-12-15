@@ -10,7 +10,6 @@ export default function ScrollToTopButton() {
     };
 
     window.addEventListener("scroll", handleScroll);
-
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
@@ -18,10 +17,15 @@ export default function ScrollToTopButton() {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
-  if (!isVisible) return null;
-
   return (
-    <div className="fixed bottom-30 -right-12 h-24 w-24 padding-1 rounded-full bg-(--secondary) text-(--white) z-1000 flex items-center text-2xl">
+    <div
+      className={`
+        fixed bottom-20 -right-12 h-24 w-24 rounded-full
+        bg-(--secondary) text-(--white) z-1000 flex items-center text-2xl
+        transition-transform duration-300 ease-in-out
+        ${isVisible ? "translate-x-0" : "translate-x-full"}
+      `}
+    >
       <button onClick={scrollToTop} className="pl-4">
         <ArrowIcon rotate={270} color="--white" size={20} />
       </button>

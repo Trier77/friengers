@@ -119,7 +119,8 @@
     "noMatchingPosts": "Oops! No posts match your selected tags.",
     "postImageAlt": "Post image",
     "senderAlt": "Author",
-    "previewAlt": "Preview"
+    "previewAlt": "Preview",
+    "mytasks": "My tasks"
   },
 
   "groupChat": {
