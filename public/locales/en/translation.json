@@ -151,6 +151,14 @@
     "close": "Close"
   },
 
+   "createPost": {
+    "title": "Title",
+    "description": "Description",
+    "where": "Where?",
+    "when": "When?",
+    "participants": "Number of participants"
+  },
+
   "overview": "Overview",
 
   "notif-title": "Notifications",
@@ -203,11 +211,6 @@
 
   "group?": "Create group chat?",
   "group-for?": "Do you want to make a group chat for:",
-  "no-thx": "No thank you",
+  "no-thx": "No thank you"
 
-  "when": "When",
-
-  "title": "Title",
-  "description": "Description",
-  "where": "Where does it take place"
 }

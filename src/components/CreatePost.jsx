@@ -162,14 +162,14 @@ export default function CreatePost({ open, onClose, post = null }) {
         <div className="bg-(--white) rounded-2xl p-3 mb-3">
           <input
             className="w-full text-(--secondary) font-bold mb-2"
-            placeholder={t("title")}
+            placeholder={t(`createPost.title`)}
             onFocus={handleFocus}
             value={title}
             onChange={(e) => setTitle(e.target.value)}
           />
           <textarea
             className="w-full text-(--secondary) text-lg"
-            placeholder={t("decription")}
+            placeholder={t(`createPost.description`)}
             onFocus={handleFocus}
             value={description}
             onChange={(e) => setDescription(e.target.value)}
@@ -197,7 +197,7 @@ export default function CreatePost({ open, onClose, post = null }) {
               <MapPinIcon color="--white" size={20} />
               <input
                 className="bg-transparent appearance-none border-none focus:outline-none text-[--white] flex-1 min-w-0 "
-                placeholder={t("where")}
+                placeholder={t(`createPost.where`)}
                 onFocus={handleFocus}
                 value={location}
                 onChange={(e) => setLocation(e.target.value)}
@@ -214,7 +214,7 @@ export default function CreatePost({ open, onClose, post = null }) {
                   className="text-[--white] pointer-events-none absolute left-7 opacity-50"
                   style={{ color: "var(--white)" }}
                 >
-                 {t("when")}
+                 {t(`createPost.when`)}
                 </span>
               )}
               <input
@@ -240,7 +240,7 @@ export default function CreatePost({ open, onClose, post = null }) {
                 onChange={(e) => setParticipantsCount(Number(e.target.value))}
               >
                 <option value="" disabled>
-                  {t("participants")}
+                  {t(`createPost.participants`)}
                 </option>
                 {Array.from({ length: 10 }, (_, i) => i + 1).map((num) => (
                   <option key={num} value={num}>

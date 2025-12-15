@@ -154,6 +154,14 @@
     "close": "Luk"
   },
 
+  "createPost": {
+    "title": "Titel",
+    "description": "Beskrivelse",
+    "where": "Hvor?",
+    "when": "Hvornår?",
+    "participants": "Antal deltagere"
+  },
+
   
   "no-notifs": "Ingen notifikationer endnu",
   "group-creation": "Gruppe chat oprettet:",
@@ -204,11 +212,7 @@
 
   "group?": "Vil du oprette en gruppechat?",
   "group-for?": "Vil du oprette en gruppechat for denne opgave?",
-  "no-thx": "Nej tak",
+  "no-thx": "Nej tak"
 
-  "when": "hvornår",
-
-  "title": "Titel",
-  "description": "Beskrivelse",
-  "where": "Hvor"
+  
 }
