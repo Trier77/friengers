@@ -283,7 +283,7 @@ export default function NotificationsPopup({
       >
         {/* Header */}
         <div className="bg-(--secondary) p-4 flex justify-between items-center">
-          <h2 className="text-(--white) font-bold text-lg">{t("notif-title")}</h2>
+          <h2 className="text-(--white) font-bold text-lg">{t(`notifications.title`)}</h2>
           <button
             onClick={closePopup}
             className="text-(--white) text-2xl font-bold hover:opacity-80"
@@ -325,7 +325,7 @@ export default function NotificationsPopup({
                     >
                       <div className="mb-3">
                         <p className="text-gray-600 text-sm mb-1">
-                          {t("group-creation")}
+                          {t(`notifications.group.created`)}
                         </p>
                         <p className="text-(--secondary) font-bold text-base">
                           {n.postTitle}
@@ -344,17 +344,17 @@ export default function NotificationsPopup({
                         </div>
                         <div className="flex-1">
                           <p className="text-gray-700 font-semibold">
-                            {t("group-ready")}
+                            {t(`notifications.group.ready`)}
                           </p>
                           <p className="text-gray-500 text-sm">
-                            {t("click-open-chat")}
+                            {t(`notifications.group.click`)}
                           </p>
                         </div>
                       </div>
 
                       {!isPending && (
                         <p className="text-center py-2 text-gray-500 text-sm italic">
-                          {t("opened")}
+                          {t(`notifications.group.opened`)}
                         </p>
                       )}
                     </div>
@@ -376,7 +376,7 @@ export default function NotificationsPopup({
                     >
                       <div className="mb-3">
                         <p className="text-gray-600 text-sm mb-1">
-                          {t("request")}
+                          {t(`notifications.request.title`)}
                         </p>
                         <p className="text-(--secondary) font-bold text-base">
                           {n.postTitle}
@@ -405,7 +405,7 @@ export default function NotificationsPopup({
                             {n.requesterName}
                           </p>
                           <p className="text-gray-500 text-sm">
-                            {t("wants-to-help")}
+                            {t(`notifications.request.wantsHelp`)}
                           </p>
                         </div>
                       </div>
@@ -416,13 +416,13 @@ export default function NotificationsPopup({
                             onClick={() => handleResponse(n, false)}
                             className="flex-1 py-3 border-2 border-gray-300 rounded-full hover:bg-gray-50"
                           >
-                            {t("deny")}
+                            {t(`notifications.request.rejected`)}
                           </button>
                           <button
                             onClick={() => handleResponse(n, true)}
                             className="flex-1 py-3 bg-(--secondary) text-white rounded-full hover:brightness-110"
                           >
-                            {t("accept")}
+                            {t(`notifications.request.accepted`)}
                           </button>
                         </div>
                       ) : (
@@ -432,8 +432,8 @@ export default function NotificationsPopup({
                           }`}
                         >
                           {isAccepted
-                            ? "Du accepterede denne anmodning"
-                            : "Du afviste denne anmodning"}
+                            ? t(`notifications.request.accepted`)
+                            : t(`notifications.request.rejected`)}
                         </p>
                       )}
                     </div>
@@ -455,7 +455,7 @@ export default function NotificationsPopup({
                     >
                       <div className="mb-3">
                         <p className="text-gray-600 text-sm mb-1">
-                          {t("invitation")}
+                          {t(`notifications.invitation.title`)}
                         </p>
                         <p className="text-(--secondary) font-bold text-base">
                           {n.postTitle}
@@ -480,7 +480,7 @@ export default function NotificationsPopup({
                             {n.fromName}
                           </p>
                           <p className="text-gray-500 text-sm">
-                            {t("invitor")}
+                            {t(`notifications.invitation.from`)}
                           </p>
                         </div>
                       </div>
@@ -491,13 +491,13 @@ export default function NotificationsPopup({
                             onClick={() => handleInvitationResponse(n, false)}
                             className="flex-1 py-3 border-2 border-gray-300 text-gray-700 font-semibold rounded-full hover:bg-gray-50 transition-colors"
                           >
-                            {t("deny")}
+                            {t(`notifications.invitation.rejected`)}
                           </button>
                           <button
                             onClick={() => handleInvitationResponse(n, true)}
                             className="flex-1 py-3 bg-(--secondary) text-(--white) font-semibold rounded-full hover:brightness-110 transition-all"
                           >
-                            {t("accept")}
+                            {t(`notifications.invitation.accepted`)}
                           </button>
                         </div>
                       ) : (
@@ -530,7 +530,7 @@ export default function NotificationsPopup({
                     >
                       <div className="mb-3">
                         <p className="text-red-600 text-sm mb-1 font-semibold">
-                          {t("deleted")}
+                          {t(`notifications.deleted.title`)}
                         </p>
                         <p
                           className="text-(--secondary) font-bold text-base cursor-pointer hover:underline"
@@ -557,7 +557,7 @@ export default function NotificationsPopup({
                             {n.deletedByName}
                           </p>
                           <p className="text-gray-500 text-sm">
-                            {t("deletor")}
+                            {t(`notifications.deleted.by`)}
                           </p>
                         </div>
                       </div>
@@ -565,7 +565,7 @@ export default function NotificationsPopup({
                       {n.hadGroupChat && (
                         <div className="bg-red-50 border border-red-200 rounded-lg p-2 mb-3">
                           <p className="text-red-700 text-sm">
-                            {t("group-ceased")}
+                            {t(`notifications.deleted.groupCeased`)}
                           </p>
                         </div>
                       )}
@@ -607,13 +607,13 @@ export default function NotificationsPopup({
                           }}
                           className="w-full py-2 bg-gray-200 text-gray-700 rounded-full hover:bg-gray-300 transition-colors"
                         >
-                          OK
+                          {t(`notifications.deleted.ok`)}
                         </button>
                       )}
 
                       {!isPending && (
                         <p className="text-center py-2 text-gray-500 text-sm italic">
-                          {t("read")}
+                          {t(`notifications.deleted.read`)}
                         </p>
                       )}
                     </div>
