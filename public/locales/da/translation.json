@@ -162,6 +162,11 @@
     "participants": "Antal deltagere"
   },
 
+  "edit": {
+    "saving": "gemmer...",
+    "save": "Gem ændringer"
+  },
+
   
   "no-notifs": "Ingen notifikationer endnu",
   "group-creation": "Gruppe chat oprettet:",
