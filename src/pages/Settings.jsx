@@ -54,14 +54,18 @@ export default function Settings() {
 
           {/* ------ ACCOUNT ------ */}
           <div className="flex items-center gap-4">
-            <ProfileIcon />
+            <div>
+              <ProfileIcon />
+            </div>
             <h2 className="text-(--primary) text-3xl">{t("account")}</h2>
           </div>
 
           {/* ------ LANGUAGE ------ */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4 w-[200px]">
-              <LangIcon />
+              <div>
+                <LangIcon />
+              </div>
               <h2 className="text-(--primary) text-3xl whitespace-nowrap">
                 {t("language")}
               </h2>
@@ -103,7 +107,9 @@ export default function Settings() {
           {/* ------ NOTIFICATIONS ------ */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4 w-[200px]">
-              <NotificationIcon color="--primary" size={20} />
+              <div>
+                <NotificationIcon color="--primary" size={20} />
+              </div>
               <h2 className="text-(--primary) text-3xl whitespace-nowrap">
                 {t("notifications")}
               </h2>
@@ -115,18 +121,22 @@ export default function Settings() {
           {/* ------ DARK MODE ------ */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4 w-[200px]">
-              <DarkModeIcon />
+              <div>
+                 <DarkModeIcon />
+              </div>
               <h2 className="text-(--primary) text-3xl whitespace-nowrap">
                 {t("darkmode")}
               </h2>
             </div>
 
-            <Toggle enabled={darkMode} setEnabled={setDarkMode} />
+           <Toggle  /> 
           </div>
 
           {/* ------ ABOUT ------ */}
           <div className="flex items-center gap-4 w-[200px]">
-            <InfoIcon />
+            <div>
+               <InfoIcon />
+            </div>
             <h2 className="text-(--primary) text-2xl whitespace-nowrap">
               {t("about")}
             </h2>
@@ -134,7 +144,9 @@ export default function Settings() {
 
           {/* ------ HELP ------ */}
           <div className="flex items-center gap-4 w-[200px]">
+            <div>
             <HelpIcon />
+            </div>
             <h2 className="text-(--primary) text-2xl whitespace-nowrap">
               {t("help")}
             </h2>
@@ -142,7 +154,9 @@ export default function Settings() {
 
           {/* ------ LOGOUT ------ */}
           <div className="flex items-center gap-4 w-[200px]">
-            <LogOutIcon />
+            <div>
+              <LogOutIcon />
+            </div>
             <button
               className="text-(--primary) text-2xl whitespace-nowrap"
               onClick={handleLogout}
