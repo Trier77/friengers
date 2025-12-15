@@ -16,7 +16,7 @@ import { db, auth } from "../firebase";
 import { useTranslation } from "react-i18next";
 
 function GroupChat() {
-  const {t} = useTranslation();
+  const { t } = useTranslation();
   const { chatId } = useParams();
   const navigate = useNavigate();
   const messagesEndRef = useRef(null);
@@ -28,6 +28,26 @@ function GroupChat() {
   const [loading, setLoading] = useState(true);
 
   const currentUserId = auth.currentUser?.uid;
+
+  const inputContainerRef = useRef(null);
+
+  useEffect(() => {
+    if (!isInputFocused) return;
+
+    const scrollToInput = () => {
+      inputContainerRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "nearest",
+      });
+    };
+
+    scrollToInput();
+    window.visualViewport?.addEventListener("resize", scrollToInput);
+
+    return () => {
+      window.visualViewport?.removeEventListener("resize", scrollToInput);
+    };
+  }, [isInputFocused]);
 
   // Hent chat info og deltagere
   useEffect(() => {
@@ -174,7 +194,7 @@ function GroupChat() {
     const participant = participants.find((p) => p.uid === senderId);
     return participant?.profileImage || "https://via.placeholder.com/32";
   };
-//LOADING ANIMATION SKAL DEN VÆRE HER?
+  //LOADING ANIMATION SKAL DEN VÆRE HER?
   if (loading) {
     return (
       <div className="p-4 text-center pointer-events-none select-none">
@@ -193,13 +213,21 @@ function GroupChat() {
 
   return (
     <motion.div
+      drag="x"
+      dragDirectionLock
+      dragConstraints={{ left: 0, right: 0 }}
+      dragElastic={0.15}
+      onDragEnd={(_, info) => {
+        if (info.offset.x > 120) navigate(-1);
+      }}
+      style={{ touchAction: "pan-x" }}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       transition={{ duration: 0.4 }}
-      className="fixed inset-0 flex flex-col bg-white"
+      className="fixed inset-0 flex flex-col bg-(--white)"
     >
       {/* Header */}
-      <div className="bg-white p-4 flex items-center gap-4 shadow-sm z-10 shrink-0">
+      <div className=" p-4 flex items-center gap-4 border-b border-(--secondary)/30 z-10 shrink-0">
         <button onClick={() => navigate(-1)} className="p-2">
           <svg
             className="w-6 h-6 text-blue-500"
@@ -235,7 +263,10 @@ function GroupChat() {
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-3">
+      <div
+        className="flex-1 overflow-y-auto p-4 space-y-3"
+        style={{ touchAction: "pan-y" }}
+      >
         {messages.length === 0 && (
           <div className="text-center text-gray-400 mt-8">
             <p>{t(`groupChat.noMessagesTitle`)}</p>
@@ -281,7 +312,7 @@ function GroupChat() {
                     className={`p-3 rounded-2xl warp-break-words ${
                       isOwnMessage
                         ? "bg-blue-500 text-white rounded-br-sm"
-                        : "bg-gray-200 text-gray-800 rounded-bl-sm"
+                        : "bg-(--primary) text-(--white) rounded-bl-sm"
                     }`}
                   >
                     <p className="wrap-break-words whitespace-pre-wrap">
@@ -312,9 +343,8 @@ function GroupChat() {
 
       {/* Input Field */}
       <div
-        className={`bg-white p-4 border-t border-gray-200 shrink-0 ${
-          isInputFocused ? "mb-0" : "mb-20"
-        }`}
+        ref={inputContainerRef}
+        className="px-4 py-6 shrink-0 border-t border-(--secondary)/30"
       >
         <div className="flex gap-2 items-center">
           <input

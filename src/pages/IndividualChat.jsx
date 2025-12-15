@@ -26,7 +26,28 @@ function IndividualChat() {
   const [otherUser, setOtherUser] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  const inputContainerRef = useRef(null);
+
   const currentUserId = auth.currentUser?.uid;
+
+  useEffect(() => {
+    if (!isInputFocused) return;
+
+    const scrollToInput = () => {
+      inputContainerRef.current?.scrollIntoView({
+        behavior: "smooth",
+        block: "nearest",
+      });
+    };
+
+    scrollToInput();
+
+    window.visualViewport?.addEventListener("resize", scrollToInput);
+
+    return () => {
+      window.visualViewport?.removeEventListener("resize", scrollToInput);
+    };
+  }, [isInputFocused]);
 
   // Hent den anden brugers info
   useEffect(() => {
@@ -174,13 +195,18 @@ function IndividualChat() {
 
   return (
     <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.4 }}
-      className="fixed inset-0 flex flex-col bg-white"
+      drag="x"
+      dragDirectionLock
+      dragConstraints={{ left: 0, right: 0 }}
+      dragElastic={0.15}
+      onDragEnd={(_, info) => {
+        if (info.offset.x > 120) navigate("/Chats");
+      }}
+      style={{ touchAction: "pan-x" }}
+      className="fixed inset-0 flex flex-col bg-(--white) z-50"
     >
       {/* Header */}
-      <div className="bg-white p-4 flex items-center gap-4 shadow-sm z-10 shrink-0">
+      <div className=" p-4 flex items-center gap-4 border-b border-(--secondary)/30 z-10 shrink-0">
         <button onClick={() => navigate(-1)} className="p-2">
           <svg
             className="w-6 h-6 text-blue-500"
@@ -211,7 +237,10 @@ function IndividualChat() {
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-3">
+      <div
+        className="flex-1 overflow-y-auto p-4 space-y-3"
+        style={{ touchAction: "pan-y" }}
+      >
         {messages.length === 0 && (
           <div className="text-center text-gray-400 mt-8">
             <p>{t(`individualChat.noMessagesTitle`)}</p>
@@ -231,7 +260,7 @@ function IndividualChat() {
               className={`max-w-[70%] p-3 rounded-2xl wrap-break-words ${
                 message.senderId === currentUserId
                   ? "bg-blue-500 text-white rounded-br-sm"
-                  : "bg-gray-200 text-gray-800 rounded-bl-sm"
+                  : "bg-(--primary) text-(--white) rounded-bl-sm"
               }`}
             >
               <p className="wrap-break-words whitespace-pre-wrap">
@@ -259,9 +288,8 @@ function IndividualChat() {
 
       {/* Input Field */}
       <div
-        className={`bg-white p-4 border-t border-gray-200 shrink-0 ${
-          isInputFocused ? "mb-0" : "mb-20"
-        }`}
+        ref={inputContainerRef}
+        className="px-4 py-6 shrink-0 border-t border-(--secondary)/30"
       >
         <div className="flex gap-2 items-center">
           <input
@@ -274,7 +302,6 @@ function IndividualChat() {
               setIsInputFocused(true);
               const nav = document.querySelector("nav");
               if (nav) nav.style.display = "none";
-              messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
             }}
             onBlur={() => {
               setTimeout(() => {
@@ -283,7 +310,7 @@ function IndividualChat() {
                 if (nav) nav.style.display = "flex";
               }, 100);
             }}
-            className="flex-1 px-4 py-3 rounded-full border-2 border-gray-200 focus:outline-none focus:border-blue-400"
+            className="flex-1 px-4 py-3 rounded-full border-2 border-(--secondary)/40 focus:border-(--secondary) focus:outline-none text-(--primary)"
           />
           <button
             onClick={handleSendMessage}
