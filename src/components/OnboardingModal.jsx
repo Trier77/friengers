@@ -152,7 +152,7 @@ export default function OnboardingModal({ isOpen, onFinish }) {
                 </h2>
 
                 {/* Create Post GIF animation */}
-                <div className="bg-gray-100 rounded-2xl mb-4 overflow-hidden flex items-center justify-center">
+                <div className="bg-(--white) rounded-2xl mb-4 overflow-hidden flex items-center justify-center">
                   <img
                     // src={createPostGif}
                     alt="Opret opslag tutorial"
