@@ -1,12 +1,17 @@
 {
-  "settings": "Settings",
-  "account": "Account",
-  "language": "Language",
-  "notifications": "Notifications",
-  "darkmode": "Dark mode",
-  "about": "About us",
-  "help": "Help & support",
-  "logout": "Log out",
+  "settings": {
+    "title": "Settings",
+    "account": "Account",
+    "language": "Language",
+    "notifications": "Notifications",
+    "darkmode": "Dark mode",
+    "about": "About us",
+    "help": "Help & support",
+    "logout": "Log out",
+    "overview": "Overview",
+    "notif-title": "Notifications"
+  },
+ 
 
   "viewProfile": {
     "loading": "Loading profile...",
@@ -122,7 +127,15 @@
     "noMessagesTitle": "No messages yet",
     "noMessagesSubtitle": "Send the first message! 💬",
     "unknownSender": "Unknown",
-    "messagePlaceholder": "Type a message..."
+    "messagePlaceholder": "Type a message...",
+
+    "title": "Create group chat?",
+    "description": "Do you want to create a group chat for",
+    "cancel": "No thanks",
+    "confirm": "Yes, create",
+    "creating": "Creating...",
+    "error": "An error occurred. Please try again.",
+    "systemCreated": "Group chat created"
   },
 
   "individualChat": {
@@ -131,6 +144,37 @@
     "noMessagesTitle": "No messages yet",
     "noMessagesSubtitle": "Send the first message! 💬",
     "messagePlaceholder": "Type a message..."
+  },
+
+  "report": {
+    "title": "Report {{name}}",
+    "helpText": "Help us understand the problem",
+    "selectPlaceholder": "Select a reason",
+    "reason": {
+      "harassment": "Harassment",
+      "inappropriate": "Inappropriate behavior",
+      "spam": "Spam",
+      "other": "Other"
+    },
+    "textPlaceholder": "Please elaborate (optional)",
+    "cancel": "Cancel",
+    "submit": "Report",
+    "successTitle": "Thank you for your report",
+    "successText": "Your request has been recorded",
+    "close": "Close"
+  },
+
+   "createPost": {
+    "title": "Title",
+    "description": "Description",
+    "where": "Where?",
+    "when": "When?",
+    "participants": "Number of participants"
+  },
+
+  "edit": {
+    "saving": "Saving...",
+    "save": "Save changes"
   },
 
   "overview": "Overview",
@@ -185,11 +229,6 @@
 
   "group?": "Create group chat?",
   "group-for?": "Do you want to make a group chat for:",
-  "no-thx": "No thank you",
+  "no-thx": "No thank you"
 
-  "when": "When",
-
-  "title": "Title",
-  "description": "Description",
-  "where": "Where does it take place"
 }

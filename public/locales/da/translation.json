@@ -1,15 +1,17 @@
 {
-  "settings": "Indstillinger",
-  "account": "Konto",
-  "language": "Sprog",
-  "notifications": "Notifikationer",
-  "darkmode": "Dark mode",
-  "about": "Om os",
-  "help": "Hjælp & support",
-  "logout": "Log ud",
-  "overview": "Oversigt",
-  "notif-title": "Notifikationer",
-
+  "settings": {
+    "title": "Indstillinger",
+    "account": "Konto",
+    "language": "Sprog",
+    "notifications": "Notifikationer",
+    "darkmode": "Dark mode",
+    "about": "Om os",
+    "help": "Hjælp & support",
+    "logout": "Log ud",
+    "overview": "Oversigt",
+    "notif-title": "Notifikationer"
+  },
+  
   "viewProfile": {
     "loading": "Henter profil...",
     "notFound": "Bruger ikke fundet",
@@ -125,7 +127,15 @@
     "noMessagesTitle": "Ingen beskeder endnu",
     "noMessagesSubtitle": "Send den første besked! 💬",
     "unknownSender": "Ukendt",
-    "messagePlaceholder": "Skriv en besked..."
+    "messagePlaceholder": "Skriv en besked...",
+  
+    "title": "Opret gruppechat?",
+    "description": "Vil du oprette en gruppechat for",
+    "cancel": "Nej tak",
+    "confirm": "Ja, opret",
+    "creating": "Opretter...",
+    "error": "Der opstod en fejl. Prøv igen.",
+    "systemCreated": "Gruppechat oprettet"
   },
 
   "individualChat": {
@@ -134,5 +144,123 @@
     "noMessagesTitle": "Ingen beskeder endnu",
     "noMessagesSubtitle": "Send den første besked! 💬",
     "messagePlaceholder": "Skriv en besked..."
-  }
+  },
+
+  "report": {
+    "title": "Anmeld {{name}}",
+    "helpText": "Hjælp os med at forstå problemet",
+    "selectPlaceholder": "Vælg årsag",
+    "reason": {
+      "harassment": "Chikane",
+      "inappropriate": "Upassende adfærd",
+      "spam": "Spam",
+      "other": "Andet"
+    },
+    "textPlaceholder": "Uddyb gerne (valgfrit)",
+    "cancel": "Annuller",
+    "submit": "Anmeld",
+    "successTitle": "Tak for din anmeldelse",
+    "successText": "Din henvendelse er registreret",
+    "close": "Luk"
+  },
+
+  "createPost": {
+    "title": "Titel",
+    "description": "Beskrivelse",
+    "where": "Hvor?",
+    "when": "Hvornår?",
+    "participants": "Antal deltagere"
+  },
+
+  "edit": {
+    "saving": "gemmer...",
+    "save": "Gem ændringer"
+  },
+
+ "notifications": {
+    "title": "Notifikationer",
+    "empty": "Du har ingen notifikationer",
+
+    "group": {
+      "created": "Gruppechat oprettet",
+      "ready": "Gruppechatten er klar",
+      "click": "Tryk for at åbne chatten",
+      "opened": "Åbnet"
+    },
+
+    "request": {
+      "title": "Anmodning",
+      "wantsHelp": "vil gerne hjælpe",
+      "accepted": "Du accepterede denne anmodning",
+      "rejected": "Du afviste denne anmodning"
+    },
+
+    "invitation": {
+      "title": "Invitation",
+      "from": "har inviteret dig",
+      "accepted": "Du accepterede denne invitation",
+      "rejected": "Du afviste denne invitation"
+    },
+
+    "deleted": {
+      "title": "Opslag slettet",
+      "by": "har slettet opslaget",
+      "groupCeased": "Gruppechatten er blevet lukket",
+      "read": "Læst",
+      "ok": "OK"
+    }
+  },
+  
+  "no-notifs": "Ingen notifikationer endnu",
+  "group-creation": "Gruppe chat oprettet:",
+  "group-ready": "Grouppe chat er klar!",
+  "click-open-chat": "Klik for at åbne chatten",
+  "opened": "Åbnet",
+  "request": "Anmodning fra:",
+  "wants-to-help": "Vil hjælpe med din opgave",
+  "denied": "Afvist",
+  "accept": "Accepter",
+  "invitation": "Invitation til",
+  "invitor": "har inviteret dig",
+  "deleted": "Opgave slettet",
+  "deletor": "har slettet opgaven",
+  "group-ceased": "Gruppe chat afsluttet",
+  "read": "Læst",
+
+  "about-you": "Fortæl lidt om dig selv...",
+  "tasks-solved": "Opgaver løst",
+  "created": "Oprettet",
+  "applied": "Tilmeldt",
+
+  "collab": "I samarbejde med",
+
+  "no-messages": "ingen beskeder endnu",
+  "first-message": "Send den første besked!",
+  "write-a": "Skriv en besked",
+
+  "no-chat": "Ingen chat valgt",
+  "participants": "Deltagere",
+
+  "name-search": "Søg efter navn",
+  "private": "Privat chat",
+  "group": "Gruppe chat",
+  "no-results": "Ingen resultater for",
+  "clear": "Ryd søgning",
+  "none": "ingen",
+  "chats-yet": "ingen chats endnu",
+  "result": "resultat",
+  "for": "for",
+
+  "task-invite": "Inviter til opgave:",
+  "no-task": "du skal oprette en opgave først for at invitere andre",
+  "create-task": "opret en opgave før du inviterer",
+  "invited": "Invited",
+
+  "request-sent": "Anmodning sendt",
+
+  "group?": "Vil du oprette en gruppechat?",
+  "group-for?": "Vil du oprette en gruppechat for denne opgave?",
+  "no-thx": "Nej tak"
+
+  
 }

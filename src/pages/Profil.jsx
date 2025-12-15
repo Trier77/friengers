@@ -22,6 +22,7 @@ import MapPinIcon from "../../public/icons/MapPinIcon";
 import { useNavigate } from "react-router";
 import ColorCircle from "../components/ColorCircle";
 import { useTranslation } from "react-i18next";
+import { arrayRemove } from "firebase/firestore";
 
 export default function Profil() {
   const { t } = useTranslation();
@@ -318,6 +319,34 @@ export default function Profil() {
     }
   };
 
+  const removeSelfFromTask = async (postId) => {
+    const userId = auth.currentUser.uid;
+    const postRef = doc(db, "posts", postId);
+
+    try {
+      await updateDoc(postRef, {
+        participants: arrayRemove(userId),
+      });
+
+      // Optionally update local state
+      setPosts((prevPosts) =>
+        prevPosts.map((post) =>
+          post.id === postId
+            ? {
+                ...post,
+                participants: post.participants.filter((id) => id !== userId),
+              }
+            : post
+        )
+      );
+
+      alert("You have been removed from this task.");
+    } catch (error) {
+      console.error("Error removing user from task:", error);
+      alert("Could not remove you from this task.");
+    }
+  };
+
   const renderMyPost = (post) => (
     <motion.div
       key={post.id}
@@ -588,6 +617,26 @@ export default function Profil() {
           className="absolute bottom-0 right-0 z-10"
         />
       </motion.div>
+      <div
+        className={`flex justify-center ${
+          expandedPostId === post.id ? "block" : "hidden"
+        } px-8`}
+        onClick={() => toggleExpand(post.id)}
+      >
+        <button
+          className="text-sm uppercase text-(--primary) font-bold"
+          onClick={(e) => {
+            e.stopPropagation(); // prevent collapsing the post
+            if (
+              window.confirm("Do you want to remove yourself from this task?")
+            ) {
+              removeSelfFromTask(post.id);
+            }
+          }}
+        >
+          {t(`actions.delete`)}
+        </button>
+      </div>
     </motion.div>
   );
 

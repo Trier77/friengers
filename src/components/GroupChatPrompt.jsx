@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useTranslation } from "react-i18next";
 
 export default function GroupChatPrompt({ postId, postTitle, onClose }) {
-  const {t} = useTranslation();
+  const { t } = useTranslation();
   const [isCreating, setIsCreating] = useState(false);
 
   console.log("🔵 GroupChatPrompt rendered:", { postId, postTitle });
@@ -36,16 +36,16 @@ export default function GroupChatPrompt({ postId, postTitle, onClose }) {
         createdAt: serverTimestamp(),
         createdBy: currentUserId,
         isGroupChat: true,
-        lastMessage: "Gruppechat oprettet",
+        lastMessage: t(`groupChat.systemCreated`),
         lastMessageTime: serverTimestamp(),
         lastMessageSenderId: currentUserId,
       });
 
-      console.log("✅ Gruppechat oprettet:", groupChatId);
+      console.log( t(`groupChat.systemCreated`), groupChatId);
       onClose(true); // true = gruppechat blev oprettet
     } catch (error) {
       console.error("❌ Fejl ved oprettelse af gruppechat:", error);
-      alert("Der opstod en fejl. Prøv igen.");
+      alert(t(`groupChat.error`));
       setIsCreating(false);
       onClose(false);
     }
@@ -68,10 +68,10 @@ export default function GroupChatPrompt({ postId, postTitle, onClose }) {
           onClick={(e) => e.stopPropagation()}
         >
           <h2 className="text-xl font-bold text-gray-900 mb-2">
-            {t("group?")}
+            {t(`groupChat.title`)}
           </h2>
           <p className="text-gray-600 mb-6">
-            {t("group-for?")}{" "}
+            {t(`groupChat.description`)}{" "}
             <span className="font-semibold text-blue-600">{postTitle}</span>?
           </p>
 
@@ -81,14 +81,14 @@ export default function GroupChatPrompt({ postId, postTitle, onClose }) {
               disabled={isCreating}
               className="flex-1 px-4 py-3 border-2 border-gray-300 text-gray-700 font-semibold rounded-full hover:bg-gray-50 transition-colors disabled:opacity-50"
             >
-              {t("no-thx")}
+              {t(`groupChat.cancel`)}
             </button>
             <button
               onClick={handleCreateGroupChat}
               disabled={isCreating}
               className="flex-1 px-4 py-3 bg-blue-500 text-white font-semibold rounded-full hover:bg-blue-600 transition-colors disabled:opacity-50"
             >
-              {isCreating ? "Opretter..." : "Ja, opret"}
+              {isCreating ? t(`groupChat.creating`) : t(`groupChat.confirm`)}
             </button>
           </div>
         </motion.div>
