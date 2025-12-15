@@ -1,8 +1,7 @@
 import { useState, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import onboardingGif from "../assets/onboarding.gif";
 import onboardVideo1 from "../assets/apply-onboarding.webm";
-// import createPostGif from "../assets/create-post.gif"; // 🆕 Ny GIF til step 3
+import onboardVideo2 from "../assets/post-onboarding.webm";
 
 export default function OnboardingModal({ isOpen, onFinish }) {
   const [step, setStep] = useState(0);
@@ -148,19 +147,22 @@ export default function OnboardingModal({ isOpen, onFinish }) {
                     className="relative w-full rounded-2xl overflow-hidden bg-(--white)"
                     style={{ height: "300px" }}
                   >
-                    <img
-                      // src={createPostGif}
-                      alt="Opret opslag tutorial"
+                    <video
+                      src={onboardVideo2}
+                      autoPlay
+                      loop
+                      muted
+                      playsInline
                       className="absolute top-0 left-0 w-full h-full object-cover"
                       onError={(e) => {
-                        console.error("Create post GIF kunne ikke loades");
-                        e.target.style.display = "none";
-                        if (e.target.parentElement) {
-                          e.target.parentElement.innerHTML = `
+                        console.error("WebM kunne ikke loades");
+                        e.currentTarget.style.display = "none";
+                        if (e.currentTarget.parentElement) {
+                          e.currentTarget.parentElement.innerHTML = `
                             <div class="flex items-center justify-center h-full">
                               <div class="text-center p-6">
-                                <div class="text-4xl mb-2">✏️</div>
-                                <p class="text-sm text-gray-600">Animation kommer snart...</p>
+                                <div class="text-4xl mb-2">📱</div>
+                                <p class="text-sm text-gray-600">Kunne ikke loade animation</p>
                               </div>
                             </div>
                           `;
