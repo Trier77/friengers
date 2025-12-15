@@ -1,10 +1,12 @@
 import { motion, AnimatePresence } from "framer-motion";
 import { useState } from "react";
+import { useTranslation } from "react-i18next";
 
 function AnmeldelsesModal({ isOpen, onClose, reportedUserName }) {
   const [reason, setReason] = useState("");
   const [text, setText] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const { t } = useTranslation();
 
   const handleClose = () => {
     setReason("");
@@ -41,7 +43,7 @@ function AnmeldelsesModal({ isOpen, onClose, reportedUserName }) {
                 {/* Header */}
                 <div className="flex justify-between items-center mb-4">
                   <h2 className="text-(--secondary) font-bold text-xl">
-                    Anmeld {reportedUserName}
+                    {t(`report.title`, {name: reportedUserName} )}
                   </h2>
                   <button
                     onClick={handleClose}
@@ -52,7 +54,7 @@ function AnmeldelsesModal({ isOpen, onClose, reportedUserName }) {
                 </div>
 
                 <p className="text-gray-500 text-sm mb-6">
-                  Hjælp os med at forstå problemet
+                  {t(`report.helpText`)}
                 </p>
 
                 {/* Dropdown */}
@@ -61,17 +63,17 @@ function AnmeldelsesModal({ isOpen, onClose, reportedUserName }) {
                   value={reason}
                   onChange={(e) => setReason(e.target.value)}
                 >
-                  <option value="">Vælg årsag</option>
-                  <option value="Chikane">Chikane</option>
-                  <option value="Upassende adfærd">Upassende adfærd</option>
-                  <option value="Spam">Spam</option>
-                  <option value="Andet">Andet</option>
+                  <option value="">{t(`report.selectPlaceholder`)}</option>
+                  <option value="Chikane">{t(`report.reason.harassment`)}</option>
+                  <option value="Upassende adfærd">{t(`report.reason.inappropriate`)}</option>
+                  <option value="Spam">{t(`report.reason.spam`)}</option>
+                  <option value="Andet">{t(`report.reason.other`)}</option>
                 </select>
 
                 {/* Textarea */}
                 <textarea
                   className="w-full border-2 border-gray-200 rounded-2xl p-4 mb-6 text-(--secondary) focus:outline-none focus:border-(--secondary) resize-none"
-                  placeholder="Uddyb gerne (valgfrit)"
+                  placeholder={t(`report.textPlaceholder`)}
                   rows={4}
                   value={text}
                   onChange={(e) => setText(e.target.value)}
@@ -83,14 +85,14 @@ function AnmeldelsesModal({ isOpen, onClose, reportedUserName }) {
                     onClick={handleClose}
                     className="flex-1 py-3 border-2 border-gray-300 text-gray-700 font-semibold rounded-full hover:bg-gray-50 transition-colors"
                   >
-                    Annuller
+                    {t(`report.cancel`)}
                   </button>
                   <button
                     disabled={!reason}
                     onClick={() => setSubmitted(true)}
                     className="flex-1 py-3 bg-red-500 text-white font-semibold rounded-full hover:brightness-110 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    Anmeld
+                   {t(`report.submit`)}
                   </button>
                 </div>
               </>
@@ -112,17 +114,17 @@ function AnmeldelsesModal({ isOpen, onClose, reportedUserName }) {
                 </div>
 
                 <h3 className="text-(--secondary) font-bold text-xl mb-2">
-                  Tak for din anmeldelse
+                  {t(`report.successTitle`)}
                 </h3>
                 <p className="text-gray-500 text-sm mb-6">
-                  Din henvendelse er registreret
+                  {t(`report.successText`)}
                 </p>
 
                 <button
                   onClick={handleClose}
                   className="w-full py-3 bg-(--secondary) text-white font-semibold rounded-full hover:brightness-110 transition-all"
                 >
-                  Luk
+                  {t(`report.close`)}
                 </button>
               </div>
             )}
