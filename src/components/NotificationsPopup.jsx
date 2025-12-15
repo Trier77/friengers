@@ -421,13 +421,13 @@ export default function NotificationsPopup({
                             onClick={() => handleResponse(n, false)}
                             className="flex-1 py-3 border-2 border-gray-300 rounded-full hover:bg-gray-50"
                           >
-                            {t(`notifications.request.rejected`)}
+                            {t(`denied`)}
                           </button>
                           <button
                             onClick={() => handleResponse(n, true)}
                             className="flex-1 py-3 bg-(--secondary) text-white rounded-full hover:brightness-110"
                           >
-                            {t(`notifications.request.accepted`)}
+                            {t(`accept`)}
                           </button>
                         </div>
                       ) : (
