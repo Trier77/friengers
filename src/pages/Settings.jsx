@@ -64,19 +64,70 @@ export default function Settings() {
           <div className="w-full px-6 flex flex-col gap-6">
             {/* ------ ACCOUNT ------ */}
             <div className="flex items-center gap-4">
-              <div>
+              <div className="h-5 w-5 flex justify-center items-center">
                 <ProfileIcon />
               </div>
-              <h2 className="text-(--primary) text-3xl">{t(`settings.account`)}</h2>
+              <h2 className="text-(--primary) text-2xl">{t(`settings.account`)}</h2>
             </div>
+
+            {/* ------ NOTIFICATIONS ------ */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4 w-[200px]">
+                <div className="h-5 w-5 flex justify-center items-center">
+                  <NotificationIcon color="--primary" size={20} />
+                </div>
+                <h2 className="text-(--primary) text-2xl whitespace-nowrap">
+                  {t(`settings.notifications`)}
+                </h2>
+              </div>
+
+              <Toggle enabled={notifications} setEnabled={setNotifications} />
+            </div>
+
+            {/* ------ DARK MODE ------ */}
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-4 w-[200px]">
+                <div className="h-5 w-5 flex justify-center items-center">
+                  <DarkModeIcon />
+                </div>
+                <h2 className="text-(--primary) text-2xl whitespace-nowrap">
+                  {t(`settings.darkmode`)}
+                </h2>
+              </div>
+
+              <Toggle />
+            </div>
+
+            {/* ------ ABOUT ------ */}
+            <div className="flex items-center gap-4 w-[200px]">
+              <div className="h-5 w-5 flex justify-center items-center">
+                <InfoIcon />
+              </div>
+              <h2 className="text-(--primary) text-2xl whitespace-nowrap">
+                {t(`settings.about`)}
+              </h2>
+            </div>
+
+            {/* ------ HELP ------ */}
+            <button
+              onClick={handleHelpClick}
+              className="flex items-center gap-4 w-[200px]"
+            >
+              <div className="h-5 w-5 flex justify-center items-center">
+                <HelpIcon />
+              </div>
+              <h2 className="text-(--primary) text-2xl whitespace-nowrap">
+                {t(`settings.help`)}
+              </h2>
+            </button>
 
             {/* ------ LANGUAGE ------ */}
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-4 w-[200px]">
-                <div>
+                <div className="h-5 w-5 flex justify-center items-center">
                   <LangIcon />
                 </div>
-                <h2 className="text-(--primary) text-3xl whitespace-nowrap">
+                <h2 className="text-(--primary) text-2xl whitespace-nowrap">
                   {t(`settings.language`)}
                 </h2>
               </div>
@@ -116,60 +167,9 @@ export default function Settings() {
               </div>
             </div>
 
-            {/* ------ NOTIFICATIONS ------ */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4 w-[200px]">
-                <div>
-                  <NotificationIcon color="--primary" size={20} />
-                </div>
-                <h2 className="text-(--primary) text-3xl whitespace-nowrap">
-                  {t(`settings.notifications`)}
-                </h2>
-              </div>
-
-              <Toggle enabled={notifications} setEnabled={setNotifications} />
-            </div>
-
-            {/* ------ DARK MODE ------ */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4 w-[200px]">
-                <div>
-                  <DarkModeIcon />
-                </div>
-                <h2 className="text-(--primary) text-3xl whitespace-nowrap">
-                  {t(`settings.darkmode`)}
-                </h2>
-              </div>
-
-              <Toggle />
-            </div>
-
-            {/* ------ ABOUT ------ */}
-            <div className="flex items-center gap-4 w-[200px]">
-              <div>
-                <InfoIcon />
-              </div>
-              <h2 className="text-(--primary) text-2xl whitespace-nowrap">
-                {t(`settings.about`)}
-              </h2>
-            </div>
-
-            {/* ------ HELP ------ */}
-            <button
-              onClick={handleHelpClick}
-              className="flex items-center gap-4 w-[200px]"
-            >
-              <div>
-                <HelpIcon />
-              </div>
-              <h2 className="text-(--primary) text-2xl whitespace-nowrap">
-                {t(`settings.help`)}
-              </h2>
-            </button>
-
             {/* ------ LOGOUT ------ */}
             <div className="flex items-center gap-4 w-[200px]">
-              <div>
+              <div className="h-5 w-5 flex justify-center items-center">
                 <LogOutIcon />
               </div>
               <button
