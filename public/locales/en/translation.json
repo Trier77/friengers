@@ -76,8 +76,8 @@
     "unknownUser": "Unknown",
 
     "tabs": {
-      "private": "Private chats",
-      "group": "Group chats"
+      "private": "Private",
+      "group": "Group"
     },
 
     "search": {
