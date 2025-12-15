@@ -23,6 +23,7 @@ import { useNavigate } from "react-router";
 import ColorCircle from "../components/ColorCircle";
 import { useTranslation } from "react-i18next";
 import { arrayRemove } from "firebase/firestore";
+import PreviewModal from "../components/PreviewModal";
 
 export default function Profil() {
   const { t } = useTranslation();
@@ -758,22 +759,13 @@ export default function Profil() {
             joinedPosts.length > 0 &&
             joinedPosts.map((post, index) => renderOthersPost(post, index))}
         </div>
-
-        {previewImage && (
-          <div
-            className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50"
-            onClick={() => setPreviewImage(null)}
-          >
-            <div className="max-w-3xl max-h-[90vh]">
-              <img
-                src={previewImage}
-                alt={t(`common.preview`)}
-                className="w-full h-full object-contain rounded-xl"
-              />
-            </div>
-          </div>
-        )}
       </div>
+      {previewImage && (
+        <PreviewModal
+          imageUrl={previewImage}
+          onClose={() => setPreviewImage(null)}
+        />
+      )}
     </motion.div>
   );
 }

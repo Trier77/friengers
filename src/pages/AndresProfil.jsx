@@ -20,6 +20,7 @@ import ColorCircle from "../components/ColorCircle";
 import AnmeldelsesModal from "../components/Anmeldelsesmodal";
 import { useTranslation } from "react-i18next";
 import { onSnapshot } from "firebase/firestore";
+import PreviewModal from "../components/PreviewModal";
 
 function AndresProfil() {
   const { t } = useTranslation();
@@ -509,25 +510,17 @@ function AndresProfil() {
         )}
       </div>
 
-      {previewImage && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50"
-          onClick={() => setPreviewImage(null)}
-        >
-          <div className="max-w-3xl max-h-[90vh]">
-            <img
-              src={previewImage}
-              alt="Preview"
-              className="w-full h-full object-contain rounded-xl"
-            />
-          </div>
-        </div>
-      )}
       <AnmeldelsesModal
         isOpen={showAnmeldelsesModal}
         onClose={() => setShowAnmeldelsesModal(false)}
         reportedUserName={userData.fuldenavn || "brugeren"}
       />
+      {previewImage && (
+        <PreviewModal
+          imageUrl={previewImage}
+          onClose={() => setPreviewImage(null)}
+        />
+      )}
     </motion.div>
   );
 }

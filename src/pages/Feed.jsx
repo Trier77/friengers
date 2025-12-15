@@ -15,6 +15,7 @@ import FunnelIcon from "../../public/icons/FunnelIcon";
 import { useSwipe } from "../components/SwipeContext";
 import { useTranslation } from "react-i18next";
 import OnboardingModal from "../components/OnboardingModal";
+import PreviewModal from "../components/PreviewModal";
 
 export default function Feed() {
   const { t } = useTranslation();
@@ -360,6 +361,13 @@ export default function Feed() {
         isOpen={showOnboarding}
         onFinish={handleOnboardingDone}
       />
+
+      {previewImage && (
+        <PreviewModal
+          imageUrl={previewImage}
+          onClose={() => setPreviewImage(null)}
+        />
+      )}
     </div>
   );
 }
