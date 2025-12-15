@@ -122,7 +122,15 @@
     "noMessagesTitle": "No messages yet",
     "noMessagesSubtitle": "Send the first message! 💬",
     "unknownSender": "Unknown",
-    "messagePlaceholder": "Type a message..."
+    "messagePlaceholder": "Type a message...",
+
+    "title": "Create group chat?",
+    "description": "Do you want to create a group chat for",
+    "cancel": "No thanks",
+    "confirm": "Yes, create",
+    "creating": "Creating...",
+    "error": "An error occurred. Please try again.",
+    "systemCreated": "Group chat created"
   },
 
   "individualChat": {

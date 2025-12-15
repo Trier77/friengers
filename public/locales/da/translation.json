@@ -125,7 +125,15 @@
     "noMessagesTitle": "Ingen beskeder endnu",
     "noMessagesSubtitle": "Send den første besked! 💬",
     "unknownSender": "Ukendt",
-    "messagePlaceholder": "Skriv en besked..."
+    "messagePlaceholder": "Skriv en besked...",
+  
+    "title": "Opret gruppechat?",
+    "description": "Vil du oprette en gruppechat for",
+    "cancel": "Nej tak",
+    "confirm": "Ja, opret",
+    "creating": "Opretter...",
+    "error": "Der opstod en fejl. Prøv igen.",
+    "systemCreated": "Gruppechat oprettet"
   },
 
   "individualChat": {
@@ -167,6 +175,7 @@
     "save": "Gem ændringer"
   },
 
+ 
   
   "no-notifs": "Ingen notifikationer endnu",
   "group-creation": "Gruppe chat oprettet:",
