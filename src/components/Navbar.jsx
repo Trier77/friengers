@@ -69,7 +69,7 @@ export default function Navbar() {
 
   return (
     <div className="z-1000">
-      <div className="pointer-events-none fixed bottom-24 left-0 w-full h-24 z-40 bg-gradient-to-t from-(--white) to-transparent" />
+      <div className="pointer-events-none fixed bottom-24 left-0 w-full h-24 z-40 bg-linear-to-t from-(--white) to-transparent" />
 
       <nav className="fixed bottom-0 left-0 w-full z-50 flex justify-around p-7 bg-(--white)">
         {/* Chat Icon */}
