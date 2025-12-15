@@ -136,6 +136,24 @@
     "messagePlaceholder": "Skriv en besked..."
   },
 
+  "report": {
+    "title": "Anmeld {{name}}",
+    "helpText": "Hjælp os med at forstå problemet",
+    "selectPlaceholder": "Vælg årsag",
+    "reason": {
+      "harassment": "Chikane",
+      "inappropriate": "Upassende adfærd",
+      "spam": "Spam",
+      "other": "Andet"
+    },
+    "textPlaceholder": "Uddyb gerne (valgfrit)",
+    "cancel": "Annuller",
+    "submit": "Anmeld",
+    "successTitle": "Tak for din anmeldelse",
+    "successText": "Din henvendelse er registreret",
+    "close": "Luk"
+  },
+
   
   "no-notifs": "Ingen notifikationer endnu",
   "group-creation": "Gruppe chat oprettet:",

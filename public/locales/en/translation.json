@@ -133,6 +133,24 @@
     "messagePlaceholder": "Type a message..."
   },
 
+  "report": {
+    "title": "Report {{name}}",
+    "helpText": "Help us understand the problem",
+    "selectPlaceholder": "Select a reason",
+    "reason": {
+      "harassment": "Harassment",
+      "inappropriate": "Inappropriate behavior",
+      "spam": "Spam",
+      "other": "Other"
+    },
+    "textPlaceholder": "Please elaborate (optional)",
+    "cancel": "Cancel",
+    "submit": "Report",
+    "successTitle": "Thank you for your report",
+    "successText": "Your request has been recorded",
+    "close": "Close"
+  },
+
   "overview": "Overview",
 
   "notif-title": "Notifications",

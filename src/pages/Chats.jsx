@@ -501,7 +501,7 @@ function Chats() {
           <div className="text-center text-gray-500 mt-8">
             {searchQuery ? (
               <>
-                <p> {t(`chats.search.noResults`, { quwry: searchQuery })} "</p>
+                <p> {t(`chats.search.noResults`, { query: searchQuery })} "</p>
                 <button
                   onClick={() => setSearchQuery("")}
                   className="text-blue-500 text-sm mt-2 underline"
@@ -530,8 +530,8 @@ function Chats() {
             {searchQuery && (
               <p className="text-sm text-gray-500 mb-3">
                 {currentChats.length !== 1
-                  ? "t(`chats.search.showingResults_other`, {count: currentChats.length, query: searchQuery })"
-                  : "t(`chats.search.showingResults_one`, {count: currentChats.length, query: searchQuery })"}{" "}
+                  ? t(`chats.search.showingResults_other`, {count: currentChats.length, query: searchQuery })
+                  : t(`chats.search.showingResults_one`, {count: currentChats.length, query: searchQuery })}{" "}
                 for "{searchQuery}"
               </p>
             )}
