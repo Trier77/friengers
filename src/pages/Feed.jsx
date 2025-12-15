@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { collection, getDocs, doc, getDoc } from "firebase/firestore";
 import { auth, db } from "../firebase";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import CalenderIcon from "../../public/icons/CalenderIcon";
 import MapPinIcon from "../../public/icons/MapPinIcon";
 import Tilmeld from "../components/Tilmeld";
@@ -28,6 +28,7 @@ export default function Feed() {
   const [highlightPostId, setHighlightPostId] = useState(null);
   const myPostsRef = useRef(null);
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [myPostsDropdownOpen, setMyPostsDropdownOpen] = useState(false); // 🆕 Dropdown state
 
   const { setSwipeEnabled } = useSwipe();
 
@@ -82,14 +83,13 @@ export default function Feed() {
     (post) => post.uid === userId && post.active !== false
   );
 
-  // FUNGERENDE VERSION - Bruger friske data direkte
   const handlePostCreated = async () => {
     console.log(" handlePostCreated started");
 
     const oldPostIds = new Set(myPosts.map((p) => p.id));
     console.log(" Old post IDs:", Array.from(oldPostIds));
 
-    // Hent friske posts direkte (ikke via state)
+    // Hent friske posts direkte
     const postsSnapshot = await getDocs(collection(db, "posts"));
     const freshPosts = await Promise.all(
       postsSnapshot.docs.map(async (postDoc) => {
@@ -103,20 +103,16 @@ export default function Feed() {
       })
     );
 
-    console.log(" Fresh posts fetched:", freshPosts.length);
+    console.log("✅ Fresh posts fetched:", freshPosts.length);
 
-    // Opdater state (til UI)
+    // Opdater state
     setPosts(freshPosts);
 
-    // Find det nye opslag med de FRISKE data (ikke state)
+    // Find det nye opslag
     const newMyPosts = freshPosts.filter(
       (post) => post.uid === userId && post.active !== false
     );
-    console.log(" New myPosts count:", newMyPosts.length);
-    console.log(
-      " New myPosts IDs:",
-      newMyPosts.map((p) => p.id)
-    );
+    console.log("📊 New myPosts count:", newMyPosts.length);
 
     const newPost = newMyPosts.find((p) => !oldPostIds.has(p.id));
     console.log("✨ New post:", newPost ? newPost.id : "NONE");
@@ -124,30 +120,28 @@ export default function Feed() {
     if (newPost) {
       console.log("🎉 New post found:", newPost.id);
 
-      // 1️ Scroll til toppen FØRST
+      // Åbn dropdown automatisk når nyt post oprettes
+      setMyPostsDropdownOpen(true);
+
+      // Scroll til toppen
       myPostsRef.current?.scrollIntoView({
         behavior: "smooth",
         block: "start",
       });
 
-      // 2️ Vent på scroll er færdig, SÅ trigger shockwave
+      // Trigger shockwave animation
       setTimeout(() => {
-        console.log(" Triggering shockwave animation");
+        console.log("💫 Triggering shockwave animation");
         setHighlightPostId(newPost.id);
 
-        // 3️ Fjern highlight efter shockwave er færdig
+        // Fjern highlight
         setTimeout(() => {
           console.log(" Removing highlight");
           setHighlightPostId(null);
-        }, 1200); // Match shockwave animation duration
-      }, 800); //  Delay så scroll når at blive færdig først
+        }, 1200);
+      }, 800);
     } else {
       console.log("❌ NO NEW POST FOUND!");
-      console.log("Debug - oldPostIds:", Array.from(oldPostIds));
-      console.log(
-        "Debug - newMyPosts IDs:",
-        newMyPosts.map((p) => p.id)
-      );
     }
   };
 
@@ -184,7 +178,7 @@ export default function Feed() {
       key={post.id}
       initial={{
         opacity: 0,
-        y: -20, // Lidt mindre bevægelse
+        y: -20,
       }}
       animate={{
         opacity: 1,
@@ -194,9 +188,9 @@ export default function Feed() {
         duration: 0.5,
         ease: "easeOut",
       }}
-      className="mb-4 relative"
+      className="mb-2 relative"
     >
-      {/*  Shockwave effekt - enkelt bølge der pulserer ud */}
+      {/* Shockwave effekt */}
       {highlightPostId === post.id && (
         <div className="absolute inset-0 border-4 border-blue-400 rounded-full animate-shockwave pointer-events-none"></div>
       )}
@@ -209,13 +203,14 @@ export default function Feed() {
           delay: 0.3 + index * 0.15,
           ease: "easeInOut",
         }}
-        className="flex text-(--secondary) justify-between items-center bg-(--secondary) rounded-full px-4 py-3 transition-all duration-300"
+        onClick={() => navigate("/Profil")}
+        className="flex text-(--secondary) justify-between items-center bg-(--secondary) rounded-full px-4 transition-all duration-300 cursor-pointer hover:brightness-110"
       >
-        <h3 className="justify-start text-(--white) text-xl overskrift">
+        <h3 className="justify-start text-(--white) text-md overskrift truncate maw-w-[120]">
           {post.title}
         </h3>
 
-        <div className="flex justify-between items-center text-sm font-bold bg-(--white) rounded-full px-2 gap-5">
+        <div className="flex justify-between items-center text-sm font-bold bg-(--white) rounded-full w-30 px-1 gap-5">
           <div className="gap-2 flex items-center">
             <GroupsIcon color="--secondary" size={20} />
             <p className="text-(--secondary)">{post.participants.length}</p>
@@ -238,10 +233,58 @@ export default function Feed() {
     <div className="p-4">
       <NotificationWrapper />
 
-      <div ref={myPostsRef}>
-        {myPosts.length > 0 &&
-          myPosts.map((post, index) => renderMyPost(post, index))}
-      </div>
+      {/* Mine opgaver dropdown */}
+      {myPosts.length > 0 && (
+        <div ref={myPostsRef} className="mb-4">
+          <motion.button
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.4 }}
+            onClick={() => setMyPostsDropdownOpen(!myPostsDropdownOpen)}
+            className="w-full flex items-center justify-between bg-(--secondary) text-(--white) rounded-full px-3 font-bold text-lg hover:brightness-110 transition-all"
+          >
+            <div className="flex items-center gap-1">
+              <span className="overskrift">
+                {t("My Tasks") || "Mine opgaver"}
+              </span>
+            </div>
+
+            {/* Chevron icon */}
+            <motion.svg
+              animate={{ rotate: myPostsDropdownOpen ? 180 : 0 }}
+              transition={{ duration: 0.3 }}
+              className="w-6 h-6"
+              fill="none"
+              stroke="white"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M19 9l-7 7-7-7"
+              />
+            </motion.svg>
+          </motion.button>
+
+          {/* Dropdown content med AnimatePresence */}
+          <AnimatePresence>
+            {myPostsDropdownOpen && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.3, ease: "easeInOut" }}
+                className="overflow-hidden"
+              >
+                <div className="mt-2 space-y-2">
+                  {myPosts.map((post, index) => renderMyPost(post, index))}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      )}
 
       <Create
         allTags={allTags}
