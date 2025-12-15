@@ -20,8 +20,7 @@ export default function Settings() {
   const { t, i18n } = useTranslation();
   const [showOnboarding, setShowOnboarding] = useState(false);
 
-  const { darkMode, setDarkMode, notifications, setNotifications } =
-    useContext(SettingsContext);
+  const { notifications, setNotifications } = useContext(SettingsContext);
 
   const changeLanguage = (lang) => i18n.changeLanguage(lang);
 
@@ -38,21 +37,6 @@ export default function Settings() {
   const handleHelpClick = () => {
     setShowOnboarding(true);
   };
-  return (
-    <div className="text-6xl flex flex-col gap-5">
-      
-      {/* Back button */}
-      <div className="flex flex-row justify-between items-center m-4 mt-8 pr-4">
-        <button onClick={() => navigate(-1)} className="ml-4">
-          <BackArrowIcon />
-        </button>
-      </div>
-
-      {/* Page title */}
-      <div className="flex flex-col items-center gap-5 m-4">
-        <h1 className="text-(--primary) text-5xl whitespace-nowrap">
-          {t(`settings.title`)}
-        </h1>
 
   return (
     <>
@@ -75,13 +59,6 @@ export default function Settings() {
           <h1 className="text-(--primary) text-5xl whitespace-nowrap">
             {t("settings")}
           </h1>
-          {/* ------ ACCOUNT ------ */}
-          <div className="flex items-center gap-4">
-            <div>
-              <ProfileIcon />
-            </div>
-            <h2 className="text-(--primary) text-3xl">{t(`settings.account`)}</h2>
-          </div>
 
           {/* Content */}
           <div className="w-full px-6 flex flex-col gap-6">
@@ -91,9 +68,6 @@ export default function Settings() {
                 <ProfileIcon />
               </div>
               <h2 className="text-(--primary) text-3xl">{t("account")}</h2>
-              <h2 className="text-(--primary) text-3xl whitespace-nowrap">
-                {t(`settings.language`)}
-              </h2>
             </div>
 
             {/* ------ LANGUAGE ------ */}
@@ -120,6 +94,7 @@ export default function Settings() {
                   <img
                     src="/img/dannebrog.png"
                     className="h-8 w-8 rounded-full"
+                    alt="Danish flag"
                   />
                 </button>
 
@@ -135,6 +110,7 @@ export default function Settings() {
                   <img
                     src="/img/union-jack.png"
                     className="h-8 w-8 rounded-full"
+                    alt="English flag"
                   />
                 </button>
               </div>
@@ -152,9 +128,6 @@ export default function Settings() {
               </div>
 
               <Toggle enabled={notifications} setEnabled={setNotifications} />
-              <h2 className="text-(--primary) text-3xl whitespace-nowrap">
-                {t(`settings.notifications`)}
-              </h2>
             </div>
 
             {/* ------ DARK MODE ------ */}
@@ -182,39 +155,6 @@ export default function Settings() {
             </div>
 
             {/* ------ HELP ------ */}
-              <h2 className="text-(--primary) text-3xl whitespace-nowrap">
-                {t(`settings.darkmode`)}
-              </h2>
-            </div>
-
-           <Toggle  /> 
-          </div>
-
-          {/* ------ ABOUT ------ */}
-          <div className="flex items-center gap-4 w-[200px]">
-            <div>
-               <InfoIcon />
-            </div>
-            <h2 className="text-(--primary) text-2xl whitespace-nowrap">
-              {t(`settings.about`)}
-            </h2>
-          </div>
-
-          {/* ------ HELP ------ */}
-          <div className="flex items-center gap-4 w-[200px]">
-            <div>
-            <HelpIcon />
-            </div>
-            <h2 className="text-(--primary) text-2xl whitespace-nowrap">
-              {t(`settings.help`)}
-            </h2>
-          </div>
-
-          {/* ------ LOGOUT ------ */}
-          <div className="flex items-center gap-4 w-[200px]">
-            <div>
-              <LogOutIcon />
-            </div>
             <button
               onClick={handleHelpClick}
               className="flex items-center gap-4 w-[200px]"
@@ -225,7 +165,6 @@ export default function Settings() {
               <h2 className="text-(--primary) text-2xl whitespace-nowrap">
                 {t("help")}
               </h2>
-              {t(`settings.logout`)}
             </button>
 
             {/* ------ LOGOUT ------ */}
