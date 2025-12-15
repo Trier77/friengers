@@ -622,7 +622,7 @@ export default function Profil() {
             }
           }}
         >
-          {t(`actions.delete`)}
+          {t(`actions.afmeld`)}
         </button>
       </div>
     </motion.div>
@@ -694,7 +694,7 @@ export default function Profil() {
         {/* Bio */}
         <textarea
           ref={bioRef}
-          className="w-full text-(--secondary) resize-none overflow-hidden"
+          className="w-full text-(--secondary) text-center resize-none overflow-hidden"
           placeholder={t(`ownProfile.bioPlaceholder`)}
           value={bio}
           rows={3}
@@ -751,13 +751,23 @@ export default function Profil() {
         </div>
 
         <div className="mt-6">
-          {activeTab === "active" &&
-            myPosts.length > 0 &&
-            myPosts.map((post, index) => renderMyPost(post, index))}
-
-          {activeTab === "group" &&
-            joinedPosts.length > 0 &&
-            joinedPosts.map((post, index) => renderOthersPost(post, index))}
+          {activeTab === "active" ? (
+            myPosts.length > 0 ? (
+              myPosts.map((post) => renderMyPost(post))
+            ) : (
+              <div className="text-center text-(--secondary)">
+                <p>{t("ownProfile.noCreatedTasks")}</p>
+              </div>
+            )
+          ) : activeTab === "group" ? (
+            joinedPosts.length > 0 ? (
+              joinedPosts.map((post) => renderOthersPost(post))
+            ) : (
+              <div className="text-center text-(--secondary)">
+                <p>{t("ownProfile.noJoinedTasks")}</p>
+              </div>
+            )
+          ) : null}
         </div>
       </div>
       {previewImage && (

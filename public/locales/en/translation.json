@@ -11,7 +11,6 @@
     "overview": "Overview",
     "notif-title": "Notifications"
   },
- 
 
   "viewProfile": {
     "loading": "Loading profile...",
@@ -33,7 +32,9 @@
     "tabs": {
       "created": "Created",
       "joined": "Joined"
-    }
+    },
+    "noCreatedTasks": "No work for u",
+    "noJoinedTasks": "No work for them"
   },
   "post": {
     "noParticipants": "No participants yet",
@@ -42,7 +43,8 @@
   },
   "actions": {
     "delete": "Delete",
-    "markDone": "Mark as done"
+    "markDone": "Mark as done",
+    "afmeld": "Remove from task"
   },
   "time": {
     "now": "just now",
@@ -164,7 +166,7 @@
     "close": "Close"
   },
 
-   "createPost": {
+  "createPost": {
     "title": "Title",
     "description": "Description",
     "where": "Where?",
@@ -230,5 +232,4 @@
   "group?": "Create group chat?",
   "group-for?": "Do you want to make a group chat for:",
   "no-thx": "No thank you"
-
 }
