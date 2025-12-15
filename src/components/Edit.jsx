@@ -1,4 +1,8 @@
+import { useTranslation } from "react-i18next";
+
 export default function EditPost({ handlePublish, isPublishing }) {
+  const {t} = useTranslation();
+
   return (
     <button
       onClick={handlePublish}
@@ -14,7 +18,7 @@ export default function EditPost({ handlePublish, isPublishing }) {
         }
       `}
     >
-      {isPublishing ? "Saving..." : "Gem ændring"}
+      {isPublishing ? t(`edit.saving`) : t(`edit.save`)}
     </button>
   );
 }

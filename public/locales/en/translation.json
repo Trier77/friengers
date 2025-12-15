@@ -159,6 +159,11 @@
     "participants": "Number of participants"
   },
 
+  "edit": {
+    "saving": "Saving...",
+    "save": "Save changes"
+  },
+
   "overview": "Overview",
 
   "notif-title": "Notifications",
