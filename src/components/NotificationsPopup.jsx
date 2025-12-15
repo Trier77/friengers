@@ -284,7 +284,7 @@ export default function NotificationsPopup({
         {/* Header */}
         <div className="bg-(--secondary) p-4 flex justify-between items-center">
           <h2 className="text-(--white) font-bold text-lg">
-            {t("notif-title")}
+            {t(`notifications.title`)}
           </h2>
           <button
             onClick={closePopup}
@@ -309,83 +309,83 @@ export default function NotificationsPopup({
                   const isAccepted = n.status === "accepted";
                   const isRejected = n.status === "rejected";
 
-                  // GRUPPECHAT NOTIFIKATION
-                  if (n.notificationType === "groupchat_created") {
-                    return (
-                      <div
-                        key={`groupchat-${n.postId}-${n.timestamp}`}
-                        className={`p-4 cursor-pointer hover:bg-gray-50 transition-colors ${
-                          !isPending ? "opacity-50 bg-gray-50" : ""
-                        } ${
-                          index !== notifications.length - 1
-                            ? "border-b border-gray-200"
-                            : ""
-                        }`}
-                        onClick={() => {
-                          if (isPending) {
-                            handleGroupChatNotification(n);
-                          }
-                        }}
-                      >
-                        <div className="mb-3">
-                          <p className="text-gray-600 text-sm mb-1">
-                            {t("group-creation")}
-                          </p>
-                          <p className="text-(--secondary) font-bold text-base">
-                            {n.postTitle}
-                          </p>
-                        </div>
-
-                        <div className="flex items-center gap-3 mb-2">
-                          <div className="w-12 h-12 rounded-full bg-blue-500 flex items-center justify-center">
-                            <svg
-                              className="w-6 h-6 text-white"
-                              fill="currentColor"
-                              viewBox="0 0 20 20"
-                            >
-                              <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
-                            </svg>
-                          </div>
-                          <div className="flex-1">
-                            <p className="text-gray-700 font-semibold">
-                              {t("group-ready")}
-                            </p>
-                            <p className="text-gray-500 text-sm">
-                              {t("click-open-chat")}
-                            </p>
-                          </div>
-                        </div>
-
-                        {!isPending && (
-                          <p className="text-center py-2 text-gray-500 text-sm italic">
-                            {t("opened")}
-                          </p>
-                        )}
+                // GRUPPECHAT NOTIFIKATION
+                if (n.notificationType === "groupchat_created") {
+                  return (
+                    <div
+                      key={`groupchat-${n.postId}-${n.timestamp}`}
+                      className={`p-4 cursor-pointer hover:bg-gray-50 transition-colors ${
+                        !isPending ? "opacity-50 bg-gray-50" : ""
+                      } ${
+                        index !== notifications.length - 1
+                          ? "border-b border-gray-200"
+                          : ""
+                      }`}
+                      onClick={() => {
+                        if (isPending) {
+                          handleGroupChatNotification(n);
+                        }
+                      }}
+                    >
+                      <div className="mb-3">
+                        <p className="text-gray-600 text-sm mb-1">
+                          {t(`notifications.group.created`)}
+                        </p>
+                        <p className="text-(--secondary) font-bold text-base">
+                          {n.postTitle}
+                        </p>
                       </div>
-                    );
-                  }
 
-                  // REQUEST NOTIFIKATION
-                  if (n.notificationType === "request") {
-                    return (
-                      <div
-                        key={`request-${n.postId}-${n.requesterUid}-${n.createdAt}`}
-                        className={`p-4 ${
-                          !isPending ? "opacity-50 bg-gray-50" : ""
-                        } ${
-                          index !== notifications.length - 1
-                            ? "border-b border-gray-200"
-                            : ""
-                        }`}
-                      >
-                        <div className="mb-3">
-                          <p className="text-gray-600 text-sm mb-1">
-                            {t("request")}
+                      <div className="flex items-center gap-3 mb-2">
+                        <div className="w-12 h-12 rounded-full bg-blue-500 flex items-center justify-center">
+                          <svg
+                            className="w-6 h-6 text-white"
+                            fill="currentColor"
+                            viewBox="0 0 20 20"
+                          >
+                            <path d="M9 6a3 3 0 11-6 0 3 3 0 016 0zM17 6a3 3 0 11-6 0 3 3 0 016 0zM12.93 17c.046-.327.07-.66.07-1a6.97 6.97 0 00-1.5-4.33A5 5 0 0119 16v1h-6.07zM6 11a5 5 0 015 5v1H1v-1a5 5 0 015-5z" />
+                          </svg>
+                        </div>
+                        <div className="flex-1">
+                          <p className="text-gray-700 font-semibold">
+                            {t(`notifications.group.ready`)}
                           </p>
-                          <p className="text-(--secondary) font-bold text-base">
-                            {n.postTitle}
+                          <p className="text-gray-500 text-sm">
+                            {t(`notifications.group.click`)}
                           </p>
                         </div>
+                      </div>
+
+                      {!isPending && (
+                        <p className="text-center py-2 text-gray-500 text-sm italic">
+                          {t(`notifications.group.opened`)}
+                        </p>
+                      )}
+                    </div>
+                  );
+                }
+
+                // REQUEST NOTIFIKATION
+                if (n.notificationType === "request") {
+                  return (
+                    <div
+                      key={`request-${n.postId}-${n.requesterUid}-${n.createdAt}`}
+                      className={`p-4 ${
+                        !isPending ? "opacity-50 bg-gray-50" : ""
+                      } ${
+                        index !== notifications.length - 1
+                          ? "border-b border-gray-200"
+                          : ""
+                      }`}
+                    >
+                      <div className="mb-3">
+                        <p className="text-gray-600 text-sm mb-1">
+                          {t(`notifications.request.title`)}
+                        </p>
+                        <p className="text-(--secondary) font-bold text-base">
+                          {n.postTitle}
+                        </p>
+                      </div>
 
                         <div className="flex items-center gap-3 mb-4">
                           <img
@@ -410,62 +410,62 @@ export default function NotificationsPopup({
                               {n.requesterName}
                             </p>
                             <p className="text-gray-500 text-sm">
-                              {t("wants-to-help")}
+                              {t(`notifications.request.wantsHelp`)}
                             </p>
                           </div>
                         </div>
 
-                        {isPending ? (
-                          <div className="flex gap-3">
-                            <button
-                              onClick={() => handleResponse(n, false)}
-                              className="flex-1 py-3 border-2 border-gray-300 rounded-full hover:bg-gray-50"
-                            >
-                              {t("deny")}
-                            </button>
-                            <button
-                              onClick={() => handleResponse(n, true)}
-                              className="flex-1 py-3 bg-(--secondary) text-white rounded-full hover:brightness-110"
-                            >
-                              {t("accept")}
-                            </button>
-                          </div>
-                        ) : (
-                          <p
-                            className={`text-center py-3 font-semibold ${
-                              isAccepted ? "text-green-600" : "text-red-600"
-                            }`}
+                      {isPending ? (
+                        <div className="flex gap-3">
+                          <button
+                            onClick={() => handleResponse(n, false)}
+                            className="flex-1 py-3 border-2 border-gray-300 rounded-full hover:bg-gray-50"
                           >
-                            {isAccepted
-                              ? "Du accepterede denne anmodning"
-                              : "Du afviste denne anmodning"}
-                          </p>
-                        )}
-                      </div>
-                    );
-                  }
-
-                  // INVITATION NOTIFIKATION
-                  if (n.notificationType === "invitation") {
-                    return (
-                      <div
-                        key={`invitation-${n.postId}-${n.from}-${n.timestamp}`}
-                        className={`p-4 ${
-                          !isPending ? "opacity-50 bg-gray-50" : ""
-                        } ${
-                          index !== notifications.length - 1
-                            ? "border-b border-gray-200"
-                            : ""
-                        }`}
-                      >
-                        <div className="mb-3">
-                          <p className="text-gray-600 text-sm mb-1">
-                            {t("invitation")}
-                          </p>
-                          <p className="text-(--secondary) font-bold text-base">
-                            {n.postTitle}
-                          </p>
+                            {t(`notifications.request.rejected`)}
+                          </button>
+                          <button
+                            onClick={() => handleResponse(n, true)}
+                            className="flex-1 py-3 bg-(--secondary) text-white rounded-full hover:brightness-110"
+                          >
+                            {t(`notifications.request.accepted`)}
+                          </button>
                         </div>
+                      ) : (
+                        <p
+                          className={`text-center py-3 font-semibold ${
+                            isAccepted ? "text-green-600" : "text-red-600"
+                          }`}
+                        >
+                          {isAccepted
+                            ? t(`notifications.request.accepted`)
+                            : t(`notifications.request.rejected`)}
+                        </p>
+                      )}
+                    </div>
+                  );
+                }
+
+                // INVITATION NOTIFIKATION
+                if (n.notificationType === "invitation") {
+                  return (
+                    <div
+                      key={`invitation-${n.postId}-${n.from}-${n.timestamp}`}
+                      className={`p-4 ${
+                        !isPending ? "opacity-50 bg-gray-50" : ""
+                      } ${
+                        index !== notifications.length - 1
+                          ? "border-b border-gray-200"
+                          : ""
+                      }`}
+                    >
+                      <div className="mb-3">
+                        <p className="text-gray-600 text-sm mb-1">
+                          {t(`notifications.invitation.title`)}
+                        </p>
+                        <p className="text-(--secondary) font-bold text-base">
+                          {n.postTitle}
+                        </p>
+                      </div>
 
                         <div className="flex items-center gap-3 mb-4">
                           <img
@@ -489,40 +489,40 @@ export default function NotificationsPopup({
                               {n.fromName}
                             </p>
                             <p className="text-gray-500 text-sm">
-                              {t("invitor")}
+                              {t(`notifications.invitation.from`)}
                             </p>
                           </div>
                         </div>
 
-                        {isPending ? (
-                          <div className="flex gap-3">
-                            <button
-                              onClick={() => handleInvitationResponse(n, false)}
-                              className="flex-1 py-3 border-2 border-gray-300 text-gray-700 font-semibold rounded-full hover:bg-gray-50 transition-colors"
-                            >
-                              {t("deny")}
-                            </button>
-                            <button
-                              onClick={() => handleInvitationResponse(n, true)}
-                              className="flex-1 py-3 bg-(--secondary) text-(--white) font-semibold rounded-full hover:brightness-110 transition-all"
-                            >
-                              {t("accept")}
-                            </button>
-                          </div>
-                        ) : (
-                          <p
-                            className={`text-center py-3 font-semibold ${
-                              isAccepted ? "text-green-600" : "text-red-600"
-                            }`}
+                      {isPending ? (
+                        <div className="flex gap-3">
+                          <button
+                            onClick={() => handleInvitationResponse(n, false)}
+                            className="flex-1 py-3 border-2 border-gray-300 text-gray-700 font-semibold rounded-full hover:bg-gray-50 transition-colors"
                           >
-                            {isAccepted
-                              ? "Du accepterede denne invitation"
-                              : "Du afviste denne invitation"}
-                          </p>
-                        )}
-                      </div>
-                    );
-                  }
+                            {t(`notifications.invitation.rejected`)}
+                          </button>
+                          <button
+                            onClick={() => handleInvitationResponse(n, true)}
+                            className="flex-1 py-3 bg-(--secondary) text-(--white) font-semibold rounded-full hover:brightness-110 transition-all"
+                          >
+                            {t(`notifications.invitation.accepted`)}
+                          </button>
+                        </div>
+                      ) : (
+                        <p
+                          className={`text-center py-3 font-semibold ${
+                            isAccepted ? "text-green-600" : "text-red-600"
+                          }`}
+                        >
+                          {isAccepted
+                            ? "Du accepterede denne invitation"
+                            : "Du afviste denne invitation"}
+                        </p>
+                      )}
+                    </div>
+                  );
+                }
 
                   // POST SLETTET NOTIFIKATION
                   if (n.notificationType === "post_deleted") {
@@ -539,7 +539,7 @@ export default function NotificationsPopup({
                       >
                         <div className="mb-3">
                           <p className="text-red-600 text-sm mb-1 font-semibold">
-                            {t("deleted")}
+                            {t(`notifications.deleted.title`)}
                           </p>
                           <p
                             className="text-(--secondary) font-bold text-base cursor-pointer hover:underline"
@@ -569,18 +569,18 @@ export default function NotificationsPopup({
                               {n.deletedByName}
                             </p>
                             <p className="text-gray-500 text-sm">
-                              {t("deletor")}
+                              {t(`notifications.deleted.by`)}
                             </p>
                           </div>
                         </div>
 
-                        {n.hadGroupChat && (
-                          <div className="bg-red-50 border border-red-200 rounded-lg p-2 mb-3">
-                            <p className="text-red-700 text-sm">
-                              {t("group-ceased")}
-                            </p>
-                          </div>
-                        )}
+                      {n.hadGroupChat && (
+                        <div className="bg-red-50 border border-red-200 rounded-lg p-2 mb-3">
+                          <p className="text-red-700 text-sm">
+                            {t(`notifications.deleted.groupCeased`)}
+                          </p>
+                        </div>
+                      )}
 
                         {isPending && (
                           <button
@@ -611,30 +611,30 @@ export default function NotificationsPopup({
                                   return notification;
                                 });
 
-                                await updateDoc(userRef, {
-                                  notifications: updatedNotifications,
-                                });
-                              } catch (error) {
-                                console.error(
-                                  "Fejl ved markering af notifikation:",
-                                  error
-                                );
-                              }
-                            }}
-                            className="w-full py-2 bg-gray-200 text-gray-700 rounded-full hover:bg-gray-300 transition-colors"
-                          >
-                            OK
-                          </button>
-                        )}
+                              await updateDoc(userRef, {
+                                notifications: updatedNotifications,
+                              });
+                            } catch (error) {
+                              console.error(
+                                "Fejl ved markering af notifikation:",
+                                error
+                              );
+                            }
+                          }}
+                          className="w-full py-2 bg-gray-200 text-gray-700 rounded-full hover:bg-gray-300 transition-colors"
+                        >
+                          {t(`notifications.deleted.ok`)}
+                        </button>
+                      )}
 
-                        {!isPending && (
-                          <p className="text-center py-2 text-gray-500 text-sm italic">
-                            {t("read")}
-                          </p>
-                        )}
-                      </div>
-                    );
-                  }
+                      {!isPending && (
+                        <p className="text-center py-2 text-gray-500 text-sm italic">
+                          {t(`notifications.deleted.read`)}
+                        </p>
+                      )}
+                    </div>
+                  );
+                }
 
                   return null;
                 })}
