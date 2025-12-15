@@ -161,6 +161,7 @@ export default function Feed() {
       ? posts.filter(
           (post) =>
             post.uid !== userId &&
+            post.active !== false && // ← only active posts
             post.tags.some((tag) => selectedTags.includes(tag))
         )
       : [];
@@ -205,18 +206,18 @@ export default function Feed() {
           ease: "easeInOut",
         }}
         onClick={() => navigate("/Profil")}
-        className="flex text-(--secondary) justify-between items-center bg-(--secondary) rounded-full px-4 transition-all duration-300 cursor-pointer hover:brightness-110"
+        className="flex text-(--secondary) justify-between items-center bg-(--secondary)/70 rounded-full p-2 transition-all duration-300 cursor-pointer hover:brightness-110"
       >
         <h3 className="justify-start text-(--white) text-md overskrift truncate maw-w-[120]">
           {post.title}
         </h3>
 
-        <div className="flex justify-between items-center text-sm font-bold bg-(--white) rounded-full w-30 px-1 gap-5">
-          <div className="gap-2 flex items-center">
+        <div className="flex justify-between items-center text-sm font-bold bg-(--white) rounded-full w-30 px-2">
+          <div className="gap-1 flex items-center">
             <GroupsIcon color="--secondary" size={20} />
             <p className="text-(--secondary)">{post.participants.length}</p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
             <CalenderIcon color="--secondary" size={10} />
             <p className="">
               {post.time?.toDate().toLocaleDateString(undefined, {
@@ -238,11 +239,11 @@ export default function Feed() {
       {myPosts.length > 0 && (
         <div ref={myPostsRef} className="mb-4">
           <motion.button
-            initial={{ opacity: 0, y: -10 }}
+            initial={{ opacity: 0, y: 0 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4 }}
+            transition={{ duration: 0 }}
             onClick={() => setMyPostsDropdownOpen(!myPostsDropdownOpen)}
-            className="w-full flex items-center justify-between bg-(--secondary) text-(--white) rounded-full px-3 font-bold text-lg hover:brightness-110 transition-all"
+            className="w-full flex items-center justify-between bg-(--secondary) text-(--white) rounded-2xl p-4 font-bold text-lg hover:brightness-110 transition-all"
           >
             <div className="flex items-center gap-1">
               <span className="overskrift">
@@ -300,7 +301,12 @@ export default function Feed() {
         transition={{ duration: 0.5 }}
         className="mb-4 flex flex-col justify-end"
       >
-        <div className="flex gap-4 items-center px-4">
+        <motion.div
+          initial={{ opacity: 0, y: 0 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+          className="flex gap-4 items-center px-4"
+        >
           <h3 className="text-(--secondary) font-bold text-lg">
             {t("overview")}
           </h3>{" "}
@@ -315,7 +321,7 @@ export default function Feed() {
               filled={showFilter || selectedTags.length > 0}
             />
           </button>
-        </div>
+        </motion.div>
         {selectedTags.length > 0 && !showFilter && (
           <div className="flex flex-wrap gap-2 px-2 mt-2 justify-end">
             {selectedTags.map((tag) => (
@@ -378,8 +384,18 @@ export default function Feed() {
           </p>
         )
       ) : (
-        otherPosts.map((post) => (
-          <div key={post.id} id={`post-${post.id}`}>
+        otherPosts.map((post, index) => (
+          <motion.div
+            key={post.id}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{
+              duration: 0.5,
+              delay: 0.2 + index * 0.15, // staggered animation
+              ease: "easeOut",
+            }}
+            id={`post-${post.id}`}
+          >
             <PostCard
               post={post}
               userId={userId}
@@ -397,7 +413,7 @@ export default function Feed() {
                 fetchPosts();
               }}
             />
-          </div>
+          </motion.div>
         ))
       )}
       <OnboardingModal
