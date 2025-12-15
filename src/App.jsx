@@ -61,11 +61,15 @@ function App() {
 
   if (loading) return null;
 
+  const hideNavbar =
+    location.pathname.startsWith("/Chats/") ||
+    location.pathname.startsWith("/GroupChat/");
+
   return (
     <SwipeProvider>
       <>
         {user && <Logo />}
-        {user && <Navbar />}
+        {user && !hideNavbar && <Navbar />}
         <div className={user ? "pb-36" : ""}>
           <Routes>
             <Route
