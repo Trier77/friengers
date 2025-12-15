@@ -134,5 +134,63 @@
     "noMessagesTitle": "Ingen beskeder endnu",
     "noMessagesSubtitle": "Send den første besked! 💬",
     "messagePlaceholder": "Skriv en besked..."
-  }
+  },
+
+  
+  "no-notifs": "Ingen notifikationer endnu",
+  "group-creation": "Gruppe chat oprettet:",
+  "group-ready": "Grouppe chat er klar!",
+  "click-open-chat": "Klik for at åbne chatten",
+  "opened": "Åbnet",
+  "request": "Anmodning fra:",
+  "wants-to-help": "Vil hjælpe med din opgave",
+  "denied": "Afvist",
+  "accept": "Accepter",
+  "invitation": "Invitation til",
+  "invitor": "har inviteret dig",
+  "deleted": "Opgave slettet",
+  "deletor": "har slettet opgaven",
+  "group-ceased": "Gruppe chat afsluttet",
+  "read": "Læst",
+
+  "about-you": "Fortæl lidt om dig selv...",
+  "tasks-solved": "Opgaver løst",
+  "created": "Oprettet",
+  "applied": "Tilmeldt",
+
+  "collab": "I samarbejde med",
+
+  "no-messages": "ingen beskeder endnu",
+  "first-message": "Send den første besked!",
+  "write-a": "Skriv en besked",
+
+  "no-chat": "Ingen chat valgt",
+  "participants": "Deltagere",
+
+  "name-search": "Søg efter navn",
+  "private": "Privat chat",
+  "group": "Gruppe chat",
+  "no-results": "Ingen resultater for",
+  "clear": "Ryd søgning",
+  "none": "ingen",
+  "chats-yet": "ingen chats endnu",
+  "result": "resultat",
+  "for": "for",
+
+  "task-invite": "Inviter til opgave:",
+  "no-task": "du skal oprette en opgave først for at invitere andre",
+  "create-task": "opret en opgave før du inviterer",
+  "invited": "Invited",
+
+  "request-sent": "Anmodning sendt",
+
+  "group?": "Vil du oprette en gruppechat?",
+  "group-for?": "Vil du oprette en gruppechat for denne opgave?",
+  "no-thx": "Nej tak",
+
+  "when": "hvornår",
+
+  "title": "Titel",
+  "description": "Beskrivelse",
+  "where": "Hvor"
 }
