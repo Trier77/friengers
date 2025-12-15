@@ -1,15 +1,17 @@
 {
-  "settings": "Indstillinger",
-  "account": "Konto",
-  "language": "Sprog",
-  "notifications": "Notifikationer",
-  "darkmode": "Dark mode",
-  "about": "Om os",
-  "help": "Hjælp & support",
-  "logout": "Log ud",
-  "overview": "Oversigt",
-  "notif-title": "Notifikationer",
-
+  "settings": {
+    "title": "Indstillinger",
+    "account": "Konto",
+    "language": "Sprog",
+    "notifications": "Notifikationer",
+    "darkmode": "Dark mode",
+    "about": "Om os",
+    "help": "Hjælp & support",
+    "logout": "Log ud",
+    "overview": "Oversigt",
+    "notif-title": "Notifikationer"
+  },
+  
   "viewProfile": {
     "loading": "Henter profil...",
     "notFound": "Bruger ikke fundet",
@@ -175,7 +177,39 @@
     "save": "Gem ændringer"
   },
 
- 
+ "notifications": {
+    "title": "Notifikationer",
+    "empty": "Du har ingen notifikationer",
+
+    "group": {
+      "created": "Gruppechat oprettet",
+      "ready": "Gruppechatten er klar",
+      "click": "Tryk for at åbne chatten",
+      "opened": "Åbnet"
+    },
+
+    "request": {
+      "title": "Anmodning",
+      "wantsHelp": "vil gerne hjælpe",
+      "accepted": "Du accepterede denne anmodning",
+      "rejected": "Du afviste denne anmodning"
+    },
+
+    "invitation": {
+      "title": "Invitation",
+      "from": "har inviteret dig",
+      "accepted": "Du accepterede denne invitation",
+      "rejected": "Du afviste denne invitation"
+    },
+
+    "deleted": {
+      "title": "Opslag slettet",
+      "by": "har slettet opslaget",
+      "groupCeased": "Gruppechatten er blevet lukket",
+      "read": "Læst",
+      "ok": "OK"
+    }
+  },
   
   "no-notifs": "Ingen notifikationer endnu",
   "group-creation": "Gruppe chat oprettet:",

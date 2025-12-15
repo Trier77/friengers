@@ -1,12 +1,17 @@
 {
-  "settings": "Settings",
-  "account": "Account",
-  "language": "Language",
-  "notifications": "Notifications",
-  "darkmode": "Dark mode",
-  "about": "About us",
-  "help": "Help & support",
-  "logout": "Log out",
+  "settings": {
+    "title": "Settings",
+    "account": "Account",
+    "language": "Language",
+    "notifications": "Notifications",
+    "darkmode": "Dark mode",
+    "about": "About us",
+    "help": "Help & support",
+    "logout": "Log out",
+    "overview": "Overview",
+    "notif-title": "Notifications"
+  },
+ 
 
   "viewProfile": {
     "loading": "Loading profile...",
