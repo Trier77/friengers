@@ -125,14 +125,14 @@ export default function Notifikationshistorik({ open, onClose }) {
         <div className="bg-(--white) rounded-2xl p-3 mb-3">
           <input
             className="w-full text-(--secondary) font-bold mb-2"
-            placeholder={t("title")}
+            placeholder={t(`createPost.title`)}
             onFocus={handleFocus}
             value={title}
             onChange={(e) => setTitle(e.target.value)}
           />
           <textarea
             className="w-full text-(--secondary) text-lg"
-            placeholder={t("description")}
+            placeholder={t(`createPost.description`)}
             onFocus={handleFocus}
             value={description}
             onChange={(e) => setDescription(e.target.value)}
@@ -162,7 +162,7 @@ export default function Notifikationshistorik({ open, onClose }) {
             <input
               className="w-full"
               onFocus={handleFocus}
-              placeholder={t("where")}
+              placeholder={t(`createPost.where`)}
               value={location}
               onChange={(e) => setLocation(e.target.value)}
             />
