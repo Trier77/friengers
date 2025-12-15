@@ -78,9 +78,10 @@ export default function OnboardingModal({ isOpen, onFinish }) {
                   </h2>
 
                   <p className="text-(--secondary) text-center text-sm leading-relaxed">
-                    Friengers er din platform til at finde og hjælpe med opgaver
-                    på AU. Få hjælp til at flytte en sofa, find en studiegruppe,
-                    eller del dine skills med andre studerende.
+                    Platformen hvor AU-studerende hjælper hinanden, deler skills
+                    og mødes over små og store opgaver. Flyt en sofa, find en
+                    studiegruppe, eller start en aktivitet og måske møder du nye
+                    venner undervejs!
                   </p>
                 </motion.div>
               )}
@@ -95,7 +96,7 @@ export default function OnboardingModal({ isOpen, onFinish }) {
                   className="flex flex-col justify-center"
                 >
                   <h2 className="text-xl font-bold text-(--secondary) mb-3 text-center overskrift">
-                    Brug dit feed
+                    Dit feed, dit fælleskab
                   </h2>
 
                   {/* Video container */}
@@ -139,7 +140,7 @@ export default function OnboardingModal({ isOpen, onFinish }) {
                   className="flex flex-col justify-center"
                 >
                   <h2 className="text-xl font-bold text-(--secondary) mb-3 text-center overskrift">
-                    Opret dit eget opslag
+                    Din idé, dit opslag!
                   </h2>
 
                   {/* Image container - samme størrelse som video */}
