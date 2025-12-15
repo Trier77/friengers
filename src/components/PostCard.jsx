@@ -38,13 +38,13 @@ export default function PostCard({
     const seconds = Math.floor((Date.now() - date.getTime()) / 1000);
 
     const intervals = [
-      { label: ["år", "år"], secs: 31536000 },
-      { label: ["måned", "måneder"], secs: 2592000 },
-      { label: ["uge", "uger"], secs: 604800 },
-      { label: ["dag", "dage"], secs: 86400 },
-      { label: ["time", "timer"], secs: 3600 },
-      { label: ["minut", "minutter"], secs: 60 },
-      { label: ["sekund", "sekunder"], secs: 1 },
+      { label: [t(`time.year_one`), t(`time.year_other`)], secs: 31536000 },
+      { label: [t(`time.month_one`), t(`time.month_other`)], secs: 2592000 },
+      { label: [t(`time.week_one`), t(`time.week_other`)], secs: 604800 },
+      { label: [t(`time.day_one`), t(`time.day_other`)], secs: 86400 },
+      { label: [t(`time.hour_one`), t(`time.hour_other`)], secs: 3600 },
+      { label: [t(`time.minute_one`), t(`time.minutter_other`)], secs: 60 },
+      { label: [t(`time.year_one`), t(`time.sekunder_other`)], secs: 1 },
     ];
 
     for (const i of intervals) {
