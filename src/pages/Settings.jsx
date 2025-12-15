@@ -143,7 +143,7 @@ export default function Settings() {
                   onClick={() => changeLanguage("da")}
                 >
                   <img
-                    src="/img/dannebrog.png"
+                    src="img/dannebrog.png"
                     className="h-8 w-8 rounded-full"
                     alt="Danish flag"
                   />
@@ -159,7 +159,7 @@ export default function Settings() {
                   onClick={() => changeLanguage("en")}
                 >
                   <img
-                    src="/img/union-jack.png"
+                    src="img/union-jack.png"
                     className="h-8 w-8 rounded-full"
                     alt="English flag"
                   />
