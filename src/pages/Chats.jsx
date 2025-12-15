@@ -16,10 +16,10 @@ import { db, auth } from "../firebase";
 import { isUserOnline } from "../hooks/Useonlinestatus";
 import ColorCircle from "../components/ColorCircle";
 import { useTranslation } from "react-i18next";
-import loadingVideo from "../assets/loadingScreen.mp4"
+import loadingVideo from "../assets/loadingScreen.mp4";
 
 function Chats() {
-  const {t} = useTranslation();
+  const { t } = useTranslation();
   const [activeTab, setActiveTab] = useState("private");
   const [privateChats, setPrivateChats] = useState([]);
   const [groupChats, setGroupChats] = useState([]);
@@ -189,10 +189,9 @@ function Chats() {
 
             groupChatList.push({
               id: chatId,
-              name: (chatData.chatName || t(`chats.groupChat.defaultName`)).replace(
-                t(`chats.groupChat.prefix`),
-                ""
-              ), // ← Fjern præfix
+              name: (
+                chatData.chatName || t(`chats.groupChat.defaultName`)
+              ).replace(t(`chats.groupChat.prefix`), ""), // ← Fjern præfix
               message: lastMessage,
               time: timeDisplay || "",
               participantAvatars: participantAvatars,
@@ -391,20 +390,19 @@ function Chats() {
   // }
 
   if (loading) {
-  return (
-    <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-      <video
-        src={loadingVideo}
-        autoPlay
-        loop
-        muted
-        playsInline
-        className="w-50% h-50% pointer-events-none select-none"
-      />
-    </div>
-  );
-}
-
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <video
+          src={loadingVideo}
+          autoPlay
+          loop
+          muted
+          playsInline
+          className="w-50% h-50% pointer-events-none select-none"
+        />
+      </div>
+    );
+  }
 
   return (
     <motion.div
@@ -530,8 +528,14 @@ function Chats() {
             {searchQuery && (
               <p className="text-sm text-gray-500 mb-3">
                 {currentChats.length !== 1
-                  ? t(`chats.search.showingResults_other`, {count: currentChats.length, query: searchQuery })
-                  : t(`chats.search.showingResults_one`, {count: currentChats.length, query: searchQuery })}{" "}
+                  ? t(`chats.search.showingResults_other`, {
+                      count: currentChats.length,
+                      query: searchQuery,
+                    })
+                  : t(`chats.search.showingResults_one`, {
+                      count: currentChats.length,
+                      query: searchQuery,
+                    })}{" "}
                 for "{searchQuery}"
               </p>
             )}
@@ -554,8 +558,8 @@ function Chats() {
                 }}
                 className={`relative flex items-center border-2 border-(--secondary) gap-4 mb-3 rounded-full cursor-pointer transition-all active:brightness-80 ${
                   chat.unread > 0
-                    ? "bg-blue-400 text-(--white)"
-                    : "bg-(--white) text-gray-800 hover:bg-gray-50"
+                    ? "bg-(--secondary) text-(--white)"
+                    : "bg-(--white) text-(--primary) hover:bg-gray-50"
                 }`}
               >
                 {/* UnreadBadge */}
@@ -579,7 +583,7 @@ function Chats() {
                                 key={participant.uid}
                                 src={participant.profileImage}
                                 alt={participant.name}
-                                className="absolute w-14 h-14 rounded-full object-cover"
+                                className="absolute w-14 h-14 rounded-full object-cover border-2 border-(--white)"
                                 style={{
                                   left: `${idx * 16}px`,
                                   zIndex: 3 - idx,
@@ -619,7 +623,7 @@ function Chats() {
                       <img
                         src={chat.avatar || "https://via.placeholder.com/56"}
                         alt={chat.name}
-                        className="w-14 h-14 rounded-full object-cover"
+                        className="w-14 h-14 rounded-full object-cover border-2 border-(--white)"
                       />
                       <div
                         className={`absolute bottom-0 right-0 w-4 h-4 rounded-full border-2 border-(--white) ${

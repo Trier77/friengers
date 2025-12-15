@@ -5,7 +5,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useTranslation } from "react-i18next";
 
 export default function GroupChatPrompt({ postId, postTitle, onClose }) {
-  const {t} = useTranslation();
+  const { t } = useTranslation();
   const [isCreating, setIsCreating] = useState(false);
 
   console.log("🔵 GroupChatPrompt rendered:", { postId, postTitle });
