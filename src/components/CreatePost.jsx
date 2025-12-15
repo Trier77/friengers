@@ -20,7 +20,7 @@ import Edit from "./Edit";
 import { useTranslation } from "react-i18next";
 
 export default function CreatePost({ open, onClose, post = null }) {
-  const {t} = useTranslation();
+  const { t } = useTranslation();
   const { tags: allTags, loading: tagsLoading } = useTags();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -165,6 +165,7 @@ export default function CreatePost({ open, onClose, post = null }) {
             placeholder={t(`createPost.title`)}
             onFocus={handleFocus}
             value={title}
+            maxLength={60}
             onChange={(e) => setTitle(e.target.value)}
           />
           <textarea
@@ -172,6 +173,7 @@ export default function CreatePost({ open, onClose, post = null }) {
             placeholder={t(`createPost.description`)}
             onFocus={handleFocus}
             value={description}
+            maxLength={300}
             onChange={(e) => setDescription(e.target.value)}
           />
         </div>
@@ -214,7 +216,7 @@ export default function CreatePost({ open, onClose, post = null }) {
                   className="text-[--white] pointer-events-none absolute left-7 opacity-50"
                   style={{ color: "var(--white)" }}
                 >
-                 {t(`createPost.when`)}
+                  {t(`createPost.when`)}
                 </span>
               )}
               <input
