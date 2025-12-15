@@ -31,7 +31,7 @@ export default function PostCard({
   invitationFrom = null,
   onInvitationHandled = () => {},
 }) {
-  const {t} =useTranslation();
+  const { t } = useTranslation();
   const isFocused = expandedPostId === post.id;
 
   function timeAgo(date) {
@@ -243,7 +243,7 @@ export default function PostCard({
                     src={url}
                     alt="Post billede"
                     className="h-40 w-auto rounded-xl cursor-pointer"
-                    onClick={() => setPreviewImage(url)}
+                    onClick={() => setPreviewImage(url)} // just call the handler
                   />
                 ))}
               </div>
