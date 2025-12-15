@@ -18,9 +18,10 @@ import PostCard from "../components/PostCard";
 import PrivatChatIcon from "../../public/icons/PrivatChat";
 import ColorCircle from "../components/ColorCircle";
 import AnmeldelsesModal from "../components/Anmeldelsesmodal";
+import { useTranslation } from "react-i18next";
 
 function AndresProfil() {
-  const {t} = useTranslation();
+  const { t } = useTranslation();
   const { userId } = useParams();
   const navigate = useNavigate();
   const [userData, setUserData] = useState(null);
@@ -224,7 +225,7 @@ function AndresProfil() {
       alert("Der opstod en fejl. Prøv igen.");
     }
   };
-//LOADING ANIMATION SKAL DEN VÆRE HER????
+  //LOADING ANIMATION SKAL DEN VÆRE HER????
   if (loading) {
     return (
       <div className="p-4 text-center pointer-events-none select-none">
@@ -283,7 +284,9 @@ function AndresProfil() {
 
           <div>
             <h1 className="text-2xl font-bold text-gray-900 whitespace-nowrap">
-              {userData.fuldenavn || userData.kaldenavn || t(`viewProfile.unknownName`)}
+              {userData.fuldenavn ||
+                userData.kaldenavn ||
+                t(`viewProfile.unknownName`)}
             </h1>
             <p className="text-blue-500 font-bold text-sm">
               {userData.study || t(`viewProfile.noStudy`)}
@@ -367,9 +370,7 @@ function AndresProfil() {
                     <p className="text-gray-500 text-sm mb-2">
                       {t("no-tasks")}
                     </p>
-                    <p className="text-gray-400 text-xs">
-                      {t("create-task")}
-                    </p>
+                    <p className="text-gray-400 text-xs">{t("create-task")}</p>
                   </div>
                 ) : (
                   <div className="space-y-2">
@@ -435,7 +436,9 @@ function AndresProfil() {
           {t(`viewProfile.activeTasks`)}
         </h2>
         {userPosts.length === 0 ? (
-          <p className="text-center text-gray-500">{t(`viewProfile.noActiveTasks`)}</p>
+          <p className="text-center text-gray-500">
+            {t(`viewProfile.noActiveTasks`)}
+          </p>
         ) : (
           userPosts.map((post) => (
             <PostCard
