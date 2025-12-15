@@ -11,7 +11,7 @@ import useTags from "./Tags";
 import { useTranslation } from "react-i18next";
 
 export default function Notifikationshistorik({ open, onClose }) {
-  const {t} =useTranslation();
+  const { t } = useTranslation();
   const { tags: allTags, loading: tagsLoading } = useTags();
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -100,7 +100,7 @@ export default function Notifikationshistorik({ open, onClose }) {
       <div
         ref={containerRef}
         className={`
-          fixed inset-0 bg-(--white)/80 z-40
+          fixed inset-0 bg-(--white) z-40
           transition-opacity duration-300
           ${
             open

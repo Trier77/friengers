@@ -14,9 +14,10 @@ import PostCard from "../components/PostCard";
 import FunnelIcon from "../../public/icons/FunnelIcon";
 import { useSwipe } from "../components/SwipeContext";
 import { useTranslation } from "react-i18next";
+import OnboardingModal from "../components/OnboardingModal";
 
 export default function Feed() {
-  const { t} = useTranslation();
+  const { t } = useTranslation();
   const { tags: allTags } = useTags();
   const [posts, setPosts] = useState([]);
   const navigate = useNavigate();
@@ -26,6 +27,7 @@ export default function Feed() {
   const [previewImage, setPreviewImage] = useState(null);
   const [highlightPostId, setHighlightPostId] = useState(null);
   const myPostsRef = useRef(null);
+  const [showOnboarding, setShowOnboarding] = useState(false);
 
   const { setSwipeEnabled } = useSwipe();
 
@@ -49,6 +51,13 @@ export default function Feed() {
     );
     setPosts(postsWithUser);
   };
+
+  useEffect(() => {
+    const hasSeenOnboarding = localStorage.getItem("hasSeenOnboarding");
+    if (!hasSeenOnboarding) {
+      setShowOnboarding(true);
+    }
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -165,6 +174,11 @@ export default function Feed() {
     (post) => post.uid !== userId && post.active !== false
   );
 
+  const handleOnboardingDone = () => {
+    localStorage.setItem("hasSeenOnboarding", "true");
+    setShowOnboarding(false);
+  };
+
   const renderMyPost = (post, index) => (
     <motion.div
       key={post.id}
@@ -243,7 +257,9 @@ export default function Feed() {
         className="mb-4 flex flex-col justify-end"
       >
         <div className="flex gap-4 items-center px-4">
-          <h3 className="text-(--secondary) font-bold text-lg">{t("overview")}</h3>{" "}
+          <h3 className="text-(--secondary) font-bold text-lg">
+            {t("overview")}
+          </h3>{" "}
           <div className="w-full border border-(--secondary)"></div>
           <button
             onClick={() => setShowFilter((prev) => !prev)}
@@ -314,7 +330,7 @@ export default function Feed() {
           </div>
         ) : (
           <p className="text-(--white) mt-4">
-           {t(`feed.filnoMatchingPostster`)}
+            {t(`feed.filnoMatchingPostster`)}
           </p>
         )
       ) : (
@@ -340,6 +356,10 @@ export default function Feed() {
           </div>
         ))
       )}
+      <OnboardingModal
+        isOpen={showOnboarding}
+        onFinish={handleOnboardingDone}
+      />
     </div>
   );
 }

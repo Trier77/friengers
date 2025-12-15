@@ -283,7 +283,9 @@ export default function NotificationsPopup({
       >
         {/* Header */}
         <div className="bg-(--secondary) p-4 flex justify-between items-center">
-          <h2 className="text-(--white) font-bold text-lg">{t(`notifications.title`)}</h2>
+          <h2 className="text-(--white) font-bold text-lg">
+            {t(`notifications.title`)}
+          </h2>
           <button
             onClick={closePopup}
             className="text-(--white) text-2xl font-bold hover:opacity-80"
@@ -300,10 +302,12 @@ export default function NotificationsPopup({
             </div>
           ) : (
             <>
-              {notifications.map((n, index) => {
-                const isPending = !n.status || n.status === "pending";
-                const isAccepted = n.status === "accepted";
-                const isRejected = n.status === "rejected";
+              {[...notifications]
+                .sort((a, b) => b.timestamp - a.timestamp) // newest first
+                .map((n, index) => {
+                  const isPending = !n.status || n.status === "pending";
+                  const isAccepted = n.status === "accepted";
+                  const isRejected = n.status === "rejected";
 
                 // GRUPPECHAT NOTIFIKATION
                 if (n.notificationType === "groupchat_created") {
@@ -383,32 +387,33 @@ export default function NotificationsPopup({
                         </p>
                       </div>
 
-                      <div className="flex items-center gap-3 mb-4">
-                        <img
-                          src={
-                            n.requesterImage || "https://via.placeholder.com/48"
-                          }
-                          alt={n.requesterName}
-                          className="w-12 h-12 rounded-full border-2 border-(--secondary) cursor-pointer object-cover"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            navigate(`/AndresProfil/${n.requesterUid}`);
-                          }}
-                        />
-                        <div className="flex-1">
-                          <p
-                            className="text-(--secondary) font-semibold cursor-pointer hover:underline"
-                            onClick={() =>
-                              navigate(`/AndresProfil/${n.requesterUid}`)
+                        <div className="flex items-center gap-3 mb-4">
+                          <img
+                            src={
+                              n.requesterImage ||
+                              "https://via.placeholder.com/48"
                             }
-                          >
-                            {n.requesterName}
-                          </p>
-                          <p className="text-gray-500 text-sm">
-                            {t(`notifications.request.wantsHelp`)}
-                          </p>
+                            alt={n.requesterName}
+                            className="w-12 h-12 rounded-full border-2 border-(--secondary) cursor-pointer object-cover"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              navigate(`/AndresProfil/${n.requesterUid}`);
+                            }}
+                          />
+                          <div className="flex-1">
+                            <p
+                              className="text-(--secondary) font-semibold cursor-pointer hover:underline"
+                              onClick={() =>
+                                navigate(`/AndresProfil/${n.requesterUid}`)
+                              }
+                            >
+                              {n.requesterName}
+                            </p>
+                            <p className="text-gray-500 text-sm">
+                              {t(`notifications.request.wantsHelp`)}
+                            </p>
+                          </div>
                         </div>
-                      </div>
 
                       {isPending ? (
                         <div className="flex gap-3">
@@ -462,28 +467,32 @@ export default function NotificationsPopup({
                         </p>
                       </div>
 
-                      <div className="flex items-center gap-3 mb-4">
-                        <img
-                          src={n.fromImage || "https://via.placeholder.com/48"}
-                          alt={n.fromName}
-                          className="w-12 h-12 rounded-full object-cover cursor-pointer border-2 border-(--secondary)"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            navigate(`/AndresProfil/${n.from}`);
-                          }}
-                        />
-                        <div className="flex-1">
-                          <p
-                            className="text-(--secondary) font-semibold text-base cursor-pointer hover:underline"
-                            onClick={() => navigate(`/AndresProfil/${n.from}`)}
-                          >
-                            {n.fromName}
-                          </p>
-                          <p className="text-gray-500 text-sm">
-                            {t(`notifications.invitation.from`)}
-                          </p>
+                        <div className="flex items-center gap-3 mb-4">
+                          <img
+                            src={
+                              n.fromImage || "https://via.placeholder.com/48"
+                            }
+                            alt={n.fromName}
+                            className="w-12 h-12 rounded-full object-cover cursor-pointer border-2 border-(--secondary)"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              navigate(`/AndresProfil/${n.from}`);
+                            }}
+                          />
+                          <div className="flex-1">
+                            <p
+                              className="text-(--secondary) font-semibold text-base cursor-pointer hover:underline"
+                              onClick={() =>
+                                navigate(`/AndresProfil/${n.from}`)
+                              }
+                            >
+                              {n.fromName}
+                            </p>
+                            <p className="text-gray-500 text-sm">
+                              {t(`notifications.invitation.from`)}
+                            </p>
+                          </div>
                         </div>
-                      </div>
 
                       {isPending ? (
                         <div className="flex gap-3">
@@ -515,52 +524,55 @@ export default function NotificationsPopup({
                   );
                 }
 
-                // POST SLETTET NOTIFIKATION
-                if (n.notificationType === "post_deleted") {
-                  return (
-                    <div
-                      key={`post-deleted-${n.postId}-${n.timestamp}`}
-                      className={`p-4 ${
-                        !isPending ? "opacity-50 bg-gray-50" : ""
-                      } ${
-                        index !== notifications.length - 1
-                          ? "border-b border-gray-200"
-                          : ""
-                      }`}
-                    >
-                      <div className="mb-3">
-                        <p className="text-red-600 text-sm mb-1 font-semibold">
-                          {t(`notifications.deleted.title`)}
-                        </p>
-                        <p
-                          className="text-(--secondary) font-bold text-base cursor-pointer hover:underline"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            closePopup();
-                            navigate(`/?invitation=${n.postId}&from=${n.from}`);
-                          }}
-                        >
-                          {n.postTitle}
-                        </p>
-                      </div>
-
-                      <div className="flex items-center gap-3 mb-3">
-                        <img
-                          src={
-                            n.deletedByImage || "https://via.placeholder.com/48"
-                          }
-                          alt={n.deletedByName}
-                          className="w-12 h-12 rounded-full object-cover border-2 border-red-500"
-                        />
-                        <div className="flex-1">
-                          <p className="text-gray-700 font-semibold">
-                            {n.deletedByName}
+                  // POST SLETTET NOTIFIKATION
+                  if (n.notificationType === "post_deleted") {
+                    return (
+                      <div
+                        key={`post-deleted-${n.postId}-${n.timestamp}`}
+                        className={`p-4 ${
+                          !isPending ? "opacity-50 bg-gray-50" : ""
+                        } ${
+                          index !== notifications.length - 1
+                            ? "border-b border-gray-200"
+                            : ""
+                        }`}
+                      >
+                        <div className="mb-3">
+                          <p className="text-red-600 text-sm mb-1 font-semibold">
+                            {t(`notifications.deleted.title`)}
                           </p>
-                          <p className="text-gray-500 text-sm">
-                            {t(`notifications.deleted.by`)}
+                          <p
+                            className="text-(--secondary) font-bold text-base cursor-pointer hover:underline"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              closePopup();
+                              navigate(
+                                `/?invitation=${n.postId}&from=${n.from}`
+                              );
+                            }}
+                          >
+                            {n.postTitle}
                           </p>
                         </div>
-                      </div>
+
+                        <div className="flex items-center gap-3 mb-3">
+                          <img
+                            src={
+                              n.deletedByImage ||
+                              "https://via.placeholder.com/48"
+                            }
+                            alt={n.deletedByName}
+                            className="w-12 h-12 rounded-full object-cover border-2 border-red-500"
+                          />
+                          <div className="flex-1">
+                            <p className="text-gray-700 font-semibold">
+                              {n.deletedByName}
+                            </p>
+                            <p className="text-gray-500 text-sm">
+                              {t(`notifications.deleted.by`)}
+                            </p>
+                          </div>
+                        </div>
 
                       {n.hadGroupChat && (
                         <div className="bg-red-50 border border-red-200 rounded-lg p-2 mb-3">
@@ -570,30 +582,34 @@ export default function NotificationsPopup({
                         </div>
                       )}
 
-                      {isPending && (
-                        <button
-                          onClick={async () => {
-                            try {
-                              const userRef = doc(db, "users", currentUserUid);
-                              const userSnap = await getDoc(userRef);
-                              const userData = userSnap.data();
+                        {isPending && (
+                          <button
+                            onClick={async () => {
+                              try {
+                                const userRef = doc(
+                                  db,
+                                  "users",
+                                  currentUserUid
+                                );
+                                const userSnap = await getDoc(userRef);
+                                const userData = userSnap.data();
 
-                              const updatedNotifications = (
-                                userData.notifications || []
-                              ).map((notification) => {
-                                if (
-                                  notification.postId === n.postId &&
-                                  notification.notificationType ===
-                                    "post_deleted"
-                                ) {
-                                  return {
-                                    ...notification,
-                                    status: "seen",
-                                    seenAt: Date.now(),
-                                  };
-                                }
-                                return notification;
-                              });
+                                const updatedNotifications = (
+                                  userData.notifications || []
+                                ).map((notification) => {
+                                  if (
+                                    notification.postId === n.postId &&
+                                    notification.notificationType ===
+                                      "post_deleted"
+                                  ) {
+                                    return {
+                                      ...notification,
+                                      status: "seen",
+                                      seenAt: Date.now(),
+                                    };
+                                  }
+                                  return notification;
+                                });
 
                               await updateDoc(userRef, {
                                 notifications: updatedNotifications,
@@ -620,8 +636,8 @@ export default function NotificationsPopup({
                   );
                 }
 
-                return null;
-              })}
+                  return null;
+                })}
             </>
           )}
         </div>
