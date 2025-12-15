@@ -11,7 +11,7 @@ export default function Tilmeld({
   onUpdate,
   className = "",
 }) {
-  const {t} =useTranslation();
+  const { t } = useTranslation();
   const userId = auth.currentUser.uid;
   const [localParticipants, setLocalParticipants] = useState(
     Array.isArray(participants) ? participants : []
