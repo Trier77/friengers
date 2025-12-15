@@ -271,35 +271,22 @@ export default function Profil() {
 
   const markAsDone = async (postId) => {
     try {
-      console.log("✅ Markerer post som færdig:", postId);
-
-      // 1. Markér opslaget som inaktivt
       const postRef = doc(db, "posts", postId);
       await updateDoc(postRef, { active: false });
 
-      // 2. Opdater lokal state
       setPosts((prevPosts) =>
         prevPosts.map((post) =>
           post.id === postId ? { ...post, active: false } : post
         )
       );
-
-      console.log("✅ Post markeret som færdig");
-
-      // 3. Tjek om der er en tilhørende gruppechat
       const groupChatId = `group_${postId}`;
       const groupChatRef = doc(db, "chats", groupChatId);
 
       const groupChatSnap = await getDoc(groupChatRef);
 
       if (groupChatSnap.exists()) {
-        console.log("📬 Fandt gruppechat, sletter...");
-
-        // 3a. Slet alle beskeder i gruppechatten først
         const messagesRef = collection(db, "chats", groupChatId, "messages");
         const messagesSnap = await getDocs(messagesRef);
-
-        console.log(`🗑️ Sletter ${messagesSnap.docs.length} beskeder...`);
 
         for (const messageDoc of messagesSnap.docs) {
           await deleteDoc(messageDoc.ref);
@@ -640,7 +627,14 @@ export default function Profil() {
     </motion.div>
   );
 
-  const completedCount = userPosts.length;
+  const completedCount = posts.filter(
+    (post) =>
+      post.active === false &&
+      (post.uid === userId ||
+        (Array.isArray(post.participants) &&
+          post.participants.includes(userId)))
+  ).length;
+
   return (
     <motion.div
       initial={{ opacity: 0 }}

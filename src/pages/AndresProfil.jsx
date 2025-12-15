@@ -19,6 +19,7 @@ import PrivatChatIcon from "../../public/icons/PrivatChat";
 import ColorCircle from "../components/ColorCircle";
 import AnmeldelsesModal from "../components/Anmeldelsesmodal";
 import { useTranslation } from "react-i18next";
+import { onSnapshot } from "firebase/firestore";
 
 function AndresProfil() {
   const { t } = useTranslation();
@@ -67,6 +68,55 @@ function AndresProfil() {
       console.error("Fejl ved sending af gruppechat-notifikationer:", error);
     }
   };
+
+  useEffect(() => {
+    if (!userId) return;
+
+    const postsRef = collection(db, "posts");
+
+    // Listen to posts where user is owner or participant
+    const q1 = query(postsRef, where("uid", "==", userId));
+    const q2 = query(postsRef, where("participants", "array-contains", userId));
+
+    const unsub1 = onSnapshot(q1, (snapshot) => {
+      const ownPosts = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setUserPosts((prev) => {
+        const participantPosts = prev.filter((p) =>
+          p.participants?.includes(userId)
+        );
+        return [
+          ...ownPosts,
+          ...participantPosts.filter(
+            (p) => !ownPosts.some((op) => op.id === p.id)
+          ),
+        ];
+      });
+    });
+
+    const unsub2 = onSnapshot(q2, (snapshot) => {
+      const participantPosts = snapshot.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+      setUserPosts((prev) => {
+        const ownPosts = prev.filter((p) => p.uid === userId);
+        return [
+          ...ownPosts,
+          ...participantPosts.filter(
+            (p) => !ownPosts.some((op) => op.id === p.id)
+          ),
+        ];
+      });
+    });
+
+    return () => {
+      unsub1();
+      unsub2();
+    };
+  }, [userId]);
 
   useEffect(() => {
     const fetchUserData = async () => {
