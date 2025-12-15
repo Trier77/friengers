@@ -640,7 +640,11 @@ function Chats() {
 
                 {/* Chat Info */}
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold text-lg truncate text-(--secondary)">
+                  <h3
+                    className={`font-semibold text-lg truncate text-(--secondary) ${
+                      chat.unread > 0 ? "text-white/90" : "text-(--primary)"
+                    }`}
+                  >
                     {chat.name}
                   </h3>
                   <p
