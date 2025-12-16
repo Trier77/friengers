@@ -22,7 +22,7 @@ import MapPinIcon from "../../public/icons/MapPinIcon";
 import { useNavigate } from "react-router";
 import ColorCircle from "../components/ColorCircle";
 import { useTranslation } from "react-i18next";
-import { arrayRemove } from "firebase/firestore";
+import { arrayRemove, arrayUnion } from "firebase/firestore";
 import PreviewModal from "../components/PreviewModal";
 
 export default function Profil() {
@@ -157,7 +157,8 @@ export default function Profil() {
       const count = Math.floor(seconds / i.secs);
       if (count >= 1) {
         const label = count === 1 ? i.label[0] : i.label[1];
-        return t(`time.ago`, { count: count, unit: label });
+        // 🆕 FIX: Brug count og label separat i t() funktionen
+        return t(`time.ago`, { count, unit: label });
       }
     }
 
@@ -270,9 +271,13 @@ export default function Profil() {
     }
   };
 
-  const markAsDone = async (postId) => {
+  const markAsDone = async (postId, postTitle) => {
     try {
       const postRef = doc(db, "posts", postId);
+      const postSnap = await getDoc(postRef);
+      const postData = postSnap.data();
+      const participants = postData.participants || [];
+
       await updateDoc(postRef, { active: false });
 
       setPosts((prevPosts) =>
@@ -280,6 +285,38 @@ export default function Profil() {
           post.id === postId ? { ...post, active: false } : post
         )
       );
+
+      // 🆕 SEND NOTIFIKATIONER til alle deltagere
+      if (participants.length > 0) {
+        console.log(
+          "📬 Sender task_completed notifikationer til:",
+          participants
+        );
+
+        for (const participantId of participants) {
+          try {
+            const participantRef = doc(db, "users", participantId);
+            await updateDoc(participantRef, {
+              notifications: arrayUnion({
+                notificationType: "task_completed",
+                postId: postId,
+                postTitle: postTitle,
+                status: "seen", // 🆕 Auto-marker som seen (ikke pending)
+                timestamp: Date.now(),
+                createdAt: Date.now(),
+              }),
+            });
+          } catch (error) {
+            console.error(
+              "Fejl ved sending af notifikation til:",
+              participantId,
+              error
+            );
+          }
+        }
+        console.log("✅ Task completed notifikationer sendt!");
+      }
+
       const groupChatId = `group_${postId}`;
       const groupChatRef = doc(db, "chats", groupChatId);
 
@@ -307,11 +344,17 @@ export default function Profil() {
     }
   };
 
-  const removeSelfFromTask = async (postId) => {
+  const removeSelfFromTask = async (postId, postTitle) => {
     const userId = auth.currentUser.uid;
     const postRef = doc(db, "posts", postId);
 
     try {
+      // Hent post data før opdatering
+      const postSnap = await getDoc(postRef);
+      const postData = postSnap.data();
+      const postOwnerId = postData.uid;
+
+      // Fjern brugeren fra participants
       await updateDoc(postRef, {
         participants: arrayRemove(userId),
       });
@@ -328,7 +371,27 @@ export default function Profil() {
         )
       );
 
-      alert("You have been removed from this task.");
+      // 🆕 SEND NOTIFIKATION til opgavens ejer
+      const currentUserSnap = await getDoc(doc(db, "users", userId));
+      const currentUserData = currentUserSnap.data();
+
+      const ownerRef = doc(db, "users", postOwnerId);
+      await updateDoc(ownerRef, {
+        notifications: arrayUnion({
+          notificationType: "participant_left",
+          postId: postId,
+          postTitle: postTitle,
+          leftBy: userId,
+          leftByName: currentUserData.kaldenavn || currentUserData.fuldenavn,
+          leftByImage: currentUserData.profileImage || null,
+          status: "seen", // 🆕 Auto-marker som seen (ikke pending)
+          timestamp: Date.now(),
+          createdAt: Date.now(),
+        }),
+      });
+
+      console.log("✅ Participant left notifikation sendt til ejer");
+      console.log("✅ Du er blevet fjernet fra opgaven");
     } catch (error) {
       console.error("Error removing user from task:", error);
       alert("Could not remove you from this task.");
@@ -618,7 +681,7 @@ export default function Profil() {
             if (
               window.confirm("Do you want to remove yourself from this task?")
             ) {
-              removeSelfFromTask(post.id);
+              removeSelfFromTask(post.id, post.title);
             }
           }}
         >

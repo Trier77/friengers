@@ -182,6 +182,74 @@
 
   "overview": "Overview",
 
+  "notifications": {
+    "title": "Notifications",
+    "empty": "No new notifications...",
+
+    "group": {
+      "created": "Group chat created",
+      "ready": "Your group chat is ready!",
+      "click": "Click to open chat",
+      "opened": "Opened"
+    },
+
+    "request": {
+      "title": "Request",
+      "wantsHelp": "wants to help",
+      "accepted": "You accepted this request",
+      "rejected": "You rejected this request"
+    },
+
+    "invitation": {
+      "title": "Invitation",
+      "from": "has invited you",
+      "accepted": "Accept",
+      "rejected": "Reject",
+      "taskDeleted": "This task has been deleted"
+    },
+
+    "deleted": {
+      "title": "Task deleted",
+      "by": "has deleted the task",
+      "groupCeased": "Group chat has been closed",
+      "read": "Read",
+      "ok": "OK"
+    },
+
+    "taskCompleted": {
+      "title": "Task completed!",
+      "message": "This task has been marked as completed",
+      "thanks": "Thanks for your help! 🎉",
+      "ok": "OK",
+      "seen": "Notification seen"
+    },
+
+    "participantLeft": {
+      "title": "Participant left task",
+      "message": "has left this task",
+      "ok": "OK",
+      "seen": "Notification seen"
+    },
+
+    "requestAccepted": {
+      "title": "Request accepted!",
+      "message": "has accepted your request to participate in",
+      "subtitle": "You can now see the task in your feed",
+      "ok": "View task",
+      "seen": "Notification seen",
+      "taskNoLongerExists": "This task no longer exists"
+    },
+
+    "invitationAccepted": {
+      "title": "Invitation accepted!",
+      "message": "has accepted your invitation",
+      "noThanks": "No thanks",
+      "createGroupChat": "Create group chat",
+      "groupChatCreated": "Group chat created",
+      "declined": "You declined to create group chat"
+    }
+  },
+
   "notif-title": "Notifications",
   "no-notifs": "No notifications yet",
   "group-creation": "Group chat created:",

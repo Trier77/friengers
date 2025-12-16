@@ -207,49 +207,8 @@ function AndresProfil() {
         requests: arrayUnion(userId),
       });
 
-      const currentParticipants = postData.participants || [];
-
-      if (currentParticipants.length === 0) {
-        console.log("FØRSTE DELTAGER - Opretter gruppechat");
-        setShowInviteDropdown(false);
-
-        const groupChatId = `group_${postId}`;
-        const groupChatRef = doc(db, "chats", groupChatId);
-
-        await setDoc(groupChatRef, {
-          postId: postId,
-          chatName: postData.title,
-          participants: [currentUserId, userId],
-          createdAt: serverTimestamp(),
-          createdBy: currentUserId,
-          isGroupChat: true,
-          lastMessage: "Gruppechat oprettet",
-          lastMessageTime: serverTimestamp(),
-          lastMessageSenderId: currentUserId,
-        });
-
-        console.log("Gruppechat auto-oprettet ved invitation");
-
-        await sendGroupChatNotifications(postId, postData.title, [
-          currentUserId,
-          userId,
-        ]);
-      } else {
-        const groupChatId = `group_${postId}`;
-        const groupChatRef = doc(db, "chats", groupChatId);
-
-        try {
-          const groupChatSnap = await getDoc(groupChatRef);
-          if (groupChatSnap.exists()) {
-            await updateDoc(groupChatRef, {
-              participants: arrayUnion(userId),
-            });
-            console.log("Bruger tilføjet til gruppechat");
-          }
-        } catch (error) {
-          console.log("Ingen gruppechat endnu");
-        }
-      }
+      // 🆕 INGEN automatisk gruppechat - venter på accept
+      console.log("✅ Invitation sendt - afventer accept");
 
       const currentUserDoc = await getDoc(doc(db, "users", currentUserId));
       const currentUserData = currentUserDoc.data();
@@ -263,6 +222,7 @@ function AndresProfil() {
           postId: postId,
           postTitle: postData.title,
           timestamp: new Date().toISOString(),
+          createdAt: Date.now(),
         }),
       });
 
