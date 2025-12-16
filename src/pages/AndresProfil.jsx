@@ -149,9 +149,7 @@ export default function AndresProfil() {
         const allPostsMap = new Map();
         ownPosts.forEach((post) => allPostsMap.set(post.id, post));
         participantPosts.forEach((post) => allPostsMap.set(post.id, post));
-        const allPosts = Array.from(allPostsMap.values()).filter(
-          (post) => post.active !== false
-        ); // <-- only active
+        const allPosts = Array.from(allPostsMap.values());
         setUserPosts(allPosts);
 
         if (currentUserId) {
@@ -247,7 +245,11 @@ export default function AndresProfil() {
   }
 
   const completedCount = userPosts.filter(
-    (post) => post.active === false
+    (post) =>
+      post.active === false &&
+      (post.uid === userId ||
+        (Array.isArray(post.participants) &&
+          post.participants.includes(userId)))
   ).length;
 
   return (
