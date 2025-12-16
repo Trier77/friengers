@@ -6,7 +6,7 @@ export default function Logo() {
       <NavLink to="/">
         <img
           className="h-10"
-          src="../public/img/logo-samlet.svg"
+          src="img/logo-samlet.svg"
           alt="Friengers logo"
         />
       </NavLink>

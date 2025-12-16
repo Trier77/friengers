@@ -16,7 +16,6 @@ import { db, auth } from "../firebase";
 import { isUserOnline } from "../hooks/Useonlinestatus";
 import ColorCircle from "../components/ColorCircle";
 import { useTranslation } from "react-i18next";
-import loadingVideo from "../assets/loadingScreen.mp4";
 
 function Chats() {
   const { t } = useTranslation();
@@ -379,27 +378,10 @@ function Chats() {
     0
   );
 
-  // if (loading) {
-  //   return (
-  //     <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-  //       <p className="text-gray-500 pointer-events-none select-none">
-  //         Henter chats...
-  //       </p>
-  //     </div>
-  //   );
-  // }
-
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
-        <video
-          src={loadingVideo}
-          autoPlay
-          loop
-          muted
-          playsInline
-          className="w-50% h-50% pointer-events-none select-none"
-        />
+        <div className="w-12 h-12 border-4 border-(--secondary)/30 border-t-(--secondary) rounded-full animate-spin" />
       </div>
     );
   }
@@ -640,7 +622,11 @@ function Chats() {
 
                 {/* Chat Info */}
                 <div className="flex-1 min-w-0">
-                  <h3 className="font-semibold text-lg truncate text-(--secondary)">
+                  <h3
+                    className={`font-semibold text-lg truncate text-(--secondary) ${
+                      chat.unread > 0 ? "text-white/90" : "text-(--primary)"
+                    }`}
+                  >
                     {chat.name}
                   </h3>
                   <p

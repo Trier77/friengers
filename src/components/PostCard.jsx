@@ -31,7 +31,7 @@ export default function PostCard({
   invitationFrom = null,
   onInvitationHandled = () => {},
 }) {
-  const {t} =useTranslation();
+  const { t } = useTranslation();
   const isFocused = expandedPostId === post.id;
 
   function timeAgo(date) {
@@ -185,12 +185,52 @@ export default function PostCard({
         />
 
         <div className="flex items-center justify-between z-10">
-          <h2 className="justify-start text-(--secondary) text-xl overskrift flex-none w-40 truncate">
-            {post.title}
-          </h2>
+          {expandedPostId !== post.id && (
+            <h2 className="justify-start text-(--secondary) text-xl overskrift flex-none w-40 truncate">
+              {post.title}
+            </h2>
+          )}
+          {expandedPostId === post.id && (
+            <h2 className="justify-start text-(--secondary) text-2xl mb-1 overskrift flex-none">
+              {post.title}
+            </h2>
+          )}
+          {expandedPostId !== post.id && (
+            <motion.div
+              className="bg-(--white) rounded-full px-2 flex gap-4 font-bold text-sm text-(--secondary)"
+              animate={{
+                opacity: 1,
+                scale: 1,
+              }}
+              transition={{ duration: 0.2 }}
+            >
+              <div className="flex items-center gap-2 flex-none w-16">
+                <MapPinIcon color="--secondary" size={12} />
+                <p className="truncate">{post.location}</p>
+              </div>
 
-          <div className="bg-(--white) rounded-full px-2 flex gap-4 font-bold text-sm text-(--secondary)">
-            <div className="flex items-center gap-2 flex-none w-16">
+              <div className="flex items-center gap-2">
+                <CalenderIcon color="--secondary" size={10} />
+                <p>
+                  {post.time?.toDate().toLocaleDateString(undefined, {
+                    day: "2-digit",
+                    month: "2-digit",
+                  })}
+                </p>
+              </div>
+            </motion.div>
+          )}
+        </div>
+        {expandedPostId === post.id && (
+          <motion.div
+            className="bg-(--white) rounded-full px-4 flex w-fit gap-6 mb-1 font-bold text-sm text-(--secondary)"
+            animate={{
+              opacity: 1,
+              scale: 1,
+            }}
+            transition={{ duration: 0.2 }}
+          >
+            <div className="flex items-center gap-2">
               <MapPinIcon color="--secondary" size={12} />
               <p className="truncate">{post.location}</p>
             </div>
@@ -204,8 +244,8 @@ export default function PostCard({
                 })}
               </p>
             </div>
-          </div>
-        </div>
+          </motion.div>
+        )}
 
         <div className="z-10">
           <ul className="flex gap-1 text-(--white) text-xs">
@@ -243,7 +283,7 @@ export default function PostCard({
                     src={url}
                     alt="Post billede"
                     className="h-40 w-auto rounded-xl cursor-pointer"
-                    onClick={() => setPreviewImage(url)}
+                    onClick={() => setPreviewImage(url)} // just call the handler
                   />
                 ))}
               </div>

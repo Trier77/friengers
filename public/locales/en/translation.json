@@ -6,19 +6,18 @@
     "notifications": "Notifications",
     "darkmode": "Dark mode",
     "about": "About us",
-    "help": "Help & support",
+    "help": "Introduction",
     "logout": "Log out",
     "overview": "Overview",
     "notif-title": "Notifications"
   },
- 
 
   "viewProfile": {
     "loading": "Loading profile...",
     "notFound": "User not found",
     "unknownName": "Unknown",
-    "noStudy": "Not specified",
-    "noBio": "No description available",
+    "noStudy": "Study not specified",
+    "noBio": "There's no description here yet...",
     "tasksCompleted": "Tasks completed",
     "activeTasks": "Active tasks",
     "noActiveTasks": "No active tasks",
@@ -29,20 +28,23 @@
 
   "ownProfile": {
     "loading": "Loading profile...",
-    "bioPlaceholder": "Write your description here...",
+    "bioPlaceholder": "Tell us a bit about yourself, nothing fancy",
     "tabs": {
       "created": "Created",
       "joined": "Joined"
-    }
+    },
+    "noCreatedTasks": "You haven't made any tasks, but don't hesitate if you need help!",
+    "noJoinedTasks": "You're not signed up for any tasks yet maybe someone could use your help?"
   },
   "post": {
-    "noParticipants": "No participants yet",
+    "noParticipants": "No participants yet, maybe you'll be the first?",
     "confirmDelete": "Are you sure you want to delete this task?",
-    "confirmDone": "Are you sure you want to mark this task as completed?"
+    "confirmDone": "Are you sure you this task is completed?"
   },
   "actions": {
     "delete": "Delete",
-    "markDone": "Mark as done"
+    "markDone": "Mark as completed",
+    "afmeld": "Leave task"
   },
   "time": {
     "now": "just now",
@@ -74,8 +76,8 @@
     "unknownUser": "Unknown",
 
     "tabs": {
-      "private": "Private chats",
-      "group": "Group chats"
+      "private": "Private",
+      "group": "Group"
     },
 
     "search": {
@@ -87,10 +89,10 @@
     },
 
     "emptyState": {
-      "noPrivateChats": "No private chats yet",
+      "noPrivateChats": "No messages yet. The community is just waiting for a first hello",
       "noGroupChats": "No group chats yet",
       "startConversation": "Start a conversation by visiting a profile",
-      "groupChatInfo": "Group chats are created automatically when you approve participants"
+      "groupChatInfo": "You can create groupchats, when you approve participants for tasks that require at least 2 people"
     },
 
     "groupChat": {
@@ -100,24 +102,25 @@
   },
 
   "login": {
-    "failed": "Login failed",
+    "failed": "Hmm... something went wrong. Check your login and try again",
     "inCollaborationWith": "In collaboration with",
 
     "form": {
       "title": "Log in with your AU login",
       "emailPlaceholder": "Email",
       "passwordPlaceholder": "Password",
-      "rememberMe": "Stay logged in",
+      "rememberMe": "Remember me",
       "submit": "Log in"
     }
   },
 
   "feed": {
     "filter": "Filter",
-    "noMatchingPosts": "No posts match the selected tags.",
+    "noMatchingPosts": "Oops! No posts match your selected tags.",
     "postImageAlt": "Post image",
     "senderAlt": "Author",
-    "previewAlt": "Preview"
+    "previewAlt": "Preview",
+    "mytasks": "My tasks"
   },
 
   "groupChat": {
@@ -125,7 +128,7 @@
     "notFound": "Chat not found",
     "participants": "participants",
     "noMessagesTitle": "No messages yet",
-    "noMessagesSubtitle": "Send the first message! 💬",
+    "noMessagesSubtitle": "Be the first to send a message! 💬",
     "unknownSender": "Unknown",
     "messagePlaceholder": "Type a message...",
 
@@ -134,21 +137,21 @@
     "cancel": "No thanks",
     "confirm": "Yes, create",
     "creating": "Creating...",
-    "error": "An error occurred. Please try again.",
-    "systemCreated": "Group chat created"
+    "error": "Oops! Something went wrong...",
+    "systemCreated": "Group chat created!"
   },
 
   "individualChat": {
     "loading": "Loading chat...",
-    "userNotFound": "User not found",
+    "userNotFound": "We couldn't find the user anymore...",
     "noMessagesTitle": "No messages yet",
-    "noMessagesSubtitle": "Send the first message! 💬",
+    "noMessagesSubtitle": "Be the first to send a message! 💬",
     "messagePlaceholder": "Type a message..."
   },
 
   "report": {
     "title": "Report {{name}}",
-    "helpText": "Help us understand the problem",
+    "helpText": "Tell us what happened so we can take action",
     "selectPlaceholder": "Select a reason",
     "reason": {
       "harassment": "Harassment",
@@ -156,20 +159,20 @@
       "spam": "Spam",
       "other": "Other"
     },
-    "textPlaceholder": "Please elaborate (optional)",
+    "textPlaceholder": "Feel free to elaborate (optional)",
     "cancel": "Cancel",
     "submit": "Report",
-    "successTitle": "Thank you for your report",
-    "successText": "Your request has been recorded",
+    "successTitle": "Thanks for your report",
+    "successText": "Your report has been received and we will review it",
     "close": "Close"
   },
 
-   "createPost": {
-    "title": "Title",
+  "createPost": {
+    "title": "Post title",
     "description": "Description",
     "where": "Where?",
     "when": "When?",
-    "participants": "Number of participants"
+    "participants": "How many can join?"
   },
 
   "edit": {
@@ -178,6 +181,74 @@
   },
 
   "overview": "Overview",
+
+  "notifications": {
+    "title": "Notifications",
+    "empty": "No new notifications...",
+
+    "group": {
+      "created": "Group chat created",
+      "ready": "Your group chat is ready!",
+      "click": "Click to open chat",
+      "opened": "Opened"
+    },
+
+    "request": {
+      "title": "Request",
+      "wantsHelp": "wants to help",
+      "accepted": "You accepted this request",
+      "rejected": "You rejected this request"
+    },
+
+    "invitation": {
+      "title": "Invitation",
+      "from": "has invited you",
+      "accepted": "Accept",
+      "rejected": "Reject",
+      "taskDeleted": "This task has been deleted"
+    },
+
+    "deleted": {
+      "title": "Task deleted",
+      "by": "has deleted the task",
+      "groupCeased": "Group chat has been closed",
+      "read": "Read",
+      "ok": "OK"
+    },
+
+    "taskCompleted": {
+      "title": "Task completed!",
+      "message": "This task has been marked as completed",
+      "thanks": "Thanks for your help! 🎉",
+      "ok": "OK",
+      "seen": "Notification seen"
+    },
+
+    "participantLeft": {
+      "title": "Participant left task",
+      "message": "has left this task",
+      "ok": "OK",
+      "seen": "Notification seen"
+    },
+
+    "requestAccepted": {
+      "title": "Request accepted!",
+      "message": "has accepted your request to participate in",
+      "subtitle": "You can now see the task in your feed",
+      "ok": "View task",
+      "seen": "Notification seen",
+      "taskNoLongerExists": "This task no longer exists"
+    },
+
+    "invitationAccepted": {
+      "title": "Invitation accepted!",
+      "message": "has accepted your invitation",
+      "noThanks": "No thanks",
+      "createGroupChat": "Create group chat",
+      "groupChatCreated": "Group chat created",
+      "declined": "You declined to create group chat"
+    }
+  },
 
   "notif-title": "Notifications",
   "no-notifs": "No notifications yet",
@@ -222,7 +293,7 @@
 
   "task-invite": "Invite to task",
   "no-task": "You have no tasks to invtite to",
-  "create-task": "Create a task first to invite others",
+  "create-task": "Create a task, then you can invite others",
   "invited": "Invited",
 
   "request-sent": "Your request has been sent",
@@ -230,5 +301,4 @@
   "group?": "Create group chat?",
   "group-for?": "Do you want to make a group chat for:",
   "no-thx": "No thank you"
-
 }

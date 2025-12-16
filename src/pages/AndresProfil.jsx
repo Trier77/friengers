@@ -20,6 +20,7 @@ import ColorCircle from "../components/ColorCircle";
 import AnmeldelsesModal from "../components/Anmeldelsesmodal";
 import { useTranslation } from "react-i18next";
 import { onSnapshot } from "firebase/firestore";
+import PreviewModal from "../components/PreviewModal";
 
 function AndresProfil() {
   const { t } = useTranslation();
@@ -206,49 +207,8 @@ function AndresProfil() {
         requests: arrayUnion(userId),
       });
 
-      const currentParticipants = postData.participants || [];
-
-      if (currentParticipants.length === 0) {
-        console.log("FØRSTE DELTAGER - Opretter gruppechat");
-        setShowInviteDropdown(false);
-
-        const groupChatId = `group_${postId}`;
-        const groupChatRef = doc(db, "chats", groupChatId);
-
-        await setDoc(groupChatRef, {
-          postId: postId,
-          chatName: postData.title,
-          participants: [currentUserId, userId],
-          createdAt: serverTimestamp(),
-          createdBy: currentUserId,
-          isGroupChat: true,
-          lastMessage: "Gruppechat oprettet",
-          lastMessageTime: serverTimestamp(),
-          lastMessageSenderId: currentUserId,
-        });
-
-        console.log("Gruppechat auto-oprettet ved invitation");
-
-        await sendGroupChatNotifications(postId, postData.title, [
-          currentUserId,
-          userId,
-        ]);
-      } else {
-        const groupChatId = `group_${postId}`;
-        const groupChatRef = doc(db, "chats", groupChatId);
-
-        try {
-          const groupChatSnap = await getDoc(groupChatRef);
-          if (groupChatSnap.exists()) {
-            await updateDoc(groupChatRef, {
-              participants: arrayUnion(userId),
-            });
-            console.log("Bruger tilføjet til gruppechat");
-          }
-        } catch (error) {
-          console.log("Ingen gruppechat endnu");
-        }
-      }
+      // 🆕 INGEN automatisk gruppechat - venter på accept
+      console.log("✅ Invitation sendt - afventer accept");
 
       const currentUserDoc = await getDoc(doc(db, "users", currentUserId));
       const currentUserData = currentUserDoc.data();
@@ -262,6 +222,7 @@ function AndresProfil() {
           postId: postId,
           postTitle: postData.title,
           timestamp: new Date().toISOString(),
+          createdAt: Date.now(),
         }),
       });
 
@@ -278,8 +239,8 @@ function AndresProfil() {
   //LOADING ANIMATION SKAL DEN VÆRE HER????
   if (loading) {
     return (
-      <div className="p-4 text-center pointer-events-none select-none">
-        {t(`viewProfile.notFound`)}
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="w-12 h-12 border-4 border-(--secondary)/30 border-t-(--secondary) rounded-full animate-spin" />
       </div>
     );
   }
@@ -340,9 +301,6 @@ function AndresProfil() {
             </h1>
             <p className="text-blue-500 font-bold text-sm">
               {userData.study || t(`viewProfile.noStudy`)}
-            </p>
-            <p className="text-sm text-blue-500/50">
-              {userData.pronouns || ""}
             </p>
           </div>
         </div>
@@ -509,25 +467,17 @@ function AndresProfil() {
         )}
       </div>
 
-      {previewImage && (
-        <div
-          className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-50"
-          onClick={() => setPreviewImage(null)}
-        >
-          <div className="max-w-3xl max-h-[90vh]">
-            <img
-              src={previewImage}
-              alt="Preview"
-              className="w-full h-full object-contain rounded-xl"
-            />
-          </div>
-        </div>
-      )}
       <AnmeldelsesModal
         isOpen={showAnmeldelsesModal}
         onClose={() => setShowAnmeldelsesModal(false)}
         reportedUserName={userData.fuldenavn || "brugeren"}
       />
+      {previewImage && (
+        <PreviewModal
+          imageUrl={previewImage}
+          onClose={() => setPreviewImage(null)}
+        />
+      )}
     </motion.div>
   );
 }

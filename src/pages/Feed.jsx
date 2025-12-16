@@ -1,7 +1,7 @@
 import { useEffect, useState, useRef } from "react";
 import { collection, getDocs, doc, getDoc } from "firebase/firestore";
 import { auth, db } from "../firebase";
-import { motion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import CalenderIcon from "../../public/icons/CalenderIcon";
 import MapPinIcon from "../../public/icons/MapPinIcon";
 import Tilmeld from "../components/Tilmeld";
@@ -15,6 +15,7 @@ import FunnelIcon from "../../public/icons/FunnelIcon";
 import { useSwipe } from "../components/SwipeContext";
 import { useTranslation } from "react-i18next";
 import OnboardingModal from "../components/OnboardingModal";
+import PreviewModal from "../components/PreviewModal";
 
 export default function Feed() {
   const { t } = useTranslation();
@@ -28,6 +29,7 @@ export default function Feed() {
   const [highlightPostId, setHighlightPostId] = useState(null);
   const myPostsRef = useRef(null);
   const [showOnboarding, setShowOnboarding] = useState(false);
+  const [myPostsDropdownOpen, setMyPostsDropdownOpen] = useState(false); // 🆕 Dropdown state
 
   const { setSwipeEnabled } = useSwipe();
 
@@ -53,8 +55,7 @@ export default function Feed() {
   };
 
   useEffect(() => {
-    const hasSeenOnboarding = localStorage.getItem("hasSeenOnboarding");
-    if (!hasSeenOnboarding) {
+    if (sessionStorage.getItem("showOnboarding") === "true") {
       setShowOnboarding(true);
     }
   }, []);
@@ -82,14 +83,13 @@ export default function Feed() {
     (post) => post.uid === userId && post.active !== false
   );
 
-  // FUNGERENDE VERSION - Bruger friske data direkte
   const handlePostCreated = async () => {
     console.log(" handlePostCreated started");
 
     const oldPostIds = new Set(myPosts.map((p) => p.id));
     console.log(" Old post IDs:", Array.from(oldPostIds));
 
-    // Hent friske posts direkte (ikke via state)
+    // Hent friske posts direkte
     const postsSnapshot = await getDocs(collection(db, "posts"));
     const freshPosts = await Promise.all(
       postsSnapshot.docs.map(async (postDoc) => {
@@ -103,20 +103,16 @@ export default function Feed() {
       })
     );
 
-    console.log(" Fresh posts fetched:", freshPosts.length);
+    console.log("✅ Fresh posts fetched:", freshPosts.length);
 
-    // Opdater state (til UI)
+    // Opdater state
     setPosts(freshPosts);
 
-    // Find det nye opslag med de FRISKE data (ikke state)
+    // Find det nye opslag
     const newMyPosts = freshPosts.filter(
       (post) => post.uid === userId && post.active !== false
     );
-    console.log(" New myPosts count:", newMyPosts.length);
-    console.log(
-      " New myPosts IDs:",
-      newMyPosts.map((p) => p.id)
-    );
+    console.log("📊 New myPosts count:", newMyPosts.length);
 
     const newPost = newMyPosts.find((p) => !oldPostIds.has(p.id));
     console.log("✨ New post:", newPost ? newPost.id : "NONE");
@@ -124,30 +120,28 @@ export default function Feed() {
     if (newPost) {
       console.log("🎉 New post found:", newPost.id);
 
-      // 1️ Scroll til toppen FØRST
+      // Åbn dropdown automatisk når nyt post oprettes
+      setMyPostsDropdownOpen(true);
+
+      // Scroll til toppen
       myPostsRef.current?.scrollIntoView({
         behavior: "smooth",
         block: "start",
       });
 
-      // 2️ Vent på scroll er færdig, SÅ trigger shockwave
+      // Trigger shockwave animation
       setTimeout(() => {
-        console.log(" Triggering shockwave animation");
+        console.log("💫 Triggering shockwave animation");
         setHighlightPostId(newPost.id);
 
-        // 3️ Fjern highlight efter shockwave er færdig
+        // Fjern highlight
         setTimeout(() => {
           console.log(" Removing highlight");
           setHighlightPostId(null);
-        }, 1200); // Match shockwave animation duration
-      }, 800); //  Delay så scroll når at blive færdig først
+        }, 1200);
+      }, 800);
     } else {
       console.log("❌ NO NEW POST FOUND!");
-      console.log("Debug - oldPostIds:", Array.from(oldPostIds));
-      console.log(
-        "Debug - newMyPosts IDs:",
-        newMyPosts.map((p) => p.id)
-      );
     }
   };
 
@@ -166,6 +160,7 @@ export default function Feed() {
       ? posts.filter(
           (post) =>
             post.uid !== userId &&
+            post.active !== false && // ← only active posts
             post.tags.some((tag) => selectedTags.includes(tag))
         )
       : [];
@@ -175,7 +170,7 @@ export default function Feed() {
   );
 
   const handleOnboardingDone = () => {
-    localStorage.setItem("hasSeenOnboarding", "true");
+    sessionStorage.removeItem("showOnboarding");
     setShowOnboarding(false);
   };
 
@@ -184,7 +179,7 @@ export default function Feed() {
       key={post.id}
       initial={{
         opacity: 0,
-        y: -20, // Lidt mindre bevægelse
+        y: -20,
       }}
       animate={{
         opacity: 1,
@@ -194,9 +189,9 @@ export default function Feed() {
         duration: 0.5,
         ease: "easeOut",
       }}
-      className="mb-4 relative"
+      className="mb-2 relative"
     >
-      {/*  Shockwave effekt - enkelt bølge der pulserer ud */}
+      {/* Shockwave effekt */}
       {highlightPostId === post.id && (
         <div className="absolute inset-0 border-4 border-blue-400 rounded-full animate-shockwave pointer-events-none"></div>
       )}
@@ -209,18 +204,19 @@ export default function Feed() {
           delay: 0.3 + index * 0.15,
           ease: "easeInOut",
         }}
-        className="flex text-(--secondary) justify-between items-center bg-(--secondary) rounded-full px-4 py-3 transition-all duration-300"
+        onClick={() => navigate("/Profil")}
+        className="flex text-(--secondary) justify-between items-center bg-(--secondary)/70 rounded-full p-2 transition-all duration-300 cursor-pointer hover:brightness-110"
       >
-        <h3 className="justify-start text-(--white) text-xl overskrift">
+        <h3 className="justify-start text-(--white) text-md overskrift truncate maw-w-[120]">
           {post.title}
         </h3>
 
-        <div className="flex justify-between items-center text-sm font-bold bg-(--white) rounded-full px-2 gap-5">
-          <div className="gap-2 flex items-center">
+        <div className="flex justify-between items-center text-sm font-bold bg-(--white) rounded-full w-30 px-2">
+          <div className="gap-1 flex items-center">
             <GroupsIcon color="--secondary" size={20} />
             <p className="text-(--secondary)">{post.participants.length}</p>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
             <CalenderIcon color="--secondary" size={10} />
             <p className="">
               {post.time?.toDate().toLocaleDateString(undefined, {
@@ -238,10 +234,63 @@ export default function Feed() {
     <div className="p-4">
       <NotificationWrapper />
 
-      <div ref={myPostsRef}>
-        {myPosts.length > 0 &&
-          myPosts.map((post, index) => renderMyPost(post, index))}
-      </div>
+      {/* Mine opgaver dropdown */}
+      {myPosts.length > 0 && (
+        <div ref={myPostsRef} className="mb-4">
+          <motion.button
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ duration: 0 }}
+            onClick={() => setMyPostsDropdownOpen((prev) => !prev)}
+            style={{
+              background: myPostsDropdownOpen
+                ? "linear-gradient(to right, rgba(59,130,246,1), rgba(59,130,246,1)"
+                : "var(--secondary)",
+              transformOrigin: "right",
+              zIndex: 0, // lav z-index
+            }}
+            className="w-full flex items-center justify-between text-(--white) rounded-2xl p-4 font-bold text-lg transition-all"
+          >
+            <div className="flex items-center gap-1">
+              <span className="overskrift">{t("feed.mytasks")}</span>
+            </div>
+
+            {/* Chevron icon */}
+            <motion.svg
+              animate={{ rotate: myPostsDropdownOpen ? 180 : 0 }}
+              transition={{ duration: 0.3 }}
+              className="w-8 h-8"
+              fill="none"
+              stroke="white"
+              viewBox="0 0 24 24"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={3}
+                d="M19 9l-7 7-7-7"
+              />
+            </motion.svg>
+          </motion.button>
+
+          {/* Dropdown content med AnimatePresence */}
+          <AnimatePresence>
+            {myPostsDropdownOpen && (
+              <motion.div
+                initial={{ height: 0, opacity: 0 }}
+                animate={{ height: "auto", opacity: 1 }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.2, ease: "easeInOut" }}
+                className="overflow-hidden"
+              >
+                <div className="mt-2 space-y-2">
+                  {myPosts.map((post, index) => renderMyPost(post, index))}
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </div>
+      )}
 
       <Create
         allTags={allTags}
@@ -256,9 +305,14 @@ export default function Feed() {
         transition={{ duration: 0.5 }}
         className="mb-4 flex flex-col justify-end"
       >
-        <div className="flex gap-4 items-center px-4">
+        <motion.div
+          initial={{ opacity: 0, y: 0 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+          className="flex gap-4 items-center px-4"
+        >
           <h3 className="text-(--secondary) font-bold text-lg">
-            {t("overview")}
+            {t("settings.overview")}
           </h3>{" "}
           <div className="w-full border border-(--secondary)"></div>
           <button
@@ -271,7 +325,7 @@ export default function Feed() {
               filled={showFilter || selectedTags.length > 0}
             />
           </button>
-        </div>
+        </motion.div>
         {selectedTags.length > 0 && !showFilter && (
           <div className="flex flex-wrap gap-2 px-2 mt-2 justify-end">
             {selectedTags.map((tag) => (
@@ -334,8 +388,18 @@ export default function Feed() {
           </p>
         )
       ) : (
-        otherPosts.map((post) => (
-          <div key={post.id} id={`post-${post.id}`}>
+        otherPosts.map((post, index) => (
+          <motion.div
+            key={post.id}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{
+              duration: 0.5,
+              delay: 0.2 + index * 0.15, // staggered animation
+              ease: "easeOut",
+            }}
+            id={`post-${post.id}`}
+          >
             <PostCard
               post={post}
               userId={userId}
@@ -353,13 +417,20 @@ export default function Feed() {
                 fetchPosts();
               }}
             />
-          </div>
+          </motion.div>
         ))
       )}
       <OnboardingModal
         isOpen={showOnboarding}
         onFinish={handleOnboardingDone}
       />
+
+      {previewImage && (
+        <PreviewModal
+          imageUrl={previewImage}
+          onClose={() => setPreviewImage(null)}
+        />
+      )}
     </div>
   );
 }

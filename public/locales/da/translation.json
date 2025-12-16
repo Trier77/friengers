@@ -6,18 +6,18 @@
     "notifications": "Notifikationer",
     "darkmode": "Dark mode",
     "about": "Om os",
-    "help": "Hjælp & support",
+    "help": "Introduktioner",
     "logout": "Log ud",
     "overview": "Oversigt",
     "notif-title": "Notifikationer"
   },
-  
+
   "viewProfile": {
     "loading": "Henter profil...",
     "notFound": "Bruger ikke fundet",
     "unknownName": "Ukendt",
-    "noStudy": "Ikke angivet",
-    "noBio": "Ingen beskrivelse tilgængelig",
+    "noStudy": "Studie er ikke angivet",
+    "noBio": "Der er ikke skrevet noget her endnu...",
     "tasksCompleted": "Opgaver løst",
     "activeTasks": "Aktive opgaver",
     "noActiveTasks": "Ingen aktive opgaver",
@@ -28,20 +28,23 @@
 
   "ownProfile": {
     "loading": "Henter profil...",
-    "bioPlaceholder": "Skriv din beskrivelse her...",
+    "bioPlaceholder": "Fortæl lidt om dig selv, det behøver ikke være fancy",
     "tabs": {
       "created": "Oprettet",
       "joined": "Tilmeldt"
-    }
+    },
+    "noCreatedTasks": "Du har ikke nogle oprettede opgaver, men tøv ikke med at spørge andre om hjælp!",
+    "noJoinedTasks": "Du er ikke tilmeldt noget lige nu, måske er der nogen, som kunne bruge din hjælp?"
   },
   "post": {
-    "noParticipants": "Ingen deltagere endnu",
+    "noParticipants": "Ingen deltagere endnu, måske er du den første?",
     "confirmDelete": "Er du sikker på, at du vil slette denne opgave?",
-    "confirmDone": "Er du sikker på, at du vil markere denne opgave som løst?"
+    "confirmDone": "Er du sikker på, at denne opgave er løst?"
   },
   "actions": {
     "delete": "Slet",
-    "markDone": "Marker som færdig"
+    "markDone": "Marker som løst",
+    "afmeld": "Forlad opgaven"
   },
   "time": {
     "now": "lige nu",
@@ -74,8 +77,8 @@
     "unknownUser": "Ukendt",
 
     "tabs": {
-      "private": "Privat chat",
-      "group": "Gruppe chat"
+      "private": "Privat",
+      "group": "Gruppe"
     },
 
     "search": {
@@ -87,10 +90,10 @@
     },
 
     "emptyState": {
-      "noPrivateChats": "Ingen private chats endnu",
+      "noPrivateChats": "Ingen beskeder endnu. Fællesskabet venter bare på første hej!",
       "noGroupChats": "Ingen gruppe chats endnu",
       "startConversation": "Start en samtale ved at besøge en profil",
-      "groupChatInfo": "Gruppechats oprettes automatisk når du godkender deltagere"
+      "groupChatInfo": "Du kan oprette gruppechats, når du godkender deltagere til en ogpave, der kræver minimum 2 deltagere"
     },
 
     "groupChat": {
@@ -100,55 +103,56 @@
   },
 
   "login": {
-    "failed": "Login failed",
-    "inCollaborationWith": "In collaboration with",
+    "failed": "Hmm... noget gik galt. Tjek det login og prøv igen",
+    "inCollaborationWith": "I samarbejde med",
 
     "form": {
       "title": "Log ind med dit AU-login",
       "emailPlaceholder": "Email",
       "passwordPlaceholder": "Adgangskode",
-      "rememberMe": "Forbliv logget ind",
-      "submit": "Login"
+      "rememberMe": "Husk mig",
+      "submit": "Log ind"
     }
   },
 
   "feed": {
-    "filter": "Filter",
-    "noMatchingPosts": "Ingen opslag matcher de valgte tags.",
+    "filter": "Filtrer",
+    "noMatchingPosts": "Ups! Ingen opslag matcher de valgte tags.",
     "postImageAlt": "Post billede",
     "senderAlt": "Afsender",
-    "previewAlt": "Preview"
+    "previewAlt": "Preview",
+    "mytasks": "Mine opgaver"
   },
 
   "groupChat": {
     "loading": "Henter gruppechat...",
-    "notFound": "Chat ikke fundet",
-    "participants": "deltagere",
+    "notFound": "Noget gik galt, fordi chtten blev ikke fundet...",
+    "participants": "Deltagere",
     "noMessagesTitle": "Ingen beskeder endnu",
-    "noMessagesSubtitle": "Send den første besked! 💬",
+    "noMessagesSubtitle": "Vær den første til at sende en besked!💬",
     "unknownSender": "Ukendt",
     "messagePlaceholder": "Skriv en besked...",
-  
+
     "title": "Opret gruppechat?",
     "description": "Vil du oprette en gruppechat for",
     "cancel": "Nej tak",
     "confirm": "Ja, opret",
     "creating": "Opretter...",
-    "error": "Der opstod en fejl. Prøv igen.",
-    "systemCreated": "Gruppechat oprettet"
+    "error": "Ups! Noget gik galt.",
+    "systemCreated": "Sådan! gruppechatten er oprettet"
   },
 
   "individualChat": {
     "loading": "Henter chat...",
-    "userNotFound": "Bruger ikke fundet",
+    "userNotFound": "Kunne ikke finde brugeren",
     "noMessagesTitle": "Ingen beskeder endnu",
-    "noMessagesSubtitle": "Send den første besked! 💬",
+    "noMessagesSubtitle": "Vær den den første til at sende en besked! 💬",
     "messagePlaceholder": "Skriv en besked..."
   },
 
   "report": {
     "title": "Anmeld {{name}}",
-    "helpText": "Hjælp os med at forstå problemet",
+    "helpText": "Fortæl os, hvad der er sket, så vi kan tage hånd om det",
     "selectPlaceholder": "Vælg årsag",
     "reason": {
       "harassment": "Chikane",
@@ -160,16 +164,16 @@
     "cancel": "Annuller",
     "submit": "Anmeld",
     "successTitle": "Tak for din anmeldelse",
-    "successText": "Din henvendelse er registreret",
+    "successText": "Vi har registreret din anmeldese og ser på det!",
     "close": "Luk"
   },
 
   "createPost": {
-    "title": "Titel",
+    "title": "Titel på opslag",
     "description": "Beskrivelse",
     "where": "Hvor?",
     "when": "Hvornår?",
-    "participants": "Antal deltagere"
+    "participants": "Hvor mange kan være med?"
   },
 
   "edit": {
@@ -177,13 +181,13 @@
     "save": "Gem ændringer"
   },
 
- "notifications": {
+  "notifications": {
     "title": "Notifikationer",
-    "empty": "Du har ingen notifikationer",
+    "empty": "Ingen nye notifikationer...",
 
     "group": {
       "created": "Gruppechat oprettet",
-      "ready": "Gruppechatten er klar",
+      "ready": "Din gruppechat er klar!",
       "click": "Tryk for at åbne chatten",
       "opened": "Åbnet"
     },
@@ -198,8 +202,9 @@
     "invitation": {
       "title": "Invitation",
       "from": "har inviteret dig",
-      "accepted": "Du accepterede denne invitation",
-      "rejected": "Du afviste denne invitation"
+      "accepted": "Accepter",
+      "rejected": "Afvis",
+      "taskDeleted": "Denne opgave er blevet slettet"
     },
 
     "deleted": {
@@ -208,9 +213,42 @@
       "groupCeased": "Gruppechatten er blevet lukket",
       "read": "Læst",
       "ok": "OK"
+    },
+
+    "taskCompleted": {
+      "title": "Opgave løst!",
+      "message": "Denne opgave er blevet markeret som løst",
+      "thanks": "Tak for din hjælp! 🎉",
+      "ok": "OK",
+      "seen": "Notifikation set"
+    },
+
+    "participantLeft": {
+      "title": "Deltager forlod opgave",
+      "message": "har forladt denne opgave",
+      "ok": "OK",
+      "seen": "Notifikation set"
+    },
+
+    "requestAccepted": {
+      "title": "Anmodning godkendt!",
+      "message": "har godkendt din anmodning om at deltage i",
+      "subtitle": "Du kan nu se opgaven under dine tilmeldte og på deres profil",
+      "ok": "Se opgave",
+      "seen": "Notifikation set",
+      "taskNoLongerExists": "Denne opgave eksisterer ikke længere"
+    },
+
+    "invitationAccepted": {
+      "title": "Invitation accepteret!",
+      "message": "har accepteret din invitation",
+      "noThanks": "Nej tak",
+      "createGroupChat": "Opret gruppechat",
+      "groupChatCreated": "Gruppechat oprettet",
+      "declined": "Du afslog at oprette gruppechat"
     }
   },
-  
+
   "no-notifs": "Ingen notifikationer endnu",
   "group-creation": "Gruppe chat oprettet:",
   "group-ready": "Grouppe chat er klar!",
@@ -252,7 +290,7 @@
   "for": "for",
 
   "task-invite": "Inviter til opgave:",
-  "no-task": "du skal oprette en opgave først for at invitere andre",
+  "no-task": "du skal oprette en opgave før du kan invitere andre til at hjælpe",
   "create-task": "opret en opgave før du inviterer",
   "invited": "Invited",
 
@@ -261,6 +299,4 @@
   "group?": "Vil du oprette en gruppechat?",
   "group-for?": "Vil du oprette en gruppechat for denne opgave?",
   "no-thx": "Nej tak"
-
-  
 }
