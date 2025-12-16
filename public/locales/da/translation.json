@@ -202,8 +202,9 @@
     "invitation": {
       "title": "Invitation",
       "from": "har inviteret dig",
-      "accepted": "Du accepterede denne invitation",
-      "rejected": "Du afviste denne invitation"
+      "accepted": "Accepter",
+      "rejected": "Afvis",
+      "taskDeleted": "Denne opgave er blevet slettet"
     },
 
     "deleted": {
@@ -212,6 +213,39 @@
       "groupCeased": "Gruppechatten er blevet lukket",
       "read": "Læst",
       "ok": "OK"
+    },
+
+    "taskCompleted": {
+      "title": "Opgave løst!",
+      "message": "Denne opgave er blevet markeret som løst",
+      "thanks": "Tak for din hjælp! 🎉",
+      "ok": "OK",
+      "seen": "Notifikation set"
+    },
+
+    "participantLeft": {
+      "title": "Deltager forlod opgave",
+      "message": "har forladt denne opgave",
+      "ok": "OK",
+      "seen": "Notifikation set"
+    },
+
+    "requestAccepted": {
+      "title": "Anmodning godkendt!",
+      "message": "har godkendt din anmodning om at deltage i",
+      "subtitle": "Du kan nu se opgaven under dine tilmeldte og på deres profil",
+      "ok": "Se opgave",
+      "seen": "Notifikation set",
+      "taskNoLongerExists": "Denne opgave eksisterer ikke længere"
+    },
+
+    "invitationAccepted": {
+      "title": "Invitation accepteret!",
+      "message": "har accepteret din invitation",
+      "noThanks": "Nej tak",
+      "createGroupChat": "Opret gruppechat",
+      "groupChatCreated": "Gruppechat oprettet",
+      "declined": "Du afslog at oprette gruppechat"
     }
   },
 
