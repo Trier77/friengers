@@ -302,9 +302,6 @@ function AndresProfil() {
             <p className="text-blue-500 font-bold text-sm">
               {userData.study || t(`viewProfile.noStudy`)}
             </p>
-            <p className="text-sm text-blue-500/50">
-              {userData.pronouns || ""}
-            </p>
           </div>
         </div>
 

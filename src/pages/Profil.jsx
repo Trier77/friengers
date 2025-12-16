@@ -738,7 +738,6 @@ export default function Profil() {
               {userData.fuldenavn}
             </h1>
             <p className="text-blue-500 font-bold text-sm">{userData.study}</p>
-            <p className="text-sm text-blue-500/50">{userData.pronouns}</p>
             <div className="absolute right-0 top-2 pr-4 mt-2">
               <NavLink to="/Settings">
                 <svg
