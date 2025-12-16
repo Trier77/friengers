@@ -181,8 +181,8 @@ function IndividualChat() {
   //LOADING ANIMATION SKAL DEN VÆRE HER????
   if (loading) {
     return (
-      <div className="p-4 text-center pointer-events-none select-none">
-        {t(`individualChat.loading`)}
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="w-12 h-12 border-4 border-(--secondary)/30 border-t-(--secondary) rounded-full animate-spin" />
       </div>
     );
   }

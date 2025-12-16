@@ -59,7 +59,13 @@ function App() {
     };
   }, [user, navigate]);
 
-  if (loading) return null;
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="w-12 h-12 border-4 border-(--secondary)/30 border-t-(--secondary) rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   const hideNavbar =
     location.pathname.startsWith("/Chats/") ||
