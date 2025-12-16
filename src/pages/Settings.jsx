@@ -56,22 +56,20 @@ export default function Settings() {
 
         {/* Page title */}
         <div className="flex flex-col items-center gap-5 m-4">
-          <h1 className="text-(--primary) text-5xl whitespace-nowrap">
-            {t(`settings.title`)}
-          </h1>
-
           {/* Content */}
           <div className="w-full px-6 flex flex-col gap-6">
             {/* ------ ACCOUNT ------ */}
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-4 opacity-30">
               <div className="h-5 w-5 flex justify-center items-center">
                 <ProfileIcon />
               </div>
-              <h2 className="text-(--primary) text-2xl">{t(`settings.account`)}</h2>
+              <h2 className="text-(--primary) text-2xl">
+                {t(`settings.account`)}
+              </h2>
             </div>
 
             {/* ------ NOTIFICATIONS ------ */}
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between opacity-30">
               <div className="flex items-center gap-4 w-[200px]">
                 <div className="h-5 w-5 flex justify-center items-center">
                   <NotificationIcon color="--primary" size={20} />
@@ -85,7 +83,7 @@ export default function Settings() {
             </div>
 
             {/* ------ DARK MODE ------ */}
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between opacity-30">
               <div className="flex items-center gap-4 w-[200px]">
                 <div className="h-5 w-5 flex justify-center items-center">
                   <DarkModeIcon />
@@ -99,7 +97,7 @@ export default function Settings() {
             </div>
 
             {/* ------ ABOUT ------ */}
-            <div className="flex items-center gap-4 w-[200px]">
+            <div className="flex items-center gap-4 w-[200px] opacity-30">
               <div className="h-5 w-5 flex justify-center items-center">
                 <InfoIcon />
               </div>

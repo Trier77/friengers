@@ -455,7 +455,7 @@ export default function NotificationsPopup({
       {/* Background overlay */}
       <div
         className={`
-          fixed inset-0 bg-black/50 z-500
+          fixed inset-0 bg-(--white)/70 z-500
           transition-opacity duration-300
           ${
             open
