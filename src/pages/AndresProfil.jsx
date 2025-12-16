@@ -75,15 +75,13 @@ export default function AndresProfil() {
 
     const postsRef = collection(db, "posts");
 
-    // Listen to posts where user is owner or participant
     const q1 = query(postsRef, where("uid", "==", userId));
     const q2 = query(postsRef, where("participants", "array-contains", userId));
 
     const unsub1 = onSnapshot(q1, (snapshot) => {
-      const ownPosts = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
+      const ownPosts = snapshot.docs
+        .map((doc) => ({ id: doc.id, ...doc.data() }))
+        .filter((post) => post.active !== false); // <-- only active
       setUserPosts((prev) => {
         const participantPosts = prev.filter((p) =>
           p.participants?.includes(userId)
@@ -98,10 +96,9 @@ export default function AndresProfil() {
     });
 
     const unsub2 = onSnapshot(q2, (snapshot) => {
-      const participantPosts = snapshot.docs.map((doc) => ({
-        id: doc.id,
-        ...doc.data(),
-      }));
+      const participantPosts = snapshot.docs
+        .map((doc) => ({ id: doc.id, ...doc.data() }))
+        .filter((post) => post.active !== false); // <-- only active
       setUserPosts((prev) => {
         const ownPosts = prev.filter((p) => p.uid === userId);
         return [
@@ -152,8 +149,9 @@ export default function AndresProfil() {
         const allPostsMap = new Map();
         ownPosts.forEach((post) => allPostsMap.set(post.id, post));
         participantPosts.forEach((post) => allPostsMap.set(post.id, post));
-        const allPosts = Array.from(allPostsMap.values());
-
+        const allPosts = Array.from(allPostsMap.values()).filter(
+          (post) => post.active !== false
+        ); // <-- only active
         setUserPosts(allPosts);
 
         if (currentUserId) {
@@ -442,27 +440,29 @@ export default function AndresProfil() {
         <h2 className="text-center font-bold text-gray-900 mb-4">
           {t(`viewProfile.activeTasks`)}
         </h2>
-        {userPosts.length === 0 ? (
+        {userPosts.filter((post) => post.active !== false).length === 0 ? (
           <p className="text-center text-gray-500">
             {t(`viewProfile.noActiveTasks`)}
           </p>
         ) : (
-          userPosts.map((post) => (
-            <PostCard
-              key={post.id}
-              post={post}
-              userId={userId}
-              expandedPostId={expandedPostId}
-              toggleExpand={toggleExpand}
-              selectedTags={[]}
-              handleDropdownChange={() => {}}
-              setPreviewImage={setPreviewImage}
-              navigate={navigate}
-              fetchPosts={() => {}}
-              showAuthor={false}
-              showTimestamp={true}
-            />
-          ))
+          userPosts
+            .filter((post) => post.active !== false)
+            .map((post) => (
+              <PostCard
+                key={post.id}
+                post={post}
+                userId={userId}
+                expandedPostId={expandedPostId}
+                toggleExpand={toggleExpand}
+                selectedTags={[]}
+                handleDropdownChange={() => {}}
+                setPreviewImage={setPreviewImage}
+                navigate={navigate}
+                fetchPosts={() => {}}
+                showAuthor={false}
+                showTimestamp={true}
+              />
+            ))
         )}
       </div>
 

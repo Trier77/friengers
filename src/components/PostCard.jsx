@@ -43,19 +43,20 @@ export default function PostCard({
       { label: [t(`time.week_one`), t(`time.week_other`)], secs: 604800 },
       { label: [t(`time.day_one`), t(`time.day_other`)], secs: 86400 },
       { label: [t(`time.hour_one`), t(`time.hour_other`)], secs: 3600 },
-      { label: [t(`time.minute_one`), t(`time.minutter_other`)], secs: 60 },
-      { label: [t(`time.year_one`), t(`time.sekunder_other`)], secs: 1 },
+      { label: [t(`time.minute_one`), t(`time.minute_other`)], secs: 60 },
+      { label: [t(`time.second_one`), t(`time.second_other`)], secs: 1 },
     ];
 
     for (const i of intervals) {
       const count = Math.floor(seconds / i.secs);
       if (count >= 1) {
         const label = count === 1 ? i.label[0] : i.label[1];
-        return `for ${count} ${label} siden`;
+        // 🆕 FIX: Brug count og label separat i t() funktionen
+        return t(`time.ago`, { count, unit: label });
       }
     }
 
-    return "lige nu";
+    return t(`time.now`);
   }
 
   const handleInvitationResponse = async (approve) => {
