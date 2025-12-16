@@ -693,7 +693,7 @@ export default function Profil() {
         {/* Bio */}
         <textarea
           ref={bioRef}
-          className="w-full text-(--secondary) resize-none overflow-hidden"
+          className="w-full text-(--secondary) resize-none overflow-hidden text-center"
           placeholder={t(`ownProfile.bioPlaceholder`)}
           value={bio}
           rows={3}
