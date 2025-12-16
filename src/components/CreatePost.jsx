@@ -169,7 +169,7 @@ export default function CreatePost({ open, onClose, post = null }) {
             onChange={(e) => setTitle(e.target.value)}
           />
           <textarea
-            className="w-full text-(--secondary) text-lg"
+            className="w-full text-(--secondary) text-md"
             placeholder={t(`createPost.description`)}
             onFocus={handleFocus}
             value={description}
