@@ -22,7 +22,7 @@ import { useTranslation } from "react-i18next";
 import { onSnapshot } from "firebase/firestore";
 import PreviewModal from "../components/PreviewModal";
 
-function AndresProfil() {
+export default function AndresProfil() {
   const { t } = useTranslation();
   const { userId } = useParams();
   const navigate = useNavigate();
@@ -236,7 +236,6 @@ function AndresProfil() {
       alert("Der opstod en fejl. Prøv igen.");
     }
   };
-  //LOADING ANIMATION SKAL DEN VÆRE HER????
   if (loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
@@ -481,5 +480,3 @@ function AndresProfil() {
     </motion.div>
   );
 }
-
-export default AndresProfil;

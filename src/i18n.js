@@ -8,14 +8,14 @@ i18n
   .use(LanguageDetector)
   .use(initReactI18next)
   .init({
-    lng: "da", 
+    lng: "da",
     fallbackLng: "da",
     keySeparator: ".",
     interpolation: {
       escapeValue: false,
     },
     backend: {
-      loadPath: "./locales/{{lng}}/translation.json",
+      loadPath: `${import.meta.env.BASE_URL}locales/{{lng}}/translation.json`,
     },
   });
 
