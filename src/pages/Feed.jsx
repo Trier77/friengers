@@ -55,8 +55,7 @@ export default function Feed() {
   };
 
   useEffect(() => {
-    const hasSeenOnboarding = localStorage.getItem("hasSeenOnboarding");
-    if (!hasSeenOnboarding) {
+    if (sessionStorage.getItem("showOnboarding") === "true") {
       setShowOnboarding(true);
     }
   }, []);
@@ -171,7 +170,7 @@ export default function Feed() {
   );
 
   const handleOnboardingDone = () => {
-    localStorage.setItem("hasSeenOnboarding", "true");
+    sessionStorage.removeItem("showOnboarding");
     setShowOnboarding(false);
   };
 

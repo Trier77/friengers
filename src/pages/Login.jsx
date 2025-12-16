@@ -29,9 +29,13 @@ export default function Login() {
   const handleAnimationComplete = async () => {
     try {
       await login(email, password);
+
+      // 🔑 Trigger onboarding for denne login-session
+      sessionStorage.setItem("showOnboarding", "true");
+
       navigate("/");
     } catch (err) {
-      alert( t(`login.failed`) + err.message);
+      alert(t(`login.failed`) + err.message);
       setShouldPlay(false);
     }
   };
@@ -73,7 +77,9 @@ export default function Login() {
             exit={{ opacity: 0, y: 20 }}
             transition={{ duration: 0.5 }}
           >
-            <p className="text-xs text-(--primary)">{t(`login.inCollaborationWith`)}</p>
+            <p className="text-xs text-(--primary)">
+              {t(`login.inCollaborationWith`)}
+            </p>
             <AUIcon color="--primary" size={150} />
           </motion.div>
         )}
