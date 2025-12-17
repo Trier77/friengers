@@ -10,8 +10,6 @@ import {
   getDocs,
   updateDoc,
   arrayUnion,
-  setDoc,
-  serverTimestamp,
 } from "firebase/firestore";
 import { db, auth } from "../firebase";
 import PostCard from "../components/PostCard";
@@ -74,46 +72,17 @@ export default function AndresProfil() {
     if (!userId) return;
 
     const postsRef = collection(db, "posts");
+    const q = query(postsRef, where("uid", "==", userId));
 
-    const q1 = query(postsRef, where("uid", "==", userId));
-    const q2 = query(postsRef, where("participants", "array-contains", userId));
-
-    const unsub1 = onSnapshot(q1, (snapshot) => {
+    const unsub = onSnapshot(q, (snapshot) => {
       const ownPosts = snapshot.docs
         .map((doc) => ({ id: doc.id, ...doc.data() }))
-        .filter((post) => post.active !== false); // <-- only active
-      setUserPosts((prev) => {
-        const participantPosts = prev.filter((p) =>
-          p.participants?.includes(userId)
-        );
-        return [
-          ...ownPosts,
-          ...participantPosts.filter(
-            (p) => !ownPosts.some((op) => op.id === p.id)
-          ),
-        ];
-      });
+        .filter((post) => post.active !== false);
+
+      setUserPosts(ownPosts);
     });
 
-    const unsub2 = onSnapshot(q2, (snapshot) => {
-      const participantPosts = snapshot.docs
-        .map((doc) => ({ id: doc.id, ...doc.data() }))
-        .filter((post) => post.active !== false); // <-- only active
-      setUserPosts((prev) => {
-        const ownPosts = prev.filter((p) => p.uid === userId);
-        return [
-          ...ownPosts,
-          ...participantPosts.filter(
-            (p) => !ownPosts.some((op) => op.id === p.id)
-          ),
-        ];
-      });
-    });
-
-    return () => {
-      unsub1();
-      unsub2();
-    };
+    return () => unsub();
   }, [userId]);
 
   useEffect(() => {
@@ -124,40 +93,33 @@ export default function AndresProfil() {
           setLoading(false);
           return;
         }
+
         setUserData(userDoc.data());
 
+        // 🔥 KUN posts brugeren selv har oprettet
         const postsQuery = query(
           collection(db, "posts"),
           where("uid", "==", userId)
         );
+
         const postsSnapshot = await getDocs(postsQuery);
-        const ownPosts = postsSnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
 
-        const participantQuery = query(
-          collection(db, "posts"),
-          where("participants", "array-contains", userId)
+        setUserPosts(
+          postsSnapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          }))
         );
-        const participantSnapshot = await getDocs(participantQuery);
-        const participantPosts = participantSnapshot.docs.map((doc) => ({
-          id: doc.id,
-          ...doc.data(),
-        }));
 
-        const allPostsMap = new Map();
-        ownPosts.forEach((post) => allPostsMap.set(post.id, post));
-        participantPosts.forEach((post) => allPostsMap.set(post.id, post));
-        const allPosts = Array.from(allPostsMap.values());
-        setUserPosts(allPosts);
-
+        // 🔹 Bruges kun til invite-dropdown (dine egne posts)
         if (currentUserId) {
           const myPostsQuery = query(
             collection(db, "posts"),
             where("uid", "==", currentUserId)
           );
+
           const myPostsSnapshot = await getDocs(myPostsQuery);
+
           const myPostsList = myPostsSnapshot.docs
             .map((doc) => ({
               id: doc.id,
@@ -167,6 +129,7 @@ export default function AndresProfil() {
               const participants = post.participants || [];
               const requests = post.requests || [];
               const maxParticipants = post.maxParticipants || 1;
+
               const isActive = post.active !== false;
               const hasSpace = participants.length < maxParticipants;
               const notAlreadyParticipant = !participants.includes(userId);
