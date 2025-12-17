@@ -32,6 +32,9 @@ export default function AndresProfil() {
   const [invitedPosts, setInvitedPosts] = useState(new Set());
   const currentUserId = auth.currentUser?.uid;
 
+  const [ownActivePosts, setOwnActivePosts] = useState([]);
+  const [completedPosts, setCompletedPosts] = useState([]);
+
   const [expandedPostId, setExpandedPostId] = useState(null);
   const [previewImage, setPreviewImage] = useState(null);
   const [showAnmeldelsesModal, setShowAnmeldelsesModal] = useState(false);
@@ -67,6 +70,38 @@ export default function AndresProfil() {
       console.error("Fejl ved sending af gruppechat-notifikationer:", error);
     }
   };
+
+  useEffect(() => {
+    if (!userId) return;
+
+    const fetchPosts = async () => {
+      const snap = await getDocs(collection(db, "posts"));
+
+      const allPosts = snap.docs.map((doc) => ({
+        id: doc.id,
+        ...doc.data(),
+      }));
+
+      // 1️⃣ Feed: aktive posts brugeren selv har lavet
+      const activeOwn = allPosts.filter(
+        (post) => post.uid === userId && post.active !== false
+      );
+
+      // 2️⃣ Opgaver løst: lavet ELLER deltaget i
+      const completed = allPosts.filter(
+        (post) =>
+          post.active === false &&
+          (post.uid === userId ||
+            (Array.isArray(post.participants) &&
+              post.participants.includes(userId)))
+      );
+
+      setOwnActivePosts(activeOwn);
+      setCompletedPosts(completed);
+    };
+
+    fetchPosts();
+  }, [userId]);
 
   useEffect(() => {
     if (!userId) return;
@@ -207,13 +242,7 @@ export default function AndresProfil() {
     return <div className="p-4 text-center">{t(`viewProfile.notFound`)}</div>;
   }
 
-  const completedCount = userPosts.filter(
-    (post) =>
-      post.active === false &&
-      (post.uid === userId ||
-        (Array.isArray(post.participants) &&
-          post.participants.includes(userId)))
-  ).length;
+  const completedCount = completedPosts.length;
 
   return (
     <motion.div
